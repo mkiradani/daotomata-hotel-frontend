@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+@plugin "daisyui";
+
+/* Multitenant theme variables - loaded dynamically per hotel */
+:root {
+  --c-primary: #174972;
+  --c-secondary: #dfa73f;
+  --c-accent: #ececec;
+  --c-neutral: #ffffff;
+  --font-body: 'Playfair Display';
+  --font-head: 'Inter';
+  --font-mono: 'JetBrains Mono';
+}
+
+/* Custom hotel styles with DaisyUI and theme variables */
+.hotel-hero {
+  @apply min-h-screen text-white hero;
+}
+
+.hotel-card {
+  @apply bg-base-100 p-6 border-2 border-base-300 card;
+}
+
+.hotel-btn {
+  @apply btn btn-primary;
+  background-color: var(--accent, var(--c-accent));
+  border-color: var(--accent, var(--c-accent));
+}
+
+.hotel-btn:hover {
+  opacity: 0.9;
+}
+
+/* Typography with theme fonts */
+.font-body {
+  font-family: var(--font-body), serif;
+}
+
+.font-heading {
+  font-family: var(--font-head), sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+/* DaisyUI theme overrides for multitenant */
+[data-theme] {
+  --p: var(--c-primary);
+  --s: var(--c-secondary);
+  --a: var(--c-accent);
+  --n: var(--c-neutral);
+}

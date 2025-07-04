@@ -1,0 +1,278 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getHotelByDomain } from '../../lib/directus.js';
+
+// Get hotel from domain
+const hotelDomain = Astro.url.hostname;
+const hotel = await getHotelByDomain(hotelDomain);
+
+if (!hotel) {
+  return Astro.redirect('/404');
+}
+
+const pageTitle = `Booking Management - ${hotel.name}`;
+---
+
+<Layout title={pageTitle}>
+  <main class="min-h-screen bg-base-200">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-primary mb-2">Booking Management</h1>
+        <p class="text-lg opacity-70">Manage reservations and PMS integration for {hotel.name}</p>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs tabs-boxed mb-8">
+        <a class="tab tab-active" data-tab="sync">Room Sync</a>
+        <a class="tab" data-tab="mapping">Room Mapping</a>
+        <a class="tab" data-tab="bookings">Bookings</a>
+        <a class="tab" data-tab="settings">Settings</a>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="space-y-8">
+        <!-- Room Sync Tab -->
+        <div id="sync-tab" class="tab-content">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Room Sync Manager -->
+            <div id="room-sync-manager"></div>
+            
+            <!-- Quick Actions -->
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title text-primary">Quick Actions</h3>
+                
+                <div class="space-y-4">
+                  <button id="test-connection" class="btn btn-outline w-full">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Test Cloudbeds Connection
+                  </button>
+                  
+                  <button id="force-sync" class="btn btn-warning w-full">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Force Full Sync
+                  </button>
+                  
+                  <button id="clear-cache" class="btn btn-ghost w-full">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Clear Cache
+                  </button>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="divider"></div>
+                <div id="connection-status" class="space-y-2">
+                  <h4 class="font-semibold">Connection Status</h4>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-gray-400 rounded-full" id="status-indicator"></div>
+                    <span id="status-text" class="text-sm">Checking...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Room Mapping Tab -->
+        <div id="mapping-tab" class="tab-content hidden">
+          <div id="room-mapping-stats"></div>
+        </div>
+
+        <!-- Bookings Tab -->
+        <div id="bookings-tab" class="tab-content hidden">
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h3 class="card-title text-primary">Recent Bookings</h3>
+              <p class="opacity-70">Booking management functionality coming soon...</p>
+              
+              <!-- Placeholder for booking list -->
+              <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                  <thead>
+                    <tr>
+                      <th>Booking ID</th>
+                      <th>Guest</th>
+                      <th>Room</th>
+                      <th>Dates</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="6" class="text-center opacity-50">
+                        No bookings to display. Booking history will appear here once the system is fully integrated.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Cloudbeds Settings -->
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title text-primary">Cloudbeds Configuration</h3>
+                
+                <div class="space-y-4">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Property ID</span>
+                    </label>
+                    <input type="text" class="input input-bordered" value={hotel.cloudbeds_property_id || ''} readonly />
+                  </div>
+                  
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">API Key</span>
+                    </label>
+                    <input type="password" class="input input-bordered" value={hotel.cloudbeds_api_key ? '••••••••••••' : ''} readonly />
+                  </div>
+                  
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Client ID</span>
+                    </label>
+                    <input type="text" class="input input-bordered" value={hotel.cloudbeds_client_id || ''} readonly />
+                  </div>
+                  
+                  <div class="alert alert-info">
+                    <svg class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Credentials are managed through Directus admin panel for security.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title text-primary">System Settings</h3>
+                
+                <div class="space-y-4">
+                  <div class="form-control">
+                    <label class="label cursor-pointer">
+                      <span class="label-text">Auto-sync room IDs</span>
+                      <input type="checkbox" class="toggle toggle-primary" checked />
+                    </label>
+                  </div>
+                  
+                  <div class="form-control">
+                    <label class="label cursor-pointer">
+                      <span class="label-text">Real-time availability updates</span>
+                      <input type="checkbox" class="toggle toggle-primary" checked />
+                    </label>
+                  </div>
+                  
+                  <div class="form-control">
+                    <label class="label cursor-pointer">
+                      <span class="label-text">Email booking confirmations</span>
+                      <input type="checkbox" class="toggle toggle-primary" checked />
+                    </label>
+                  </div>
+                  
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Cache duration (minutes)</span>
+                    </label>
+                    <input type="number" class="input input-bordered" value="15" min="1" max="60" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Load Components -->
+  <script>
+    import { RoomSyncManager } from '../../components/RoomSyncManager';
+    import { RoomMappingStats } from '../../components/RoomMappingStats';
+
+    // Initialize components
+    const hotelDomain = window.location.hostname;
+    
+    // Mount Room Sync Manager
+    const syncContainer = document.getElementById('room-sync-manager');
+    if (syncContainer) {
+      // This would be handled by Qwik in a real implementation
+      syncContainer.innerHTML = '<div class="text-center py-8"><span class="loading loading-spinner loading-lg"></span></div>';
+    }
+
+    // Mount Room Mapping Stats
+    const mappingContainer = document.getElementById('room-mapping-stats');
+    if (mappingContainer) {
+      mappingContainer.innerHTML = '<div class="text-center py-8"><span class="loading loading-spinner loading-lg"></span></div>';
+    }
+
+    // Tab functionality
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-active'));
+        
+        // Add active class to clicked tab
+        tab.classList.add('tab-active');
+        
+        // Hide all tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        
+        // Show selected tab content
+        const tabName = tab.getAttribute('data-tab');
+        const tabContent = document.getElementById(`${tabName}-tab`);
+        if (tabContent) {
+          tabContent.classList.remove('hidden');
+        }
+      });
+    });
+
+    // Quick action handlers
+    document.getElementById('test-connection')?.addEventListener('click', async () => {
+      const button = document.getElementById('test-connection');
+      const statusIndicator = document.getElementById('status-indicator');
+      const statusText = document.getElementById('status-text');
+      
+      button.classList.add('loading');
+      statusText.textContent = 'Testing connection...';
+      
+      try {
+        const response = await fetch(`/api/booking/room-mapping?hotelDomain=${encodeURIComponent(hotelDomain)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          statusIndicator.className = 'w-3 h-3 bg-success rounded-full';
+          statusText.textContent = 'Connected to Cloudbeds';
+        } else {
+          statusIndicator.className = 'w-3 h-3 bg-error rounded-full';
+          statusText.textContent = 'Connection failed';
+        }
+      } catch (error) {
+        statusIndicator.className = 'w-3 h-3 bg-error rounded-full';
+        statusText.textContent = 'Connection error';
+      } finally {
+        button.classList.remove('loading');
+      }
+    });
+
+    // Initialize connection status check
+    document.getElementById('test-connection')?.click();
+  </script>
+</Layout>

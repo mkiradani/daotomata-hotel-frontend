@@ -1,0 +1,39 @@
+{
+  "name": "@daotomata/web",
+  "version": "1.8.0-dev",
+  "description": "Astro frontend with Qwik islands for hotel websites",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "eslint . --ext .js,.ts,.astro",
+    "format": "prettier --write .",
+    "clean": "rm -rf dist .astro",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^5.0.0",
+    "@builder.io/qwik": "^1.14.1",
+    "@directus/sdk": "^17.0.0",
+    "@qwikdev/astro": "^0.8.0",
+    "@supabase/supabase-js": "2.50.1-next.6",
+    "@tailwindcss/postcss": "^4.1.10",
+    "@tailwindcss/vite": "^4.1.10",
+    "astro": "5.10.0",
+    "daisyui": "5.0.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@astrojs/tailwind": "^5.1.5",
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "tailwindcss": "4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

@@ -1,0 +1,153 @@
+---
+import { getAllHotels } from '../lib/directus.js';
+
+// Get all available hotels
+const hotels = await getAllHotels();
+console.log(`🏨 Found ${hotels.length} hotels for showcase`);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daotomata Hotels - Multitenant Showcase</title>
+  <link rel="stylesheet" href="/src/styles/global.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Daotomata Hotels</h1>
+      <p>Multitenant Hotel Management Platform</p>
+      <p>Choose a hotel to explore our dynamic theming and content system</p>
+    </div>
+
+      <!-- Hotels Grid -->
+      <div class="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-12">
+        {hotels.map(hotel => {
+          const subdomain = hotel.domain.split('.')[0];
+          const isDemo = subdomain === 'demo';
+          const isBaberrih = subdomain === 'baberrih';
+          
+          return (
+            <div class="bg-white shadow-lg hover:shadow-xl rounded-xl overflow-hidden transition-shadow duration-300">
+              <!-- Hotel Header -->
+              <div class={`h-32 bg-gradient-to-r ${
+                isDemo ? 'from-emerald-400 to-cyan-400' : 
+                isBaberrih ? 'from-amber-400 to-orange-500' : 
+                'from-purple-400 to-pink-400'
+              } flex items-center justify-center`}>
+                <h2 class="px-4 font-bold text-white text-2xl text-center">
+                  {hotel.name}
+                </h2>
+              </div>
+              
+              <!-- Hotel Info -->
+              <div class="p-6">
+                <div class="mb-4">
+                  <p class="mb-2 text-gray-500 text-sm">Domain</p>
+                  <p class="bg-gray-100 px-3 py-1 rounded font-mono text-sm">
+                    {hotel.domain}
+                  </p>
+                </div>
+                
+                <div class="mb-4">
+                  <p class="mb-2 text-gray-500 text-sm">Languages</p>
+                  <div class="flex flex-wrap gap-1">
+                    {hotel.available_languages?.map(lang => (
+                      <span class="bg-blue-100 px-2 py-1 rounded text-blue-800 text-xs">
+                        {lang.split('-')[0].toUpperCase()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div class="mb-6">
+                  <p class="mb-2 text-gray-500 text-sm">Currencies</p>
+                  <div class="flex flex-wrap gap-1">
+                    {hotel.available_currencies?.map(currency => (
+                      <span class="bg-green-100 px-2 py-1 rounded text-green-800 text-xs">
+                        {currency}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                  <a 
+                    href={`/${subdomain}`}
+                    class={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-colors ${
+                      isDemo ? 'bg-emerald-500 hover:bg-emerald-600 text-white' :
+                      isBaberrih ? 'bg-amber-500 hover:bg-amber-600 text-white' :
+                      'bg-purple-500 hover:bg-purple-600 text-white'
+                    }`}
+                  >
+                    Visit Hotel Website
+                  </a>
+                  
+                  <a 
+                    href={`http://localhost:8055/admin/content/hotels/${hotel.id}`}
+                    target="_blank"
+                    class="block hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-lg w-full text-gray-700 text-center transition-colors"
+                  >
+                    Edit in Directus
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <!-- Development Info -->
+      <div class="bg-white shadow-lg p-8 rounded-xl">
+        <h3 class="mb-4 font-bold text-gray-900 text-2xl">
+          Development Information
+        </h3>
+        
+        <div class="gap-6 grid grid-cols-1 md:grid-cols-2">
+          <div>
+            <h4 class="mb-2 font-semibold text-gray-800">Architecture</h4>
+            <ul class="space-y-1 text-gray-600 text-sm">
+              <li>• Astro SSG with dynamic routing</li>
+              <li>• Directus headless CMS</li>
+              <li>• Tailwind CSS with dynamic theming</li>
+              <li>• Multitenant content isolation</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="mb-2 font-semibold text-gray-800">Features</h4>
+            <ul class="space-y-1 text-gray-600 text-sm">
+              <li>• Per-hotel themes and branding</li>
+              <li>• Multi-language support</li>
+              <li>• Multi-currency pricing</li>
+              <li>• Dynamic content management</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="mt-6 pt-6 border-gray-200 border-t">
+          <p class="text-gray-500 text-sm">
+            <strong>Wildcard Domain Setup:</strong> This system is designed to work with wildcard DNS 
+            (*.daotomata.io) where each hotel gets its own subdomain automatically.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    /* Custom styles for the showcase */
+    .hotel-card {
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .hotel-card:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</body>
+</html>

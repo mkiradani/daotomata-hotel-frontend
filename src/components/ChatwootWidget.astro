@@ -1,0 +1,214 @@
+---
+// Multitenant Chatwoot Widget - Official SDK Integration
+import { supabase } from '../lib/supabase';
+
+interface Props {
+  domain?: string;
+}
+
+const { domain } = Astro.props;
+
+// Smart domain detection for multitenant setup
+let targetDomain = domain;
+
+// If no domain provided, detect from URL path
+if (!targetDomain) {
+  const url = Astro.url;
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+
+  if (pathSegments.length > 0) {
+    const hotelSlug = pathSegments[0]; // demo, baberrih
+    targetDomain = `${hotelSlug}.daotomata.io`;
+  }
+}
+
+console.log('🔍 ChatwootWidget - Detecting domain:', targetDomain, 'from URL:', Astro.url.pathname);
+
+// Get Chatwoot configuration for this hotel domain
+console.log('🔍 ChatwootWidget - Querying for domain:', targetDomain);
+
+const { data: hotel, error } = await supabase
+  .from('hotels')
+  .select(`
+    id,
+    name,
+    website_token
+  `)
+  .eq('domain', targetDomain)
+  .single();
+
+console.log('🔍 ChatwootWidget - Query result:', { hotel, error });
+
+// Use website_token directly from hotels table
+const chatwootConfig = hotel?.website_token ? {
+  website_token: hotel.website_token,
+  account_id: null // Not needed for widget initialization
+} : null;
+
+if (error) {
+  console.error('❌ ChatwootWidget - Error:', error);
+} else if (hotel && chatwootConfig) {
+  console.log('✅ ChatwootWidget loaded for:', hotel.name, 'Token:', chatwootConfig.website_token?.substring(0, 8) + '...');
+}
+---
+
+{chatwootConfig?.website_token && hotel && (
+  <script is:inline define:vars={{
+    websiteToken: chatwootConfig.website_token,
+    hotelName: hotel.name
+  }}>
+    // Store configuration globally for debugging
+    window.chatwootConfig = {
+      websiteToken: websiteToken,
+      hotelName: hotelName,
+      baseUrl: "http://localhost:3000"
+    };
+
+    // Chatwoot Settings - Official Configuration
+    window.chatwootSettings = {
+      hideMessageBubble: false,
+      position: 'right',
+      locale: 'es', // Spanish for hotels
+      type: 'standard',
+      darkMode: 'auto',
+      launcherTitle: 'Chat con ' + hotelName
+    };
+
+    // Official Chatwoot SDK Integration
+    (function(d,t) {
+      var BASE_URL = window.chatwootConfig.baseUrl;
+      var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+      g.src=BASE_URL+"/packs/js/sdk.js";
+      g.defer=true;
+      g.async=true;
+      s.parentNode.insertBefore(g,s);
+      g.onload=function(){
+        console.log('🔧 Initializing Chatwoot with token:', websiteToken.substring(0, 8) + '...');
+
+        window.chatwootSDK.run({
+          websiteToken: websiteToken,
+          baseUrl: BASE_URL,
+          // Force ActionCable configuration for real-time messages
+          enabledFeatures: ['emoji_picker', 'attachments', 'end_conversation'],
+          // Ensure WebSocket connection for real-time updates
+          websocketUrl: 'ws://localhost:3000/cable',
+          // Auto-open widget when messages arrive
+          autoOpenOnNewMessage: true,
+          // Show unread message count
+          showUnreadCount: true
+        });
+
+        // Store SDK reference globally for debugging
+        window.chatwootSDKInstance = window.chatwootSDK;
+
+        // Listen for Chatwoot ready event
+        window.addEventListener('chatwoot:ready', function () {
+          console.log('✅ Chatwoot loaded for:', hotelName);
+
+          // Setup real-time UI refresh for incoming messages
+          setupRealTimeUIRefresh();
+        });
+
+        // Listen for new message events
+        window.addEventListener('chatwoot:on-message', function (e) {
+          console.log('📨 New message event received:', e);
+          // Force widget to open on new message
+          setTimeout(function() {
+            if (window.$chatwoot && window.$chatwoot.toggle) {
+              window.$chatwoot.toggle('open');
+              console.log('🔄 Widget auto-opened on new message');
+            }
+          }, 100);
+        });
+
+        // Listen for unread count changes
+        window.addEventListener('chatwoot:on-unread-message-count-changed', function (e) {
+          console.log('📊 Unread count changed:', e);
+          if (e.detail && e.detail.unreadCount > 0) {
+            // Force widget to open when there are unread messages
+            setTimeout(function() {
+              if (window.$chatwoot && window.$chatwoot.toggle) {
+                window.$chatwoot.toggle('open');
+                console.log('🔄 Widget auto-opened due to unread messages');
+              }
+            }, 100);
+          }
+        });
+
+        // Listen for errors
+        window.addEventListener('chatwoot:error', function (e) {
+          console.error('❌ Chatwoot error:', e);
+        });
+
+        // Function to setup real-time UI refresh
+        function setupRealTimeUIRefresh() {
+          console.log('🔄 Setting up real-time UI refresh...');
+
+          // Intercept WebSocket messages for real-time updates
+          const originalWebSocket = window.WebSocket;
+          window.WebSocket = function(url, protocols) {
+            const ws = new originalWebSocket(url, protocols);
+
+            if (url.includes('/cable')) {
+              console.log('🔗 Intercepted Chatwoot WebSocket connection');
+
+              ws.addEventListener('message', function(event) {
+                try {
+                  const data = JSON.parse(event.data);
+                  if (data.message && data.message.event) {
+                    console.log('📨 WebSocket message received:', data.message.event);
+
+                    // Force widget refresh on message events
+                    if (data.message.event === 'message.created' ||
+                        data.message.event === 'message.updated' ||
+                        data.message.event === 'conversation.updated') {
+
+                      setTimeout(function() {
+                        // Use correct Chatwoot API - $chatwoot is the main API
+                        if (window.$chatwoot && window.$chatwoot.toggle) {
+                          window.$chatwoot.toggle('open');
+                          console.log('🔄 Widget opened after:', data.message.event);
+                        }
+                      }, 200);
+                    }
+                  }
+                } catch (e) {
+                  // Ignore parsing errors for non-JSON messages
+                }
+              });
+            }
+
+            return ws;
+          };
+
+          // Also listen for postMessage events from the widget iframe
+          window.addEventListener('message', function(event) {
+            if (event.origin === 'http://localhost:3000' && event.data) {
+              if (event.data.type === 'chatwoot-widget' ||
+                  event.data.event === 'message' ||
+                  event.data.event === 'conversation-update') {
+
+                console.log('📨 Widget iframe message:', event.data);
+
+                // Force widget to open after iframe message
+                setTimeout(function() {
+                  if (window.$chatwoot && window.$chatwoot.toggle) {
+                    window.$chatwoot.toggle('open');
+                    console.log('🔄 Widget opened after iframe message');
+                  }
+                }, 100);
+              }
+            }
+          });
+        }
+
+      }
+    })(document,"script");
+  </script>
+)}
+
+{!chatwootConfig?.website_token && (
+  <div style="position: fixed; bottom: 20px; right: 20px; background: #ff6b6b; color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
+    ⚠️ Chatwoot not configured for {domain}
+  </div>
+)}

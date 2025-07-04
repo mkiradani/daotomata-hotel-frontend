@@ -1,0 +1,160 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
+import { generateThemeCSS, getThemeName } from '../../../lib/theme.js';
+import { DetailPageLayout } from '../../../components/DetailPageLayout';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  console.log('🏨 Generating static paths for room pages...');
+  
+  try {
+    const hotels = await getAllHotels();
+    const paths = [];
+    
+    for (const hotel of hotels) {
+      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
+      
+      // Get full hotel data including rooms
+      const fullHotel = await getHotelByDomain(hotel.domain);
+      if (!fullHotel || !fullHotel.rooms) {
+        console.log(`⚠️ No rooms found for hotel: ${hotel.name}`);
+        continue;
+      }
+      
+      // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
+      const subdomain = hotel.domain.split('.')[0];
+      
+      // Generate paths for each room
+      for (const room of fullHotel.rooms) {
+        // Create slug from room name
+        const slug = room.name.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+        
+        paths.push({
+          params: { 
+            hotel: subdomain,
+            slug: slug
+          },
+          props: {
+            room,
+            hotel: fullHotel,
+            hotelSubdomain: subdomain,
+            defaultLanguage: hotel.default_language || 'en-US',
+            defaultCurrency: hotel.default_currency || 'USD',
+          }
+        });
+      }
+    }
+    
+    console.log(`✅ Generated ${paths.length} room page paths`);
+    return paths;
+  } catch (error) {
+    console.error('❌ Error generating room static paths:', error);
+    return [];
+  }
+}
+
+const { room, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
+
+
+
+// Generate theme CSS and name using helper functions
+const themeCSS = generateThemeCSS(hotel, hotelSubdomain);
+const themeName = getThemeName(hotelSubdomain);
+const themeConfig = hotel.themes?.[0]?.config || {};
+const hotelLogo = hotel.themes?.[0]?.logo || null;
+
+
+
+// Prepare room data for DetailPageLayout
+const imageUrl = room.main_photo ? getMediaUrl(room.main_photo.id, { width: 1200, height: 675, quality: 95 }) : '';
+const videoUrl = room.main_video ? getMediaUrl(room.main_video.id) : undefined;
+
+// Process media gallery
+const galleryImages = [];
+if (room.media_gallery && Array.isArray(room.media_gallery)) {
+  for (const mediaItem of room.media_gallery) {
+    // media_gallery now contains objects with directus_files_id
+    if (mediaItem && mediaItem.directus_files_id) {
+      const file = mediaItem.directus_files_id;
+      const isVideo = file.type?.startsWith('video/');
+      const mediaUrl = isVideo ? getMediaUrl(file.id) : getMediaUrl(file.id, { width: 800, height: 600, quality: 90 });
+      console.log(`🎬 Media file ${file.id}: type="${file.type}", filename="${file.filename_download}", isVideo=${isVideo}`);
+      galleryImages.push({
+        id: file.id,
+        url: mediaUrl,
+        title: file.title || 'Gallery Image',
+        type: isVideo ? 'video' : 'image'
+      });
+    }
+  }
+}
+
+// Sort gallery images: videos first, then images
+galleryImages.sort((a, b) => {
+  if (a.type === 'video' && b.type === 'image') return -1;
+  if (a.type === 'image' && b.type === 'video') return 1;
+  return 0;
+});
+
+// Convert amenities array to string array if needed
+const amenities = Array.isArray(room.amenities) ? room.amenities : [];
+
+const roomMetadata = {
+  roomType: room.room_type,
+  maxOccupancy: room.max_occupancy,
+  sizeSqm: room.size_sqm,
+  bedConfiguration: room.bed_configuration,
+  viewType: room.view_type,
+  floorNumber: room.floor_number,
+  isAccessible: room.is_accessible,
+  amenities: amenities,
+  basePrice: room.base_price ? `${room.base_price}` : undefined,
+};
+
+const breadcrumbItems = [
+  { label: hotel.name, href: `/${hotelSubdomain}` },
+  { label: 'Rooms', href: `/${hotelSubdomain}#rooms` },
+  { label: room.name }
+];
+
+// TODO: Future Cloudbeds integration
+const availabilityData = {
+  isAvailable: true,
+  nextAvailableDate: undefined,
+  priceRange: undefined
+};
+---
+
+<Layout
+  title={`${room.name} - ${hotel.name}`}
+  description={room.description || `Experience luxury in our ${room.name} at ${hotel.name}`}
+  domain={hotel.domain}
+  ga4Id={hotel.analytics?.ga4_id}
+  pixelId={hotel.analytics?.pixel_id}
+  themeCSS={themeCSS}
+  themeName={themeName}
+  hotelName={hotel.name}
+  themeConfig={themeConfig}
+  hotelLogo={hotelLogo}
+  showNavbar={true}
+>
+  <DetailPageLayout
+    title={room.name}
+    description={room.description || `Experience luxury and comfort in our ${room.name}.`}
+    type="room"
+    imageUrl={imageUrl}
+    videoUrl={videoUrl}
+    galleryImages={galleryImages}
+    metadata={roomMetadata}
+    hotelName={hotel.name}
+    hotelSlug={hotelSubdomain}
+    defaultCurrency={defaultCurrency}
+    breadcrumbItems={breadcrumbItems}
+    availabilityData={availabilityData}
+    client:load
+  />
+</Layout>

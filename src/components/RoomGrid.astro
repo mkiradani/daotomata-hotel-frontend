@@ -1,0 +1,21 @@
+---
+// Auto-generated Room Grid Component
+const { rooms } = Astro.props;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {
+    rooms.map(room => (
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title">{room.name_es}</h3>
+          <p>{room.description_es}</p>
+          <div class="card-actions justify-between items-center">
+            <span class="text-2xl font-bold text-primary">€{room.base_price}</span>
+            <button class="btn btn-primary">Reservar</button>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>

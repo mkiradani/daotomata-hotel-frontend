@@ -1,0 +1,142 @@
+---
+import ChatwootWidget from '../components/ChatwootWidget.astro';
+import Navbar from '../components/Navbar.astro';
+import { getMediaUrl } from '../lib/directus.js';
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  domain?: string;
+  ga4Id?: string;
+  pixelId?: string;
+  themeCSS?: string;
+  themeName?: string;
+  hotelName?: string;
+  themeConfig?: any;
+  hotelLogo?: any;
+  showNavbar?: boolean;
+}
+
+const {
+  title,
+  description = "Hotel website powered by Daotomata Stack",
+  domain,
+  ga4Id,
+  pixelId,
+  themeCSS,
+  themeName,
+  hotelName = "Hotel",
+  themeConfig = {},
+  hotelLogo = null,
+  showNavbar = true
+} = Astro.props;
+
+// Generate dynamic favicon URL from hotel logo
+const faviconUrl = hotelLogo && hotelLogo.id
+  ? getMediaUrl(hotelLogo.id, { width: 32, height: 32, quality: 90, format: 'png' })
+  : '/favicon.svg';
+---
+
+<!doctype html>
+<html lang="en" data-theme={themeName}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Dynamic favicon based on hotel logo -->
+    {hotelLogo && hotelLogo.id ? (
+      <>
+        <link rel="icon" type="image/png" sizes="32x32" href={faviconUrl} />
+        <link rel="icon" type="image/png" sizes="16x16" href={getMediaUrl(hotelLogo.id, { width: 16, height: 16, quality: 90, format: 'png' })} />
+        <link rel="apple-touch-icon" sizes="180x180" href={getMediaUrl(hotelLogo.id, { width: 180, height: 180, quality: 90, format: 'png' })} />
+      </>
+    ) : (
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    )}
+
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    
+
+    
+    <!-- Dynamic theme CSS -->
+    {themeCSS && (
+      <style set:html={themeCSS} />
+    )}
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Poppins:wght@300;400;500;700&family=Montserrat:wght@300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- Google Analytics 4 -->
+    {ga4Id && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '{ga4Id}');
+        </script>
+      </>
+    )}
+    
+    <!-- Meta Pixel -->
+    {pixelId && (
+      <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '{pixelId}');
+        fbq('track', 'PageView');
+      </script>
+      <noscript>
+        <img height="1" width="1" style="display:none"
+             src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`} />
+      </noscript>
+    )}
+  </head>
+  <body class="bg-base-100 min-h-screen">
+    <!-- Navigation -->
+    {showNavbar && (
+      <Navbar
+        hotelName={hotelName}
+        hotelDomain={domain || 'demo.localhost'}
+        currentPath={Astro.url.pathname}
+        themeConfig={themeConfig}
+        hotelLogo={hotelLogo}
+      />
+    )}
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <!-- Auto-inject Chatwoot Widget with automatic domain detection -->
+    <ChatwootWidget />
+  </body>
+</html>
+
+<style>
+  html {
+    font-family: var(--font-family, 'Inter', sans-serif);
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+</style>
