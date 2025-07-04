@@ -1,6 +1,6 @@
 ---
-// Multitenant Chatwoot Widget - Official SDK Integration
-import { supabase } from '../lib/supabase';
+// Multitenant Chatwoot Widget - Official SDK Integration using Directus
+import { getHotelByDomain } from '../lib/directus.js';
 
 interface Props {
   domain?: string;
@@ -11,44 +11,50 @@ const { domain } = Astro.props;
 // Smart domain detection for multitenant setup
 let targetDomain = domain;
 
-// If no domain provided, detect from URL path
+// If no domain provided, detect from URL path and map to correct domain
 if (!targetDomain) {
   const url = Astro.url;
   const pathSegments = url.pathname.split('/').filter(Boolean);
 
   if (pathSegments.length > 0) {
     const hotelSlug = pathSegments[0]; // demo, baberrih
-    targetDomain = `${hotelSlug}.daotomata.io`;
+
+    // Map hotel slugs to their actual domains in Directus
+    const domainMapping = {
+      'maisondemo': 'maisondemo.com',
+      'demo': 'maisondemo.com',
+      'baberrih': 'baberrih.ma'
+    };
+
+    targetDomain = domainMapping[hotelSlug] || `${hotelSlug}.daotomata.io`;
   }
 }
 
 console.log('🔍 ChatwootWidget - Detecting domain:', targetDomain, 'from URL:', Astro.url.pathname);
 
-// Get Chatwoot configuration for this hotel domain
-console.log('🔍 ChatwootWidget - Querying for domain:', targetDomain);
+// Get Chatwoot configuration for this hotel domain from Directus
+console.log('🔍 ChatwootWidget - Querying Directus for domain:', targetDomain);
 
-const { data: hotel, error } = await supabase
-  .from('hotels')
-  .select(`
-    id,
-    name,
-    website_token
-  `)
-  .eq('domain', targetDomain)
-  .single();
+const hotel = await getHotelByDomain(targetDomain);
 
-console.log('🔍 ChatwootWidget - Query result:', { hotel, error });
+console.log('🔍 ChatwootWidget - Directus query result:', {
+  found: !!hotel,
+  name: hotel?.name,
+  hasToken: !!hotel?.chatwoot_website_token
+});
 
-// Use website_token directly from hotels table
-const chatwootConfig = hotel?.website_token ? {
-  website_token: hotel.website_token,
+// Use chatwoot_website_token from Directus hotels table
+const chatwootConfig = hotel?.chatwoot_website_token ? {
+  website_token: hotel.chatwoot_website_token,
   account_id: null // Not needed for widget initialization
 } : null;
 
-if (error) {
-  console.error('❌ ChatwootWidget - Error:', error);
+if (!hotel) {
+  console.error('❌ ChatwootWidget - Hotel not found for domain:', targetDomain);
 } else if (hotel && chatwootConfig) {
   console.log('✅ ChatwootWidget loaded for:', hotel.name, 'Token:', chatwootConfig.website_token?.substring(0, 8) + '...');
+} else {
+  console.warn('⚠️ ChatwootWidget - Hotel found but no chatwoot_website_token configured for:', hotel.name);
 }
 ---
 
@@ -57,12 +63,16 @@ if (error) {
     websiteToken: chatwootConfig.website_token,
     hotelName: hotel.name
   }}>
+    console.log('🔧 CHATWOOT SCRIPT STARTING - Token:', websiteToken.substring(0, 8) + '...', 'Hotel:', hotelName);
+
     // Store configuration globally for debugging
     window.chatwootConfig = {
       websiteToken: websiteToken,
       hotelName: hotelName,
-      baseUrl: "http://localhost:3000"
+      baseUrl: "https://chat.daotomata.io"
     };
+
+    console.log('🔧 CHATWOOT CONFIG STORED:', window.chatwootConfig);
 
     // Chatwoot Settings - Official Configuration
     window.chatwootSettings = {
@@ -74,6 +84,8 @@ if (error) {
       launcherTitle: 'Chat con ' + hotelName
     };
 
+    console.log('🔧 CHATWOOT SETTINGS CONFIGURED:', window.chatwootSettings);
+
     // Official Chatwoot SDK Integration
     (function(d,t) {
       var BASE_URL = window.chatwootConfig.baseUrl;
@@ -81,29 +93,55 @@ if (error) {
       g.src=BASE_URL+"/packs/js/sdk.js";
       g.defer=true;
       g.async=true;
+
+      console.log('🔧 Loading Chatwoot SDK from:', g.src);
+
+      g.onerror = function() {
+        console.error('❌ Failed to load Chatwoot SDK from:', g.src);
+      };
+
       s.parentNode.insertBefore(g,s);
       g.onload=function(){
         console.log('🔧 Initializing Chatwoot with token:', websiteToken.substring(0, 8) + '...');
+        console.log('🔧 Base URL:', BASE_URL);
+        console.log('🔧 Hotel:', hotelName);
 
-        window.chatwootSDK.run({
-          websiteToken: websiteToken,
-          baseUrl: BASE_URL,
-          // Force ActionCable configuration for real-time messages
-          enabledFeatures: ['emoji_picker', 'attachments', 'end_conversation'],
-          // Ensure WebSocket connection for real-time updates
-          websocketUrl: 'ws://localhost:3000/cable',
-          // Auto-open widget when messages arrive
-          autoOpenOnNewMessage: true,
-          // Show unread message count
-          showUnreadCount: true
-        });
+        try {
+          window.chatwootSDK.run({
+            websiteToken: websiteToken,
+            baseUrl: BASE_URL,
+            // Force ActionCable configuration for real-time messages
+            enabledFeatures: ['emoji_picker', 'attachments', 'end_conversation'],
+            // Ensure WebSocket connection for real-time updates
+            websocketUrl: 'wss://chat.daotomata.io/cable',
+            // Auto-open widget when messages arrive
+            autoOpenOnNewMessage: true,
+            // Show unread message count
+            showUnreadCount: true
+          });
+          console.log('✅ Chatwoot SDK initialized successfully');
+        } catch (error) {
+          console.error('❌ Error initializing Chatwoot SDK:', error);
+        }
 
         // Store SDK reference globally for debugging
         window.chatwootSDKInstance = window.chatwootSDK;
 
         // Listen for Chatwoot ready event
         window.addEventListener('chatwoot:ready', function () {
-          console.log('✅ Chatwoot loaded for:', hotelName);
+          console.log('✅ Chatwoot ready event fired for:', hotelName);
+          console.log('✅ Chatwoot widget should now be visible');
+
+          // Check if widget is actually visible
+          setTimeout(function() {
+            const widget = document.querySelector('#chatwoot_live_chat_widget');
+            if (widget) {
+              console.log('✅ Chatwoot widget element found in DOM');
+              console.log('Widget styles:', window.getComputedStyle(widget));
+            } else {
+              console.warn('⚠️ Chatwoot widget element not found in DOM');
+            }
+          }, 1000);
 
           // Setup real-time UI refresh for incoming messages
           setupRealTimeUIRefresh();
@@ -183,7 +221,7 @@ if (error) {
 
           // Also listen for postMessage events from the widget iframe
           window.addEventListener('message', function(event) {
-            if (event.origin === 'http://localhost:3000' && event.data) {
+            if (event.origin === 'https://chat.daotomata.io' && event.data) {
               if (event.data.type === 'chatwoot-widget' ||
                   event.data.event === 'message' ||
                   event.data.event === 'conversation-update') {

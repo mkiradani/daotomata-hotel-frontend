@@ -4,10 +4,10 @@ import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
 interface ActivityCardProps {
   name: string;
   description: string;
-  category: string;
-  durationMinutes?: number;
-  difficultyLevel?: string;
-  price?: string;
+  maxParticipants?: number;
+  ageRestriction?: number;
+  equipmentProvided?: string[];
+  operatingHours?: any;
   defaultCurrency: string;
   imageUrl: string;
   videoUrl?: string;
@@ -20,10 +20,10 @@ interface ActivityCardProps {
 export const ActivityCard = component$<ActivityCardProps>(({
   name,
   description,
-  category,
-  durationMinutes,
-  difficultyLevel,
-  price,
+  maxParticipants,
+  ageRestriction,
+  equipmentProvided,
+  operatingHours,
   defaultCurrency,
   imageUrl,
   videoUrl,
@@ -107,7 +107,7 @@ export const ActivityCard = component$<ActivityCardProps>(({
           )}
           <div class="top-4 right-4 z-10 absolute">
             <div class="bg-secondary/80 backdrop-blur-sm border border-secondary-content/20 font-semibold badge badge-secondary badge-lg">
-              {category}
+              Activity
             </div>
           </div>
         </figure>
@@ -123,29 +123,29 @@ export const ActivityCard = component$<ActivityCardProps>(({
         </p>
 
         <div class="flex flex-wrap gap-2 mb-6">
-          {durationMinutes && (
+          {maxParticipants && (
             <div class="badge-outline badge badge-sm">
               <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
               </svg>
-              {durationMinutes} min
+              Max {maxParticipants} people
             </div>
           )}
-          {difficultyLevel && (
+          {ageRestriction && ageRestriction > 0 && (
             <div class="badge-outline badge badge-sm">
               <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
               </svg>
-              {difficultyLevel}
+              {ageRestriction}+ years
             </div>
           )}
         </div>
 
         <div class="justify-between items-center pt-4 border-t border-base-200 card-actions">
           <div class="text-left">
-            <div class="text-xs text-base-content/50 uppercase tracking-wide">Price</div>
+            <div class="text-xs text-base-content/50 uppercase tracking-wide">Activity</div>
             <div class="font-bold text-primary text-2xl">
-              {price ? `${defaultCurrency} ${price}` : 'Free'}
+              Available
             </div>
           </div>
           <a href={`/${hotelSlug}/activities/${activitySlug}`} class="btn btn-secondary btn-sm">

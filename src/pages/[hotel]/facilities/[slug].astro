@@ -1,7 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
-import { generateThemeCSS, getThemeName } from '../../../lib/theme.js';
 import { DetailPageLayout } from '../../../components/DetailPageLayout';
 
 export const prerender = true;
@@ -59,11 +58,7 @@ export async function getStaticPaths() {
 
 const { facility, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
 
-// Generate theme CSS and name using helper functions
-const themeCSS = generateThemeCSS(hotel, hotelSubdomain);
-const themeName = getThemeName(hotelSubdomain);
-const themeConfig = hotel.themes?.[0]?.config || {};
-const hotelLogo = hotel.themes?.[0]?.logo || null;
+// Hotel theme data will be handled globally by Layout.astro
 
 
 
@@ -135,11 +130,8 @@ const breadcrumbItems = [
   domain={hotel.domain}
   ga4Id={hotel.analytics?.ga4_id}
   pixelId={hotel.analytics?.pixel_id}
-  themeCSS={themeCSS}
-  themeName={themeName}
-  hotelName={hotel.name}
-  themeConfig={themeConfig}
-  hotelLogo={hotelLogo}
+  hotel={hotel}
+  hotelSubdomain={hotelSubdomain}
   showNavbar={true}
 >
   <DetailPageLayout

@@ -49,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
     for (const mappedRoom of mappedRooms) {
       const directusRoom = directusRooms.find((r) => r.id === mappedRoom.directusId);
 
-      if (directusRoom && !directusRoom.pms_room_id) {
+      if (directusRoom && !directusRoom.cloudbeds_room_id) {
         syncRecommendations.push({
           directusRoomId: mappedRoom.directusId,
           directusRoomName: mappedRoom.name,
@@ -72,21 +72,21 @@ export const POST: APIRoute = async ({ request }) => {
             await directus.request(
               // @ts-ignore - Directus types
               directus.updateItem('rooms', recommendation.directusRoomId, {
-                pms_room_id: recommendation.suggestedPmsRoomId,
+                cloudbeds_room_id: recommendation.suggestedPmsRoomId,
               })
             );
 
             updatedRooms.push({
               roomId: recommendation.directusRoomId,
               roomName: recommendation.directusRoomName,
-              pmsRoomId: recommendation.suggestedPmsRoomId,
+              cloudbedsRoomId: recommendation.suggestedPmsRoomId,
               status: 'updated',
             });
           } catch (updateError) {
             updatedRooms.push({
               roomId: recommendation.directusRoomId,
               roomName: recommendation.directusRoomName,
-              pmsRoomId: recommendation.suggestedPmsRoomId,
+              cloudbedsRoomId: recommendation.suggestedPmsRoomId,
               status: 'error',
               error: updateError instanceof Error ? updateError.message : 'Unknown error',
             });

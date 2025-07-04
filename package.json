@@ -19,11 +19,13 @@
     "@builder.io/qwik": "^1.14.1",
     "@directus/sdk": "^17.0.0",
     "@qwikdev/astro": "^0.8.0",
-    "@supabase/supabase-js": "2.50.1-next.6",
     "@tailwindcss/postcss": "^4.1.10",
     "@tailwindcss/vite": "^4.1.10",
     "astro": "5.10.0",
     "daisyui": "5.0.4",
+    "node-fetch": "^3.3.2",
+    "ofetch": "^1.4.1",
+    "ws": "^8.18.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {

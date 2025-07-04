@@ -26,8 +26,7 @@ This is the frontend application for the Daotomata Hotel management system. It p
 │   ├── layouts/         # Page layouts
 │   ├── lib/            # Utilities and services
 │   │   ├── booking-engines/  # Booking system integrations
-│   │   ├── directus.js      # CMS integration
-│   │   └── supabase.js      # Database integration
+│   │   └── directus.js      # CMS and data integration
 │   ├── pages/          # File-based routing
 │   │   ├── [hotel]/    # Dynamic hotel routes
 │   │   ├── admin/      # Admin dashboard
@@ -39,11 +38,10 @@ This is the frontend application for the Daotomata Hotel management system. It p
 
 ## 🔧 Technology Stack
 
-- **Framework**: Astro with React
-- **Database**: Supabase
-- **CMS**: Directus
+- **Framework**: Astro with Qwik islands
+- **CMS & Data**: Directus
 - **Booking Engine**: Cloudbeds integration
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS + DaisyUI
 - **Deployment**: Docker
 
 ## 🧞 Commands
@@ -67,10 +65,8 @@ All commands are run from the root of the project, from a terminal:
    ```
 
 2. Configure your environment variables:
-   - `SUPABASE_URL`: Your Supabase project URL
-   - `SUPABASE_ANON_KEY`: Your Supabase anonymous key
    - `DIRECTUS_URL`: Your Directus CMS URL
-   - `DIRECTUS_TOKEN`: Your Directus access token
+   - `DIRECTUS_ADMIN_TOKEN`: Your Directus admin access token
    - `CLOUDBEDS_API_KEY`: Your Cloudbeds API key
 
 ## 🚀 Deployment

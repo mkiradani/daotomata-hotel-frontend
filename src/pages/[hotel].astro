@@ -73,6 +73,10 @@ const hotel = {
   available_languages: hotelData.available_languages,
   available_currencies: hotelData.available_currencies,
 
+  // Theme data from Directus
+  theme: hotelData.theme || {},
+  logo: hotelData.logo || null,
+
   // Related data with translations
   rooms: hotelData.rooms?.map(room => getTranslatedContent(room, currentLanguage)) || [],
   activities: hotelData.activities?.map(activity => getTranslatedContent(activity, currentLanguage)) || [],
@@ -81,15 +85,14 @@ const hotel = {
   menu_items: hotelData.menu_items?.map(item => getTranslatedContent(item, currentLanguage)) || [],
 
   // Other related data
-  themes: hotelData.themes || [],
   analytics: hotelData.analytics || null,
   chatwoot_accounts: hotelData.chatwoot_accounts || [],
   hero_media: hotelData.hero_media || []
 };
 
-// Generate theme CSS from Directus themes
-const themeConfig = hotel.themes?.[0]?.config || {};
-const hotelLogo = hotel.themes?.[0]?.logo || null;
+// Generate theme CSS from Directus theme data
+const themeConfig = hotel.theme || {};
+const hotelLogo = hotel.logo || null;
 const colors = themeConfig.colors || {};
 const typography = themeConfig.typography || {};
 const layout = themeConfig.layout || {};
@@ -224,14 +227,19 @@ console.log(`✅ Hotel loaded: ${hotel.name} (${hotel.rooms?.length || 0} rooms,
   domain={hotelDomain}
   ga4Id={hotel.analytics?.ga4_id}
   pixelId={hotel.analytics?.pixel_id}
-  themeCSS={themeCSS}
-  themeName={themeName}
-  hotelName={hotel.name}
-  themeConfig={themeConfig}
-  hotelLogo={hotelLogo}
+  hotel={hotel}
+  hotelSubdomain={hotelSubdomain}
   showNavbar={true}
 >
   <!-- Hero Section -->
+  {console.log('🖼️ Hero media debug:', {
+    heroPhoto: heroPhoto,
+    heroPhotoId: heroPhoto?.id,
+    heroVideo: heroVideo,
+    heroVideoId: heroVideo?.id,
+    hotelLogo: hotelLogo,
+    hotelLogoId: hotelLogo?.id
+  })}
   <HeroSection
     hotelName={hotel.name}
     heroImageUrl={heroPhoto ? getMediaUrl(heroPhoto.id, { width: 1920, height: 1080, quality: 90 }) : undefined}

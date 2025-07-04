@@ -137,10 +137,10 @@ export class RoomMappingService {
           this.normalizeRoomName(cbRoom.name) === this.normalizeRoomName(directusRoom.name),
       );
 
-      if (cloudbedsRoom && !directusRoom.pms_room_id) {
+      if (cloudbedsRoom && !directusRoom.cloudbeds_room_id) {
         return {
           ...directusRoom,
-          suggested_pms_room_id: cloudbedsRoom.id,
+          suggested_cloudbeds_room_id: cloudbedsRoom.id,
         };
       }
 

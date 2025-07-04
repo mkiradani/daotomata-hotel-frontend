@@ -3,13 +3,29 @@
  * This replicates exactly the working system from /[hotel].astro
  */
 export function generateThemeCSS(hotel, hotelSubdomain) {
-  const themeConfig = hotel.themes?.[0]?.config || {};
+  console.log('🎨 generateThemeCSS called for:', hotelSubdomain);
+  console.log('🎨 Full hotel object keys:', Object.keys(hotel));
+  console.log('🎨 Hotel theme data:', hotel.theme);
+  console.log('🎨 Hotel theme type:', typeof hotel.theme);
+  console.log('🎨 Hotel theme JSON:', JSON.stringify(hotel.theme, null, 2));
+
+  const themeConfig = hotel.theme || {};
   const colors = themeConfig.colors || {};
   const typography = themeConfig.typography || {};
   const layout = themeConfig.layout || {};
   const components = themeConfig.components || {};
 
+  console.log('🎨 Parsed theme components:', {
+    colors: Object.keys(colors),
+    typography: Object.keys(typography),
+    layout: Object.keys(layout),
+    components: Object.keys(components)
+  });
+  console.log('🎨 Colors object:', colors);
+  console.log('🎨 Layout object:', layout);
+
   const themeName = `${hotelSubdomain}-theme`;
+  console.log('🎨 Generated theme name:', themeName);
 
   // Use EXACTLY the same CSS structure that works in the main page
   const themeCSS = `

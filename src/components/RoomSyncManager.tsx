@@ -9,7 +9,7 @@ interface RoomSyncManagerProps {
 interface SyncRecommendation {
   directusRoomId: string;
   directusRoomName: string;
-  suggestedPmsRoomId: string;
+  suggestedCloudbedsRoomId: string;
   cloudbedsRoomName: string;
   confidence: string;
 }
@@ -127,9 +127,9 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
 
   return (
     <div class={`room-sync-manager ${className}`}>
-      <div class="card bg-base-100 shadow-xl">
+      <div class="bg-base-100 shadow-xl card">
         <div class="card-body">
-          <h3 class="card-title text-primary">
+          <h3 class="text-primary card-title">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
@@ -144,7 +144,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
 
           {error.value && (
             <div class="alert alert-error">
-              <svg class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>{error.value}</span>
@@ -154,10 +154,10 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
           {syncData.value && (
             <div class="space-y-6">
               {/* Sync Status Overview */}
-              <div class="stats stats-vertical lg:stats-horizontal shadow">
+              <div class="shadow stats stats-vertical lg:stats-horizontal">
                 <div class="stat">
                   <div class="stat-title">Total Rooms</div>
-                  <div class="stat-value text-primary">{syncData.value.syncStatus.totalRooms}</div>
+                  <div class="text-primary stat-value">{syncData.value.syncStatus.totalRooms}</div>
                 </div>
                 
                 <div class="stat">
@@ -170,7 +170,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
                 
                 <div class="stat">
                   <div class="stat-title">Mapping Coverage</div>
-                  <div class="stat-value text-info">
+                  <div class="text-info stat-value">
                     {Math.round(syncData.value.syncStatus.mappingCoverage)}%
                   </div>
                   <div class="stat-desc">Cloudbeds mapping</div>
@@ -206,10 +206,10 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
                   
                   <div class="space-y-2">
                     {syncData.value.syncRecommendations.map((recommendation, index) => (
-                      <div key={index} class="flex justify-between items-center p-3 bg-warning/10 rounded-lg">
+                      <div key={index} class="flex justify-between items-center bg-warning/10 p-3 rounded-lg">
                         <div>
                           <span class="font-medium">{recommendation.directusRoomName}</span>
-                          <span class="text-sm opacity-70 ml-2">
+                          <span class="opacity-70 ml-2 text-sm">
                             → {recommendation.cloudbedsRoomName}
                           </span>
                         </div>
@@ -217,7 +217,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
                           <div class="badge badge-warning">
                             {recommendation.confidence} confidence
                           </div>
-                          <div class="text-xs opacity-70 mt-1">
+                          <div class="opacity-70 mt-1 text-xs">
                             ID: {recommendation.suggestedPmsRoomId}
                           </div>
                         </div>
@@ -230,7 +230,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
               {/* Recent Sync Results */}
               {syncResults.value.length > 0 && (
                 <div>
-                  <h4 class="font-semibold text-success mb-3">✅ Recent Sync Results</h4>
+                  <h4 class="mb-3 font-semibold text-success">✅ Recent Sync Results</h4>
                   <div class="space-y-2">
                     {syncResults.value.map((result, index) => (
                       <div key={index} class={`flex justify-between items-center p-3 rounded-lg ${
@@ -239,7 +239,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
                         <div>
                           <span class="font-medium">{result.roomName}</span>
                           {result.error && (
-                            <p class="text-sm text-error mt-1">{result.error}</p>
+                            <p class="mt-1 text-error text-sm">{result.error}</p>
                           )}
                         </div>
                         <div class="text-right">
@@ -247,7 +247,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
                             {result.status}
                           </div>
                           {result.pmsRoomId && (
-                            <div class="text-xs opacity-70 mt-1">
+                            <div class="opacity-70 mt-1 text-xs">
                               PMS ID: {result.pmsRoomId}
                             </div>
                           )}
@@ -261,7 +261,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
               {/* No Sync Needed */}
               {syncData.value.syncRecommendations.length === 0 && syncData.value.syncStatus.roomsWithoutPmsId === 0 && (
                 <div class="alert alert-success">
-                  <svg class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>All rooms are properly synced with PMS IDs!</span>
@@ -270,12 +270,12 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
 
               {/* Instructions */}
               <div class="alert alert-info">
-                <svg class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
                   <h4 class="font-bold">About PMS Room ID Sync</h4>
-                  <ul class="text-sm mt-2 space-y-1">
+                  <ul class="space-y-1 mt-2 text-sm">
                     <li>• PMS Room IDs link Directus rooms to Cloudbeds rooms</li>
                     <li>• Auto-sync matches rooms by name and updates Directus</li>
                     <li>• This enables real-time availability and booking functionality</li>
@@ -285,7 +285,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(({
               </div>
 
               {/* Refresh Button */}
-              <div class="card-actions justify-center">
+              <div class="justify-center card-actions">
                 <button 
                   class={`btn btn-outline ${isLoading.value ? 'loading' : ''}`}
                   onClick$={loadSyncStatus}

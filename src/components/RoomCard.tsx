@@ -4,9 +4,8 @@ import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 interface RoomCardProps {
   name: string;
   description: string;
-  roomType: string;
-  maxOccupancy: number;
-  sizeSqm?: number;
+  bedConfiguration?: string; // Changed from roomType to bedConfiguration
+  sizeSqm?: string; // Changed from number to string to match new schema
   basePrice?: string;
   defaultCurrency: string;
   imageUrl: string;
@@ -20,8 +19,7 @@ interface RoomCardProps {
 export const RoomCard = component$<RoomCardProps>(({
   name,
   description,
-  roomType,
-  maxOccupancy,
+  bedConfiguration,
   sizeSqm,
   basePrice,
   defaultCurrency,
@@ -116,7 +114,7 @@ export const RoomCard = component$<RoomCardProps>(({
           )}
           <div class="top-4 right-4 z-10 absolute">
             <div class="bg-primary/80 backdrop-blur-sm border border-primary-content/20 font-semibold badge badge-primary badge-lg">
-              {roomType}
+              {bedConfiguration || 'Room'}
             </div>
           </div>
         </figure>
@@ -132,12 +130,7 @@ export const RoomCard = component$<RoomCardProps>(({
         </p>
 
         <div class="flex flex-wrap gap-2 mb-6">
-          <div class="badge-outline badge badge-sm">
-            <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-            </svg>
-            {maxOccupancy} guests
-          </div>
+
           {sizeSqm && (
             <div class="badge-outline badge badge-sm">
               <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -190,7 +183,7 @@ export const RoomCard = component$<RoomCardProps>(({
               <div class="flex justify-between items-center">
                 <div>
                   <h4 class="font-semibold">{name}</h4>
-                  <p class="opacity-70 text-sm">{roomType} • Max {maxOccupancy} guests</p>
+                  <p class="opacity-70 text-sm">{bedConfiguration || 'Room'}</p>
                 </div>
                 <div class="text-right">
                   <div class="font-bold text-primary text-2xl">

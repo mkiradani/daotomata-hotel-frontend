@@ -24,19 +24,19 @@ const roomType = url.searchParams.get('roomType') || '';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
-  <main class="min-h-screen bg-base-200">
+  <main class="bg-base-200 min-h-screen">
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-r from-primary/20 to-secondary/20 py-16">
-      <div class="container mx-auto px-4">
+      <div class="mx-auto px-4 container">
         <div class="text-center">
-          <h1 class="text-4xl md:text-6xl font-bold text-primary mb-4">
+          <h1 class="mb-4 font-bold text-primary text-4xl md:text-6xl">
             Book Your Stay
           </h1>
-          <p class="text-xl md:text-2xl opacity-80 mb-8">
+          <p class="opacity-80 mb-8 text-xl md:text-2xl">
             at {hotel.name}
           </p>
-          <div class="max-w-2xl mx-auto">
-            <p class="text-lg opacity-70">
+          <div class="mx-auto max-w-2xl">
+            <p class="opacity-70 text-lg">
               Experience luxury and comfort with our seamless booking system. 
               Check real-time availability and secure your perfect room today.
             </p>
@@ -47,39 +47,39 @@ const roomType = url.searchParams.get('roomType') || '';
 
     <!-- Booking Section -->
     <section class="py-12">
-      <div class="container mx-auto px-4">
-        <div class="max-w-6xl mx-auto">
+      <div class="mx-auto px-4 container">
+        <div class="mx-auto max-w-6xl">
           <!-- Booking Widget -->
           <div id="booking-widget-container" class="mb-12">
             <!-- This will be populated by the Qwik component -->
           </div>
 
           <!-- Features Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body text-center">
-                <div class="text-4xl mb-4">⚡</div>
-                <h3 class="card-title justify-center text-primary">Instant Confirmation</h3>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-3 mb-12">
+            <div class="bg-base-100 shadow-xl card">
+              <div class="text-center card-body">
+                <div class="mb-4 text-4xl">⚡</div>
+                <h3 class="justify-center text-primary card-title">Instant Confirmation</h3>
                 <p class="opacity-70">
                   Get immediate booking confirmation with real-time availability from our property management system.
                 </p>
               </div>
             </div>
 
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body text-center">
-                <div class="text-4xl mb-4">🔒</div>
-                <h3 class="card-title justify-center text-primary">Secure Booking</h3>
+            <div class="bg-base-100 shadow-xl card">
+              <div class="text-center card-body">
+                <div class="mb-4 text-4xl">🔒</div>
+                <h3 class="justify-center text-primary card-title">Secure Booking</h3>
                 <p class="opacity-70">
                   Your personal information and payment details are protected with industry-standard security.
                 </p>
               </div>
             </div>
 
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body text-center">
-                <div class="text-4xl mb-4">💰</div>
-                <h3 class="card-title justify-center text-primary">Best Rates</h3>
+            <div class="bg-base-100 shadow-xl card">
+              <div class="text-center card-body">
+                <div class="mb-4 text-4xl">💰</div>
+                <h3 class="justify-center text-primary card-title">Best Rates</h3>
                 <p class="opacity-70">
                   Book directly with us for the best available rates and exclusive offers.
                 </p>
@@ -88,19 +88,19 @@ const roomType = url.searchParams.get('roomType') || '';
           </div>
 
           <!-- Why Book Direct -->
-          <div class="card bg-primary/5 shadow-xl">
+          <div class="bg-primary/5 shadow-xl card">
             <div class="card-body">
-              <h2 class="card-title text-2xl text-primary mb-6 justify-center">
+              <h2 class="justify-center mb-6 text-primary text-2xl card-title">
                 Why Book Direct with {hotel.name}?
               </h2>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="gap-6 grid grid-cols-1 md:grid-cols-2">
                 <div class="space-y-4">
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">✅</div>
                     <div>
                       <h4 class="font-semibold text-primary">Best Price Guarantee</h4>
-                      <p class="text-sm opacity-70">We match any lower rate you find elsewhere</p>
+                      <p class="opacity-70 text-sm">We match any lower rate you find elsewhere</p>
                     </div>
                   </div>
                   
@@ -108,7 +108,7 @@ const roomType = url.searchParams.get('roomType') || '';
                     <div class="text-2xl">🎁</div>
                     <div>
                       <h4 class="font-semibold text-primary">Exclusive Perks</h4>
-                      <p class="text-sm opacity-70">Special amenities and upgrades for direct bookings</p>
+                      <p class="opacity-70 text-sm">Special amenities and upgrades for direct bookings</p>
                     </div>
                   </div>
                   
@@ -116,7 +116,7 @@ const roomType = url.searchParams.get('roomType') || '';
                     <div class="text-2xl">📞</div>
                     <div>
                       <h4 class="font-semibold text-primary">Direct Support</h4>
-                      <p class="text-sm opacity-70">Speak directly with our team for personalized service</p>
+                      <p class="opacity-70 text-sm">Speak directly with our team for personalized service</p>
                     </div>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ const roomType = url.searchParams.get('roomType') || '';
                     <div class="text-2xl">🔄</div>
                     <div>
                       <h4 class="font-semibold text-primary">Flexible Cancellation</h4>
-                      <p class="text-sm opacity-70">More flexible cancellation policies</p>
+                      <p class="opacity-70 text-sm">More flexible cancellation policies</p>
                     </div>
                   </div>
                   
@@ -134,7 +134,7 @@ const roomType = url.searchParams.get('roomType') || '';
                     <div class="text-2xl">⭐</div>
                     <div>
                       <h4 class="font-semibold text-primary">Loyalty Benefits</h4>
-                      <p class="text-sm opacity-70">Earn points and enjoy member-exclusive rates</p>
+                      <p class="opacity-70 text-sm">Earn points and enjoy member-exclusive rates</p>
                     </div>
                   </div>
                   
@@ -142,7 +142,7 @@ const roomType = url.searchParams.get('roomType') || '';
                     <div class="text-2xl">🏨</div>
                     <div>
                       <h4 class="font-semibold text-primary">Room Upgrades</h4>
-                      <p class="text-sm opacity-70">Complimentary upgrades based on availability</p>
+                      <p class="opacity-70 text-sm">Complimentary upgrades based on availability</p>
                     </div>
                   </div>
                 </div>
@@ -151,30 +151,20 @@ const roomType = url.searchParams.get('roomType') || '';
           </div>
 
           <!-- Contact Information -->
-          <div class="text-center mt-12">
-            <h3 class="text-2xl font-bold text-primary mb-4">Need Help with Your Booking?</h3>
-            <p class="text-lg opacity-70 mb-6">
+          <div class="mt-12 text-center">
+            <h3 class="mb-4 font-bold text-primary text-2xl">Need Help with Your Booking?</h3>
+            <p class="opacity-70 mb-6 text-lg">
               Our reservation team is here to assist you with any questions or special requests.
             </p>
             
-            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
-              {hotel.phone && (
-                <a href={`tel:${hotel.phone}`} class="btn btn-outline btn-primary">
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                  </svg>
-                  Call {hotel.phone}
-                </a>
-              )}
-              
-              {hotel.email && (
-                <a href={`mailto:${hotel.email}`} class="btn btn-outline btn-primary">
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                  Email Us
-                </a>
-              )}
+            <div class="flex md:flex-row flex-col justify-center items-center md:space-x-8 space-y-4 md:space-y-0">
+              <!-- Phone and email fields not available in new structure -->
+              <div class="btn-outline btn btn-primary">
+                <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+                Contact Hotel
+              </div>
             </div>
           </div>
         </div>
@@ -189,8 +179,8 @@ const roomType = url.searchParams.get('roomType') || '';
     // Get hotel data from the page
     const hotelData = {
       domain: window.location.hostname,
-      name: {JSON.stringify(hotel.name)},
-      currency: {JSON.stringify(hotel.default_currency || 'USD')}
+      name: JSON.stringify(hotel.name),
+      currency: JSON.stringify(hotel.default_currency || 'USD')
     };
     
     // Get URL parameters for pre-filling
@@ -209,18 +199,18 @@ const roomType = url.searchParams.get('roomType') || '';
     if (container) {
       // Create a placeholder while the component loads
       container.innerHTML = `
-        <div class="card bg-base-100 shadow-xl">
+        <div class="bg-base-100 shadow-xl card">
           <div class="card-body">
-            <h3 class="card-title text-primary mb-4">
-              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 class="mb-4 text-primary card-title">
+              <svg class="mr-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h3z"/>
               </svg>
               Book Your Perfect Stay
             </h3>
             <div class="flex justify-center py-8">
-              <span class="loading loading-spinner loading-lg text-primary"></span>
+              <span class="text-primary loading loading-spinner loading-lg"></span>
             </div>
-            <p class="text-center opacity-70">Loading booking system...</p>
+            <p class="opacity-70 text-center">Loading booking system...</p>
           </div>
         </div>
       `;
@@ -229,17 +219,17 @@ const roomType = url.searchParams.get('roomType') || '';
       // For now, we'll show a message about the booking system
       setTimeout(() => {
         container.innerHTML = `
-          <div class="card bg-base-100 shadow-xl">
+          <div class="bg-base-100 shadow-xl card">
             <div class="card-body">
-              <h3 class="card-title text-primary mb-4">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 class="mb-4 text-primary card-title">
+                <svg class="mr-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h3z"/>
                 </svg>
                 Book Your Perfect Stay
               </h3>
               
-              <div class="alert alert-info mb-6">
-                <svg class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <div class="mb-6 alert alert-info">
+                <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
@@ -248,26 +238,26 @@ const roomType = url.searchParams.get('roomType') || '';
                 </div>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 mb-6">
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Check-in</span>
                   </label>
-                  <input type="date" class="input input-bordered" value="${prefilledData.checkIn}" />
+                  <input type="date" class="input-bordered input" value="${prefilledData.checkIn}" />
                 </div>
                 
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Check-out</span>
                   </label>
-                  <input type="date" class="input input-bordered" value="${prefilledData.checkOut}" />
+                  <input type="date" class="input-bordered input" value="${prefilledData.checkOut}" />
                 </div>
                 
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Adults</span>
                   </label>
-                  <select class="select select-bordered">
+                  <select class="select-bordered select">
                     <option value="1" ${prefilledData.adults === 1 ? 'selected' : ''}>1 Adult</option>
                     <option value="2" ${prefilledData.adults === 2 ? 'selected' : ''}>2 Adults</option>
                     <option value="3" ${prefilledData.adults === 3 ? 'selected' : ''}>3 Adults</option>
@@ -279,7 +269,7 @@ const roomType = url.searchParams.get('roomType') || '';
                   <label class="label">
                     <span class="label-text">Children</span>
                   </label>
-                  <select class="select select-bordered">
+                  <select class="select-bordered select">
                     <option value="0" ${prefilledData.children === 0 ? 'selected' : ''}>0 Children</option>
                     <option value="1" ${prefilledData.children === 1 ? 'selected' : ''}>1 Child</option>
                     <option value="2" ${prefilledData.children === 2 ? 'selected' : ''}>2 Children</option>
@@ -291,7 +281,7 @@ const roomType = url.searchParams.get('roomType') || '';
                   <label class="label">
                     <span class="label-text">Rooms</span>
                   </label>
-                  <select class="select select-bordered">
+                  <select class="select-bordered select">
                     <option value="1" ${prefilledData.rooms === 1 ? 'selected' : ''}>1 Room</option>
                     <option value="2" ${prefilledData.rooms === 2 ? 'selected' : ''}>2 Rooms</option>
                     <option value="3" ${prefilledData.rooms === 3 ? 'selected' : ''}>3 Rooms</option>
@@ -299,7 +289,7 @@ const roomType = url.searchParams.get('roomType') || '';
                 </div>
               </div>
               
-              <div class="card-actions justify-center">
+              <div class="justify-center card-actions">
                 <button class="btn btn-primary btn-lg" onclick="showComingSoon()">
                   Search Availability
                 </button>
@@ -309,18 +299,18 @@ const roomType = url.searchParams.get('roomType') || '';
               
               <div class="text-center">
                 <p class="mb-4">For immediate assistance with your booking:</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="flex sm:flex-row flex-col justify-center gap-4">
                   ${hotel.phone ? `
-                    <a href="tel:${hotel.phone}" class="btn btn-outline btn-primary">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="tel:${hotel.phone}" class="btn-outline btn btn-primary">
+                      <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                       </svg>
                       Call ${hotel.phone}
                     </a>
                   ` : ''}
                   ${hotel.email ? `
-                    <a href="mailto:${hotel.email}" class="btn btn-outline btn-primary">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="mailto:${hotel.email}" class="btn-outline btn btn-primary">
+                      <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                       </svg>
                       Email Us
@@ -336,7 +326,7 @@ const roomType = url.searchParams.get('roomType') || '';
     
     // Function to show coming soon message
     window.showComingSoon = function() {
-      alert('🚀 Booking functionality coming soon!\\n\\nWe\\'re implementing the full booking system with Cloudbeds integration. For now, please contact us directly to make a reservation.');
+      alert('🚀 Booking functionality coming soon!\n\nWe are implementing the full booking system with Cloudbeds integration. For now, please contact us directly to make a reservation.');
     };
   </script>
 </Layout>

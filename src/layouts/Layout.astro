@@ -2,6 +2,7 @@
 import ChatwootWidget from '../components/ChatwootWidget.astro';
 import Navbar from '../components/Navbar.astro';
 import { getMediaUrl } from '../lib/directus.js';
+import { generateThemeCSS, getThemeName } from '../lib/theme.js';
 import '../styles/global.css';
 
 export interface Props {
@@ -10,6 +11,9 @@ export interface Props {
   domain?: string;
   ga4Id?: string;
   pixelId?: string;
+  hotel?: any; // Hotel data for automatic theme generation
+  hotelSubdomain?: string; // For theme naming
+  // Legacy props for backward compatibility
   themeCSS?: string;
   themeName?: string;
   hotelName?: string;
@@ -24,13 +28,51 @@ const {
   domain,
   ga4Id,
   pixelId,
-  themeCSS,
-  themeName,
+  hotel,
+  hotelSubdomain,
+  // Legacy props for backward compatibility
+  themeCSS: legacyThemeCSS,
+  themeName: legacyThemeName,
   hotelName = "Hotel",
-  themeConfig = {},
-  hotelLogo = null,
+  themeConfig: legacyThemeConfig = {},
+  hotelLogo: legacyHotelLogo = null,
   showNavbar = true
 } = Astro.props;
+
+// Auto-generate theme from hotel data or use legacy props
+let themeCSS, themeName, themeConfig, hotelLogo;
+
+if (hotel && hotelSubdomain) {
+  // Generate theme automatically from hotel data
+  console.log('🎨 Layout.astro - Auto-generating theme for:', hotelSubdomain);
+  console.log('🎨 Hotel data received:', {
+    name: hotel.name,
+    domain: hotel.domain,
+    hasTheme: !!hotel.theme,
+    themeKeys: hotel.theme ? Object.keys(hotel.theme) : [],
+    hasLogo: !!hotel.logo,
+    logoId: hotel.logo?.id
+  });
+
+  themeCSS = generateThemeCSS(hotel, hotelSubdomain);
+  themeName = getThemeName(hotelSubdomain);
+  themeConfig = hotel.theme || {};
+  hotelLogo = hotel.logo || null;
+
+  console.log('🎨 Generated theme:', {
+    themeName,
+    themeConfigKeys: Object.keys(themeConfig),
+    cssLength: themeCSS?.length || 0,
+    hotelLogoId: hotelLogo?.id
+  });
+} else {
+  // Use legacy props for backward compatibility
+  console.log('🎨 Layout.astro - Using legacy theme props');
+  themeCSS = legacyThemeCSS;
+  themeName = legacyThemeName;
+  themeConfig = legacyThemeConfig;
+  hotelLogo = legacyHotelLogo;
+}
 
 // Generate dynamic favicon URL from hotel logo
 const faviconUrl = hotelLogo && hotelLogo.id
