@@ -1,33 +1,50 @@
-# Astro Starter Kit: Minimal
+# Daotomata Hotel Frontend
 
-```sh
-pnpm create astro@latest -- --template minimal
-```
+Frontend application for the Daotomata Hotel project, built with Astro and React.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+## 🏨 About
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+This is the frontend application for the Daotomata Hotel management system. It provides a modern, responsive interface for hotel booking, room management, and customer interactions.
+
+### Key Features
+
+- Multi-tenant hotel management
+- Real-time booking system
+- Room and facility management
+- Activity booking
+- Responsive design
+- Integration with booking engines (Cloudbeds)
+- Admin dashboard
 
 ## 🚀 Project Structure
 
-Inside of your Astro project, you'll see the following folders and files:
-
 ```text
 /
-├── public/
+├── public/              # Static assets
 ├── src/
-│   └── pages/
-│       └── index.astro
+│   ├── components/      # React/Astro components
+│   ├── layouts/         # Page layouts
+│   ├── lib/            # Utilities and services
+│   │   ├── booking-engines/  # Booking system integrations
+│   │   ├── directus.js      # CMS integration
+│   │   └── supabase.js      # Database integration
+│   ├── pages/          # File-based routing
+│   │   ├── [hotel]/    # Dynamic hotel routes
+│   │   ├── admin/      # Admin dashboard
+│   │   └── api/        # API endpoints
+│   └── styles/         # Global styles
+├── Dockerfile          # Container configuration
 └── package.json
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 🔧 Technology Stack
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
+- **Framework**: Astro with React
+- **Database**: Supabase
+- **CMS**: Directus
+- **Booking Engine**: Cloudbeds integration
+- **Styling**: Tailwind CSS
+- **Deployment**: Docker
 
 ## 🧞 Commands
 
@@ -42,6 +59,53 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `pnpm astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
+## ⚙️ Configuration
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+1. Copy the environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Configure your environment variables:
+   - `SUPABASE_URL`: Your Supabase project URL
+   - `SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `DIRECTUS_URL`: Your Directus CMS URL
+   - `DIRECTUS_TOKEN`: Your Directus access token
+   - `CLOUDBEDS_API_KEY`: Your Cloudbeds API key
+
+## 🚀 Deployment
+
+### Docker
+
+```bash
+# Build the image
+docker build -t daotomata-hotel-frontend .
+
+# Run the container
+docker run -p 4321:4321 daotomata-hotel-frontend
+```
+
+### Production Build
+
+```bash
+pnpm build
+pnpm preview
+```
+
+## 🏗️ Development
+
+1. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+2. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+
+3. Open [http://localhost:4321](http://localhost:4321) in your browser
+
+## 📝 License
+
+This project is part of the Daotomata Hotel management system.
