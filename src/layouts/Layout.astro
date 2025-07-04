@@ -39,9 +39,9 @@ const {
 
 // Auto-generate theme from hotel data or use legacy props
 let themeCSS: string | undefined,
-    themeName: string | undefined,
-    themeConfig: Record<string, unknown> | undefined,
-    hotelLogo: Record<string, unknown> | null | undefined;
+  themeName: string | undefined,
+  themeConfig: Record<string, unknown> | undefined,
+  hotelLogo: Record<string, unknown> | null | undefined;
 
 if (hotel && hotelSubdomain) {
   // Generate theme automatically from hotel data

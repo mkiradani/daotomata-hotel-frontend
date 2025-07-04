@@ -39,7 +39,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
     const isLoading = useSignal(false);
     const error = useSignal('');
     const isAutoSyncing = useSignal(false);
-    const syncResults = useSignal<any[]>([]);
+    const syncResults = useSignal<Record<string, unknown>[]>([]);
 
     // Load sync status
     const loadSyncStatus = $(async () => {
@@ -135,6 +135,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
           <div class="card-body">
             <h3 class="text-primary card-title">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>Sync icon</title>
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -154,6 +155,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
             {error.value && (
               <div class="alert alert-error">
                 <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <title>Error icon</title>
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -283,6 +285,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                   syncData.value.syncStatus.roomsWithoutPmsId === 0 && (
                     <div class="alert alert-success">
                       <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                        <title>Success icon</title>
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
@@ -297,6 +300,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                 {/* Instructions */}
                 <div class="alert alert-info">
                   <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                    <title>Information icon</title>
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"

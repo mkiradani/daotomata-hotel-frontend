@@ -542,14 +542,20 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
                 {/* Action Buttons */}
                 <div class="space-y-4">
-                  <button type="button" class="w-full btn btn-primary btn-lg" onClick$={openBookingModal}>
+                  <button
+                    type="button"
+                    class="w-full btn btn-primary btn-lg"
+                    onClick$={openBookingModal}
+                  >
                     {type === 'room'
                       ? 'Check Availability'
                       : type === 'activity'
                         ? 'Reserve Activity'
                         : 'Book Facility'}
                   </button>
-                  <button type="button" class="btn-outline w-full btn">Contact Reception</button>
+                  <button type="button" class="btn-outline w-full btn">
+                    Contact Reception
+                  </button>
                 </div>
               </div>
             </div>
@@ -568,7 +574,11 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                       ? `Reserve ${title}`
                       : `Book ${title}`}
                 </h3>
-                <button type="button" class="btn btn-sm btn-circle btn-ghost" onClick$={closeBookingModal}>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-circle btn-ghost"
+                  onClick$={closeBookingModal}
+                >
                   ✕
                 </button>
               </div>
@@ -614,17 +624,17 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                   We're implementing the full booking system with Cloudbeds integration.
                 </p>
                 <div class="flex justify-center gap-2">
-                  <button class="btn btn-primary" onClick$={closeBookingModal}>
+                  <button type="button" class="btn btn-primary" onClick$={closeBookingModal}>
                     Contact Reception
                   </button>
-                  <button class="btn-outline btn" onClick$={closeBookingModal}>
+                  <button type="button" class="btn-outline btn" onClick$={closeBookingModal}>
                     Close
                   </button>
                 </div>
               </div>
 
               <div class="modal-action">
-                <button class="btn" onClick$={closeBookingModal}>
+                <button type="button" class="btn" onClick$={closeBookingModal}>
                   Close
                 </button>
               </div>

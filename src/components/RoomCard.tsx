@@ -177,7 +177,11 @@ export const RoomCard = component$<RoomCardProps>(
             <div class="max-w-4xl modal-box">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg">Book {name}</h3>
-                <button type="button" class="btn btn-sm btn-circle btn-ghost" onClick$={closeBookingModal}>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-circle btn-ghost"
+                  onClick$={closeBookingModal}
+                >
                   ✕
                 </button>
               </div>

@@ -47,7 +47,13 @@ interface RoomRate {
 }
 
 export const BookingWidgetReal = component$<BookingWidgetRealProps>(
-  ({ hotelDomain, hotelName, defaultCurrency: _defaultCurrency, className = '', compact = false }) => {
+  ({
+    hotelDomain,
+    hotelName,
+    defaultCurrency: _defaultCurrency,
+    className = '',
+    compact = false,
+  }) => {
     // Form state
     const checkIn = useSignal('');
     const checkOut = useSignal('');
@@ -272,10 +278,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   </div>
 
                   <div class="form-control">
-                    <label class="label">
+                    <label class="label" for="adults-select">
                       <span class="label-text">Adults</span>
                     </label>
-                    <select class="select-bordered select" bind:value={adults}>
+                    <select id="adults-select" class="select-bordered select" bind:value={adults}>
                       <option value={1}>1 Adult</option>
                       <option value={2}>2 Adults</option>
                       <option value={3}>3 Adults</option>
@@ -284,10 +290,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   </div>
 
                   <div class="form-control">
-                    <label class="label">
+                    <label class="label" for="children-select">
                       <span class="label-text">Children</span>
                     </label>
-                    <select class="select-bordered select" bind:value={children}>
+                    <select id="children-select" class="select-bordered select" bind:value={children}>
                       <option value={0}>0 Children</option>
                       <option value={1}>1 Child</option>
                       <option value={2}>2 Children</option>
@@ -296,10 +302,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   </div>
 
                   <div class="form-control">
-                    <label class="label">
+                    <label class="label" for="rooms-select">
                       <span class="label-text">Rooms</span>
                     </label>
-                    <select class="select-bordered select" bind:value={rooms}>
+                    <select id="rooms-select" class="select-bordered select" bind:value={rooms}>
                       <option value={1}>1 Room</option>
                       <option value={2}>2 Rooms</option>
                       <option value={3}>3 Rooms</option>
