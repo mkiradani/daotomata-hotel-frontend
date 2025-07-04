@@ -2,45 +2,40 @@
  * Booking engines module - Unified interface for multiple booking systems
  */
 
-// Types and interfaces
-export type {
-  BookingEngineConfig,
-  RoomAvailability,
-  BookingRequest,
-  BookingResponse,
-  RateQuery,
-  RoomRate,
-  IBookingEngine,
-  IBookingEngineFactory,
-} from './types';
-
-// Error classes
-export { BookingEngineError, ConfigurationError, AvailabilityError, BookingError } from './types';
-
+// Service
+export { BookingService, getBookingService } from './booking-service';
 // Engines
 export { CloudbedsEngine } from './cloudbeds-engine';
-
 // Factory
 export {
   BookingEngineFactory,
-  getBookingEngineFactory,
   createBookingEngineForHotel,
+  getBookingEngineFactory,
   hasBookingCapabilities,
 } from './factory';
-
-// Service
-export { BookingService, getBookingService } from './booking-service';
-
 // Room mapping
 export {
-  RoomMappingService,
-  type DirectusRoom,
   type CloudbedsRoom,
+  type DirectusRoom,
   type MappedRoom,
+  RoomMappingService,
 } from './room-mapping-service';
+// Types and interfaces
+export type {
+  BookingEngineConfig,
+  BookingRequest,
+  BookingResponse,
+  IBookingEngine,
+  IBookingEngineFactory,
+  RateQuery,
+  RoomAvailability,
+  RoomRate,
+} from './types';
+// Error classes
+export { AvailabilityError, BookingEngineError, BookingError, ConfigurationError } from './types';
 
 // Import types for convenience functions
-import type { RateQuery, BookingRequest } from './types';
+import type { BookingRequest, RateQuery } from './types';
 
 // Convenience functions for common operations
 export const BookingEngines = {

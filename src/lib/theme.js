@@ -19,7 +19,7 @@ export function generateThemeCSS(hotel, hotelSubdomain) {
     colors: Object.keys(colors),
     typography: Object.keys(typography),
     layout: Object.keys(layout),
-    components: Object.keys(components)
+    components: Object.keys(components),
   });
   console.log('🎨 Colors object:', colors);
   console.log('🎨 Layout object:', layout);
@@ -102,8 +102,8 @@ export function generateThemeCSS(hotel, hotelSubdomain) {
 
   /* Hotel-specific border radius overrides */
   ${
-  hotelSubdomain === 'baberrih'
-    ? `
+    hotelSubdomain === 'baberrih'
+      ? `
     .card, .btn, .badge, .input, .select, .textarea, .rounded-lg, .rounded-full, .nav-link {
       border-radius: 0px !important;
     }
@@ -113,12 +113,12 @@ export function generateThemeCSS(hotel, hotelSubdomain) {
       --radius-selector: 0px;
     }
   `
-    : ''
-}
+      : ''
+  }
 
   ${
-  hotelSubdomain === 'demo'
-    ? `
+    hotelSubdomain === 'demo'
+      ? `
     .card, .btn, .badge, .input, .select, .textarea, .rounded-lg, .rounded-full, .nav-link {
       border-radius: 12px !important;
     }
@@ -128,8 +128,8 @@ export function generateThemeCSS(hotel, hotelSubdomain) {
       --radius-selector: 12px;
     }
   `
-    : ''
-}
+      : ''
+  }
 `;
 
   return themeCSS;

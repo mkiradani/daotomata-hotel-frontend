@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin "daisyui";
 
 /* Multitenant theme variables - loaded dynamically per hotel */
@@ -7,9 +7,9 @@
   --c-secondary: #dfa73f;
   --c-accent: #ececec;
   --c-neutral: #ffffff;
-  --font-body: 'Playfair Display';
-  --font-head: 'Inter';
-  --font-mono: 'JetBrains Mono';
+  --font-body: "Playfair Display";
+  --font-head: "Inter";
+  --font-mono: "JetBrains Mono";
 }
 
 /* Custom hotel styles with DaisyUI and theme variables */

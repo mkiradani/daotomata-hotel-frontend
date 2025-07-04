@@ -42,6 +42,7 @@ This is the frontend application for the Daotomata Hotel management system. It p
 - **CMS & Data**: Directus
 - **Booking Engine**: Cloudbeds integration
 - **Styling**: Tailwind CSS + DaisyUI
+- **Quality**: Husky hooks (pre-commit build, pre-push comprehensive checks)
 - **Deployment**: Docker
 
 ## 🧞 Commands
@@ -68,6 +69,34 @@ All commands are run from the root of the project, from a terminal:
    - `DIRECTUS_URL`: Your Directus CMS URL
    - `DIRECTUS_ADMIN_TOKEN`: Your Directus admin access token
    - `CLOUDBEDS_API_KEY`: Your Cloudbeds API key
+
+## 🔒 Code Quality & Git Hooks
+
+This project uses Husky to enforce code quality through Git hooks:
+
+### Pre-commit Hook
+- **Trigger**: Before every commit
+- **Action**: Runs `pnpm build` to ensure code compiles
+- **Purpose**: Prevents committing broken code
+
+### Pre-push Hook
+- **Trigger**: Before every push to remote
+- **Actions**:
+  1. Build verification (`pnpm build`)
+  2. Type checking (`tsc --noEmit`)
+  3. Linting (`pnpm lint`)
+- **Purpose**: Comprehensive quality check before sharing code
+
+### Bypassing Hooks (Emergency Only)
+```bash
+# Skip pre-commit (not recommended)
+git commit --no-verify -m "emergency fix"
+
+# Skip pre-push (not recommended)
+git push --no-verify
+```
+
+**Note**: Hooks are automatically installed when running `pnpm install` via the `prepare` script.
 
 ## 🚀 Deployment
 

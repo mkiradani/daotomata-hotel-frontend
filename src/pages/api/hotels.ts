@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ request }) => {
         avaliable_currencies: ['MAD', 'EUR', 'GBP', 'USD'],
         avaliable_lenguages: [4, 5, 6],
         pms_type: 'cloudbeds',
-      }
+      },
     ];
 
     return new Response(JSON.stringify(hotels), {

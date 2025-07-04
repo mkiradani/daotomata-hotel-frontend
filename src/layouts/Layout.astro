@@ -24,7 +24,7 @@ export interface Props {
 
 const {
   title,
-  description = "Hotel website powered by Daotomata Stack",
+  description = 'Hotel website powered by Daotomata Stack',
   domain,
   ga4Id,
   pixelId,
@@ -33,10 +33,10 @@ const {
   // Legacy props for backward compatibility
   themeCSS: legacyThemeCSS,
   themeName: legacyThemeName,
-  hotelName = "Hotel",
+  hotelName = 'Hotel',
   themeConfig: legacyThemeConfig = {},
   hotelLogo: legacyHotelLogo = null,
-  showNavbar = true
+  showNavbar = true,
 } = Astro.props;
 
 // Auto-generate theme from hotel data or use legacy props
@@ -51,7 +51,7 @@ if (hotel && hotelSubdomain) {
     hasTheme: !!hotel.theme,
     themeKeys: hotel.theme ? Object.keys(hotel.theme) : [],
     hasLogo: !!hotel.logo,
-    logoId: hotel.logo?.id
+    logoId: hotel.logo?.id,
   });
 
   themeCSS = generateThemeCSS(hotel, hotelSubdomain);
@@ -63,7 +63,7 @@ if (hotel && hotelSubdomain) {
     themeName,
     themeConfigKeys: Object.keys(themeConfig),
     cssLength: themeCSS?.length || 0,
-    hotelLogoId: hotelLogo?.id
+    hotelLogoId: hotelLogo?.id,
   });
 } else {
   // Use legacy props for backward compatibility
@@ -75,9 +75,10 @@ if (hotel && hotelSubdomain) {
 }
 
 // Generate dynamic favicon URL from hotel logo
-const faviconUrl = hotelLogo && hotelLogo.id
-  ? getMediaUrl(hotelLogo.id, { width: 32, height: 32, quality: 90, format: 'png' })
-  : '/favicon.svg';
+const faviconUrl =
+  hotelLogo && hotelLogo.id
+    ? getMediaUrl(hotelLogo.id, { width: 32, height: 32, quality: 90, format: 'png' })
+    : '/favicon.svg';
 ---
 
 <!doctype html>

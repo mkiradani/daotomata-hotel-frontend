@@ -3,8 +3,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { getHotelByDomain } from '../../../lib/directus.js';
 import { getBookingService } from '../../../lib/booking-engines';
+import { getHotelByDomain } from '../../../lib/directus.js';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -14,12 +14,12 @@ export const POST: APIRoute = async ({ request }) => {
     // Validate required fields
     if (!hotelDomain || !checkIn || !checkOut || !adults) {
       return new Response(
-        JSON.stringify({ 
-          error: 'Missing required fields: hotelDomain, checkIn, checkOut, adults' 
+        JSON.stringify({
+          error: 'Missing required fields: hotelDomain, checkIn, checkOut, adults',
         }),
-        { 
+        {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -27,13 +27,10 @@ export const POST: APIRoute = async ({ request }) => {
     // Get hotel data
     const hotel = await getHotelByDomain(hotelDomain);
     if (!hotel) {
-      return new Response(
-        JSON.stringify({ error: 'Hotel not found' }),
-        { 
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Hotel not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Initialize booking service
@@ -53,32 +50,31 @@ export const POST: APIRoute = async ({ request }) => {
     const rates = await bookingService.getRates(hotel.id, query);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         rates,
         hotel: {
           id: hotel.id,
           name: hotel.name,
           domain: hotel.domain,
-        }
+        },
       }),
-      { 
+      {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
-
   } catch (error) {
     console.error('Rates check error:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: 'Failed to get rates',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
-      { 
+      {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

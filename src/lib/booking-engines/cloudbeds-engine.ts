@@ -2,17 +2,17 @@
  * Cloudbeds booking engine implementation
  */
 
+import { type CloudbedsRoom, type DirectusRoom, RoomMappingService } from './room-mapping-service';
 import type {
-  IBookingEngine,
   BookingEngineConfig,
-  RoomAvailability,
   BookingRequest,
   BookingResponse,
+  IBookingEngine,
   RateQuery,
+  RoomAvailability,
   RoomRate,
 } from './types';
-import { BookingEngineError, ConfigurationError, AvailabilityError, BookingError } from './types';
-import { RoomMappingService, type DirectusRoom, type CloudbedsRoom } from './room-mapping-service';
+import { AvailabilityError, BookingEngineError, BookingError, ConfigurationError } from './types';
 
 export class CloudbedsEngine implements IBookingEngine {
   private config: BookingEngineConfig | null = null;
@@ -103,7 +103,7 @@ export class CloudbedsEngine implements IBookingEngine {
 
   private async makeRequest(
     endpoint: string,
-    options: Record<string, unknown> = {},
+    options: Record<string, unknown> = {}
   ): Promise<unknown> {
     if (!this.accessToken || !this.config) {
       throw new ConfigurationError('Engine not properly initialized');
@@ -128,7 +128,7 @@ export class CloudbedsEngine implements IBookingEngine {
         throw new BookingEngineError(
           `Cloudbeds API error: ${response.status} ${response.statusText}`,
           'API_ERROR',
-          errorData,
+          errorData
         );
       }
 
@@ -139,7 +139,7 @@ export class CloudbedsEngine implements IBookingEngine {
       throw new BookingEngineError(
         `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'NETWORK_ERROR',
-        error,
+        error
       );
     }
   }
@@ -163,7 +163,7 @@ export class CloudbedsEngine implements IBookingEngine {
     } catch (error) {
       throw new AvailabilityError(
         `Failed to check availability: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        error,
+        error
       );
     }
   }
@@ -187,7 +187,7 @@ export class CloudbedsEngine implements IBookingEngine {
     } catch (error) {
       throw new AvailabilityError(
         `Failed to get rates: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        error,
+        error
       );
     }
   }
@@ -205,7 +205,7 @@ export class CloudbedsEngine implements IBookingEngine {
     } catch (error) {
       throw new BookingError(
         `Failed to create booking: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        error,
+        error
       );
     }
   }
@@ -216,7 +216,7 @@ export class CloudbedsEngine implements IBookingEngine {
     } catch (error) {
       throw new BookingError(
         `Failed to get booking: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        error,
+        error
       );
     }
   }
@@ -243,7 +243,7 @@ export class CloudbedsEngine implements IBookingEngine {
 
   async modifyBooking(
     bookingId: string,
-    changes: Partial<BookingRequest>,
+    changes: Partial<BookingRequest>
   ): Promise<BookingResponse> {
     try {
       const updateData = this.transformBookingRequest(changes);
@@ -257,7 +257,7 @@ export class CloudbedsEngine implements IBookingEngine {
     } catch (error) {
       throw new BookingError(
         `Failed to modify booking: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        error,
+        error
       );
     }
   }
@@ -269,7 +269,7 @@ export class CloudbedsEngine implements IBookingEngine {
       throw new BookingEngineError(
         `Failed to get property info: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'PROPERTY_ERROR',
-        error,
+        error
       );
     }
   }
@@ -308,7 +308,7 @@ export class CloudbedsEngine implements IBookingEngine {
 
   private transformAvailabilityResponse(
     response: Record<string, unknown>,
-    query: RateQuery,
+    query: RateQuery
   ): RoomAvailability[] {
     // Transform Cloudbeds availability response to our common format
     // This is a simplified implementation - adjust based on actual Cloudbeds API response

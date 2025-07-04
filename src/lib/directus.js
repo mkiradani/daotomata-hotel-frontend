@@ -1,4 +1,4 @@
-import { createDirectus, rest, readItems, staticToken } from '@directus/sdk';
+import { createDirectus, readItems, rest, staticToken } from '@directus/sdk';
 import fetch from 'node-fetch';
 
 // Create Directus client with admin token for build-time access
@@ -8,26 +8,28 @@ const directusToken = import.meta.env.DIRECTUS_ADMIN_TOKEN || 'rYncRSsu41KQQLvZY
 // Create Directus client with proper configuration for Node.js/Astro using node-fetch polyfill
 const directus = createDirectus(directusUrl, {
   globals: {
-    fetch: fetch
-  }
+    fetch: fetch,
+  },
 })
-  .with(rest({
-    // Configure for Node.js compatibility and CORS
-    credentials: 'include',
-    onRequest: (options) => {
-      // Ensure proper headers and configuration for Node.js requests
-      return {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Daotomata-Hotel-Frontend/1.0',
-          ...options.headers,
-        },
-        // Disable cache for fresh data
-        cache: 'no-store'
-      };
-    }
-  }))
+  .with(
+    rest({
+      // Configure for Node.js compatibility and CORS
+      credentials: 'include',
+      onRequest: (options) => {
+        // Ensure proper headers and configuration for Node.js requests
+        return {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Daotomata-Hotel-Frontend/1.0',
+            ...options.headers,
+          },
+          // Disable cache for fresh data
+          cache: 'no-store',
+        };
+      },
+    })
+  )
   .with(staticToken(directusToken));
 
 /**
@@ -52,13 +54,16 @@ export async function getAllHotels() {
         ],
         filter: {
           status: {
-            _in: ['published', 'draft'] // Include both published and draft hotels
-          }
-        }
-      }),
+            _in: ['published', 'draft'], // Include both published and draft hotels
+          },
+        },
+      })
     );
 
-    console.log(`✅ Found ${hotels.length} hotels:`, hotels.map(h => h.domain));
+    console.log(
+      `✅ Found ${hotels.length} hotels:`,
+      hotels.map((h) => h.domain)
+    );
     return hotels;
   } catch (error) {
     console.error('❌ Error fetching hotels:', error);
@@ -101,7 +106,7 @@ export async function getHotelByDomain(domain) {
           'logo.title',
         ],
         limit: 1,
-      }),
+      })
     );
 
     if (!hotels || hotels.length === 0) {
@@ -111,164 +116,157 @@ export async function getHotelByDomain(domain) {
     const hotel = hotels[0];
 
     // Load related data separately for better control
-    const [
-      rooms,
-      activities,
-      facilities,
-      galleries,
-      heroMedia,
-      restaurant,
-      dishes,
-    ] = await Promise.all([
-      // Rooms - Updated fields for new structure
-      directus.request(
-        readItems('rooms', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'id',
-            'name',
-            'description',
-            'cloudbeds_room_id', // Changed from pms_room_id
-            'bed_configuration',
-            'size_sqm',
-            'amenities',
-            'is_accesible', // Note: typo in new schema (accesible vs accessible)
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-            'main_video.id',
-            'main_video.filename_disk',
-            'main_video.title',
-            'media_gallery.directus_files_id.id',
-            'media_gallery.directus_files_id.filename_disk',
-            'media_gallery.directus_files_id.title',
-            'media_gallery.directus_files_id.type',
-          ],
-        }),
-      ),
-      // Activities - Updated fields for new structure
-      directus.request(
-        readItems('activities', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'id',
-            'name',
-            'description',
-            'max_participants',
-            'age_restriction',
-            'equipment_provided',
-            'booking_requiered', // Note: typo in new schema (requiered vs required)
-            'operating_hours',
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-            'main_video.id',
-            'main_video.filename_disk',
-            'main_video.title',
-            'media_gallery.directus_files_id.id',
-            'media_gallery.directus_files_id.filename_disk',
-            'media_gallery.directus_files_id.title',
-            'media_gallery.directus_files_id.type',
-          ],
-        }),
-      ),
-      // Facilities - Updated fields for new structure
-      directus.request(
-        readItems('facilities', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'id',
-            'name',
-            'description',
-            'capacity',
-            'operating_hours',
-            'booking_requiered', // Note: typo in new schema (requiered vs required)
-            'price', // Changed from price_per_hour
-            'amenities',
-            'age_restriction',
-            'is_accessible',
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-            'main_video.id',
-            'main_video.filename_disk',
-            'main_video.title',
-            'media_gallery.directus_files_id.id',
-            'media_gallery.directus_files_id.filename_disk',
-            'media_gallery.directus_files_id.title',
-            'media_gallery.directus_files_id.type',
-          ],
-        }),
-      ),
-      // Galleries - Updated fields for new structure
-      directus.request(
-        readItems('galleries', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'id',
-            'name', // Changed from title to name
-            'description',
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-            'media_gallery.directus_files_id.id',
-            'media_gallery.directus_files_id.filename_disk',
-            'media_gallery.directus_files_id.title',
-            'media_gallery.directus_files_id.type',
-          ],
-        }),
-      ),
-      // Hero Media
-      directus.request(
-        readItems('hero_media', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-            'main_video.id',
-            'main_video.filename_disk',
-            'main_video.title',
-          ],
-        }),
-      ),
-      // Restaurant - New collection
-      directus.request(
-        readItems('restaurant', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'id',
-            'name',
-            'description',
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-            'main_video.id',
-            'main_video.filename_disk',
-            'main_video.title',
-          ],
-        }),
-      ),
-      // Dishes - New collection
-      directus.request(
-        readItems('dishes', {
-          filter: { hotel_id: { _eq: hotel.id } },
-          fields: [
-            'id',
-            'name',
-            'description',
-            'ingredients',
-            'dietary_options',
-            'calories',
-            'allergens',
-            'is_available',
-            'main_photo.id',
-            'main_photo.filename_disk',
-            'main_photo.title',
-          ],
-        }),
-      ),
-    ]);
+    const [rooms, activities, facilities, galleries, heroMedia, restaurant, dishes] =
+      await Promise.all([
+        // Rooms - Updated fields for new structure
+        directus.request(
+          readItems('rooms', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'id',
+              'name',
+              'description',
+              'cloudbeds_room_id', // Changed from pms_room_id
+              'bed_configuration',
+              'size_sqm',
+              'amenities',
+              'is_accesible', // Note: typo in new schema (accesible vs accessible)
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+              'main_video.id',
+              'main_video.filename_disk',
+              'main_video.title',
+              'media_gallery.directus_files_id.id',
+              'media_gallery.directus_files_id.filename_disk',
+              'media_gallery.directus_files_id.title',
+              'media_gallery.directus_files_id.type',
+            ],
+          })
+        ),
+        // Activities - Updated fields for new structure
+        directus.request(
+          readItems('activities', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'id',
+              'name',
+              'description',
+              'max_participants',
+              'age_restriction',
+              'equipment_provided',
+              'booking_requiered', // Note: typo in new schema (requiered vs required)
+              'operating_hours',
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+              'main_video.id',
+              'main_video.filename_disk',
+              'main_video.title',
+              'media_gallery.directus_files_id.id',
+              'media_gallery.directus_files_id.filename_disk',
+              'media_gallery.directus_files_id.title',
+              'media_gallery.directus_files_id.type',
+            ],
+          })
+        ),
+        // Facilities - Updated fields for new structure
+        directus.request(
+          readItems('facilities', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'id',
+              'name',
+              'description',
+              'capacity',
+              'operating_hours',
+              'booking_requiered', // Note: typo in new schema (requiered vs required)
+              'price', // Changed from price_per_hour
+              'amenities',
+              'age_restriction',
+              'is_accessible',
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+              'main_video.id',
+              'main_video.filename_disk',
+              'main_video.title',
+              'media_gallery.directus_files_id.id',
+              'media_gallery.directus_files_id.filename_disk',
+              'media_gallery.directus_files_id.title',
+              'media_gallery.directus_files_id.type',
+            ],
+          })
+        ),
+        // Galleries - Updated fields for new structure
+        directus.request(
+          readItems('galleries', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'id',
+              'name', // Changed from title to name
+              'description',
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+              'media_gallery.directus_files_id.id',
+              'media_gallery.directus_files_id.filename_disk',
+              'media_gallery.directus_files_id.title',
+              'media_gallery.directus_files_id.type',
+            ],
+          })
+        ),
+        // Hero Media
+        directus.request(
+          readItems('hero_media', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+              'main_video.id',
+              'main_video.filename_disk',
+              'main_video.title',
+            ],
+          })
+        ),
+        // Restaurant - New collection
+        directus.request(
+          readItems('restaurant', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'id',
+              'name',
+              'description',
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+              'main_video.id',
+              'main_video.filename_disk',
+              'main_video.title',
+            ],
+          })
+        ),
+        // Dishes - New collection
+        directus.request(
+          readItems('dishes', {
+            filter: { hotel_id: { _eq: hotel.id } },
+            fields: [
+              'id',
+              'name',
+              'description',
+              'ingredients',
+              'dietary_options',
+              'calories',
+              'allergens',
+              'is_available',
+              'main_photo.id',
+              'main_photo.filename_disk',
+              'main_photo.title',
+            ],
+          })
+        ),
+      ]);
 
     // Combine all data
     return {
@@ -307,7 +305,7 @@ export async function getMediaGallery(collection, itemId) {
           'directus_files_id.type',
           'directus_files_id.filesize',
         ],
-      }),
+      })
     );
 
     return files?.map((file) => file.directus_files_id) || [];
@@ -336,7 +334,7 @@ export async function getRestaurantByHotelId(hotelId) {
           'main_video.filename_disk',
           'main_video.title',
         ],
-      }),
+      })
     );
     return restaurants?.[0] || null;
   } catch (error) {
@@ -354,7 +352,7 @@ export async function getDishesByHotelId(hotelId) {
       readItems('dishes', {
         filter: {
           hotel_id: { _eq: hotelId },
-          is_available: { _eq: true }
+          is_available: { _eq: true },
         },
         fields: [
           'id',
@@ -369,7 +367,7 @@ export async function getDishesByHotelId(hotelId) {
           'main_photo.filename_disk',
           'main_photo.title',
         ],
-      }),
+      })
     );
     return dishes || [];
   } catch (error) {
@@ -386,12 +384,8 @@ export async function getAIKnowledgeByHotelId(hotelId) {
     const knowledge = await directus.request(
       readItems('ai_knowledge', {
         filter: { hotel_id: { _eq: hotelId } },
-        fields: [
-          'id',
-          'title',
-          'content',
-        ],
-      }),
+        fields: ['id', 'title', 'content'],
+      })
     );
     return knowledge || [];
   } catch (error) {

@@ -1,41 +1,42 @@
 ---
+import { DetailPageLayout } from '../../../components/DetailPageLayout';
 import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
-import { DetailPageLayout } from '../../../components/DetailPageLayout';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
   console.log('🏨 Generating static paths for room pages...');
-  
+
   try {
     const hotels = await getAllHotels();
     const paths = [];
-    
+
     for (const hotel of hotels) {
       console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
-      
+
       // Get full hotel data including rooms
       const fullHotel = await getHotelByDomain(hotel.domain);
       if (!fullHotel || !fullHotel.rooms) {
         console.log(`⚠️ No rooms found for hotel: ${hotel.name}`);
         continue;
       }
-      
+
       // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
       const subdomain = hotel.domain.split('.')[0];
-      
+
       // Generate paths for each room
       for (const room of fullHotel.rooms) {
         // Create slug from room name
-        const slug = room.name.toLowerCase()
+        const slug = room.name
+          .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
-        
+
         paths.push({
-          params: { 
+          params: {
             hotel: subdomain,
-            slug: slug
+            slug: slug,
           },
           props: {
             room,
@@ -43,11 +44,11 @@ export async function getStaticPaths() {
             hotelSubdomain: subdomain,
             defaultLanguage: hotel.default_language || 'en-US',
             defaultCurrency: hotel.default_currency || 'USD',
-          }
+          },
         });
       }
     }
-    
+
     console.log(`✅ Generated ${paths.length} room page paths`);
     return paths;
   } catch (error) {
@@ -58,14 +59,12 @@ export async function getStaticPaths() {
 
 const { room, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
 
-
-
 // Hotel theme data will be handled globally by Layout.astro
 
-
-
 // Prepare room data for DetailPageLayout
-const imageUrl = room.main_photo ? getMediaUrl(room.main_photo.id, { width: 1200, height: 675, quality: 95 }) : '';
+const imageUrl = room.main_photo
+  ? getMediaUrl(room.main_photo.id, { width: 1200, height: 675, quality: 95 })
+  : '';
 const videoUrl = room.main_video ? getMediaUrl(room.main_video.id) : undefined;
 
 // Process media gallery
@@ -76,13 +75,17 @@ if (room.media_gallery && Array.isArray(room.media_gallery)) {
     if (mediaItem && mediaItem.directus_files_id) {
       const file = mediaItem.directus_files_id;
       const isVideo = file.type?.startsWith('video/');
-      const mediaUrl = isVideo ? getMediaUrl(file.id) : getMediaUrl(file.id, { width: 800, height: 600, quality: 90 });
-      console.log(`🎬 Media file ${file.id}: type="${file.type}", filename="${file.filename_download}", isVideo=${isVideo}`);
+      const mediaUrl = isVideo
+        ? getMediaUrl(file.id)
+        : getMediaUrl(file.id, { width: 800, height: 600, quality: 90 });
+      console.log(
+        `🎬 Media file ${file.id}: type="${file.type}", filename="${file.filename_download}", isVideo=${isVideo}`
+      );
       galleryImages.push({
         id: file.id,
         url: mediaUrl,
         title: file.title || 'Gallery Image',
-        type: isVideo ? 'video' : 'image'
+        type: isVideo ? 'video' : 'image',
       });
     }
   }
@@ -113,14 +116,14 @@ const roomMetadata = {
 const breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Rooms', href: `/${hotelSubdomain}#rooms` },
-  { label: room.name }
+  { label: room.name },
 ];
 
 // TODO: Future Cloudbeds integration
 const availabilityData = {
   isAvailable: true,
   nextAvailableDate: undefined,
-  priceRange: undefined
+  priceRange: undefined,
 };
 ---
 

@@ -3,8 +3,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { getHotelByDomain } from '../../../lib/directus.js';
 import { hasBookingCapabilities } from '../../../lib/booking-engines';
+import { getHotelByDomain } from '../../../lib/directus.js';
 
 export const GET: APIRoute = async ({ url }) => {
   try {

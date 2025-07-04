@@ -9,7 +9,13 @@ export interface Props {
   hotelLogo?: any;
 }
 
-const { hotelName, hotelDomain, currentPath = '', themeConfig = {}, hotelLogo = null } = Astro.props;
+const {
+  hotelName,
+  hotelDomain,
+  currentPath = '',
+  themeConfig = {},
+  hotelLogo = null,
+} = Astro.props;
 
 // Extract subdomain from full domain (e.g., "baberrih" from "baberrih.daotomata.io")
 const hotelSubdomain = hotelDomain.split('.')[0];
@@ -21,7 +27,7 @@ const navItems = [
   { name: 'Facilities', href: `/${hotelSubdomain}/facilities` },
   { name: 'Experiences', href: `/${hotelSubdomain}/experiences` },
   { name: 'Restaurant', href: `/${hotelSubdomain}/restaurant` },
-  { name: 'Contact', href: `/${hotelSubdomain}/contact` }
+  { name: 'Contact', href: `/${hotelSubdomain}/contact` },
 ];
 
 // Extract theme configuration

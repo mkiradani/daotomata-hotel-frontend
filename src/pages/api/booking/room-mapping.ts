@@ -3,8 +3,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { getHotelByDomain } from '../../../lib/directus.js';
 import { getBookingService } from '../../../lib/booking-engines';
+import { getHotelByDomain } from '../../../lib/directus.js';
 
 export const GET: APIRoute = async ({ url }) => {
   try {
@@ -12,25 +12,19 @@ export const GET: APIRoute = async ({ url }) => {
     const hotelDomain = searchParams.get('hotelDomain');
 
     if (!hotelDomain) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required parameter: hotelDomain' }),
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Missing required parameter: hotelDomain' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Get hotel data with rooms
     const hotel = await getHotelByDomain(hotelDomain);
     if (!hotel) {
-      return new Response(
-        JSON.stringify({ error: 'Hotel not found' }),
-        { 
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Hotel not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Initialize booking service
@@ -42,7 +36,7 @@ export const GET: APIRoute = async ({ url }) => {
     const mappedRooms = bookingService.getMappedRooms(hotel.id);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         hotel: {
           id: hotel.id,
@@ -51,31 +45,31 @@ export const GET: APIRoute = async ({ url }) => {
         },
         mappingStats,
         mappedRooms,
-        directusRooms: hotel.rooms?.map(room => ({
-          id: room.id,
-          name: room.name,
-          room_type: room.room_type,
-          max_occupancy: room.max_occupancy,
-          pms_room_id: room.pms_room_id,
-        })) || [],
+        directusRooms:
+          hotel.rooms?.map((room) => ({
+            id: room.id,
+            name: room.name,
+            room_type: room.room_type,
+            max_occupancy: room.max_occupancy,
+            pms_room_id: room.pms_room_id,
+          })) || [],
       }),
-      { 
+      {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
-
   } catch (error) {
     console.error('Room mapping error:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: 'Failed to get room mapping information',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
-      { 
+      {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

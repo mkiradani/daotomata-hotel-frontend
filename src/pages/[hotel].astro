@@ -1,21 +1,29 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { getAllHotels, getHotelByDomain, getTranslatedContent, getMediaUrl } from '../lib/directus.js';
-import { HeroSection } from '../components/HeroSection';
-import { RoomCard } from '../components/RoomCard';
 import { ActivityCard } from '../components/ActivityCard';
 import { FacilityCard } from '../components/FacilityCard';
+import { HeroSection } from '../components/HeroSection';
+import { RoomCard } from '../components/RoomCard';
+import Layout from '../layouts/Layout.astro';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
   console.log('🏨 Generating static paths for hotels...');
-  
+
   try {
     const hotels = await getAllHotels();
-    console.log(`✅ Found ${hotels.length} hotels:`, hotels.map(h => h.domain));
-    
-    return hotels.map(hotel => {
+    console.log(
+      `✅ Found ${hotels.length} hotels:`,
+      hotels.map((h) => h.domain)
+    );
+
+    return hotels.map((hotel) => {
       // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
       const subdomain = hotel.domain.split('.')[0];
       return {
@@ -28,8 +36,8 @@ export async function getStaticPaths() {
           defaultLanguage: hotel.default_language || 'en-US',
           defaultCurrency: hotel.default_currency || 'USD',
           availableLanguages: hotel.available_languages || ['en-US'],
-          availableCurrencies: hotel.available_currencies || ['USD']
-        }
+          availableCurrencies: hotel.available_currencies || ['USD'],
+        },
       };
     });
   } catch (error) {
@@ -46,7 +54,7 @@ const {
   defaultLanguage,
   defaultCurrency,
   availableLanguages,
-  availableCurrencies
+  availableCurrencies,
 } = Astro.props;
 
 console.log(`🏨 Loading hotel data for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`);
@@ -78,16 +86,20 @@ const hotel = {
   logo: hotelData.logo || null,
 
   // Related data with translations
-  rooms: hotelData.rooms?.map(room => getTranslatedContent(room, currentLanguage)) || [],
-  activities: hotelData.activities?.map(activity => getTranslatedContent(activity, currentLanguage)) || [],
-  facilities: hotelData.facilities?.map(facility => getTranslatedContent(facility, currentLanguage)) || [],
-  galleries: hotelData.galleries?.map(gallery => getTranslatedContent(gallery, currentLanguage)) || [],
-  menu_items: hotelData.menu_items?.map(item => getTranslatedContent(item, currentLanguage)) || [],
+  rooms: hotelData.rooms?.map((room) => getTranslatedContent(room, currentLanguage)) || [],
+  activities:
+    hotelData.activities?.map((activity) => getTranslatedContent(activity, currentLanguage)) || [],
+  facilities:
+    hotelData.facilities?.map((facility) => getTranslatedContent(facility, currentLanguage)) || [],
+  galleries:
+    hotelData.galleries?.map((gallery) => getTranslatedContent(gallery, currentLanguage)) || [],
+  menu_items:
+    hotelData.menu_items?.map((item) => getTranslatedContent(item, currentLanguage)) || [],
 
   // Other related data
   analytics: hotelData.analytics || null,
   chatwoot_accounts: hotelData.chatwoot_accounts || [],
-  hero_media: hotelData.hero_media || []
+  hero_media: hotelData.hero_media || [],
 };
 
 // Generate theme CSS from Directus theme data
@@ -218,7 +230,9 @@ const themeCSS = `
 const heroPhoto = hotel.hero_media?.[0]?.main_photo;
 const heroVideo = hotel.hero_media?.[0]?.main_video;
 
-console.log(`✅ Hotel loaded: ${hotel.name} (${hotel.rooms?.length || 0} rooms, ${hotel.activities?.length || 0} activities, ${hotel.facilities?.length || 0} facilities)`);
+console.log(
+  `✅ Hotel loaded: ${hotel.name} (${hotel.rooms?.length || 0} rooms, ${hotel.activities?.length || 0} activities, ${hotel.facilities?.length || 0} facilities)`
+);
 ---
 
 <Layout

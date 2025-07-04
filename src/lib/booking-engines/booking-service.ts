@@ -2,18 +2,18 @@
  * Booking service - High-level API for booking operations
  */
 
+import { CloudbedsEngine } from './cloudbeds-engine';
+import { createBookingEngineForHotel, hasBookingCapabilities } from './factory';
+import type { DirectusRoom } from './room-mapping-service';
 import type {
+  BookingRequest,
+  BookingResponse,
   IBookingEngine,
   RateQuery,
-  BookingRequest,
   RoomAvailability,
   RoomRate,
-  BookingResponse,
 } from './types';
-import { createBookingEngineForHotel, hasBookingCapabilities } from './factory';
 import { ConfigurationError } from './types';
-import { CloudbedsEngine } from './cloudbeds-engine';
-import type { DirectusRoom } from './room-mapping-service';
 
 export class BookingService {
   private engines: Map<string, IBookingEngine> = new Map();
@@ -24,7 +24,7 @@ export class BookingService {
   async initializeForHotel(hotelData: Record<string, unknown>): Promise<void> {
     if (!hasBookingCapabilities(hotelData)) {
       throw new ConfigurationError(
-        `Hotel ${hotelData.name} does not have booking capabilities configured`,
+        `Hotel ${hotelData.name} does not have booking capabilities configured`
       );
     }
 
@@ -88,7 +88,7 @@ export class BookingService {
   async cancelBooking(
     hotelId: string,
     bookingId: string,
-    reason?: string,
+    reason?: string
   ): Promise<BookingResponse> {
     const engine = this.getEngine(hotelId);
     return await engine.cancelBooking(bookingId, reason);
@@ -100,7 +100,7 @@ export class BookingService {
   async modifyBooking(
     hotelId: string,
     bookingId: string,
-    changes: Partial<BookingRequest>,
+    changes: Partial<BookingRequest>
   ): Promise<BookingResponse> {
     const engine = this.getEngine(hotelId);
     return await engine.modifyBooking(bookingId, changes);
@@ -126,7 +126,7 @@ export class BookingService {
    * Get room mapping statistics for a hotel (Cloudbeds only)
    */
   getRoomMappingStats(
-    hotelId: string,
+    hotelId: string
   ): ReturnType<typeof CloudbedsEngine.prototype.getRoomMappingStats> | null {
     const engine = this.getEngine(hotelId);
     if (engine instanceof CloudbedsEngine) {
@@ -139,7 +139,7 @@ export class BookingService {
    * Get mapped rooms for a hotel (Cloudbeds only)
    */
   getMappedRooms(
-    hotelId: string,
+    hotelId: string
   ): ReturnType<typeof CloudbedsEngine.prototype.getMappedRooms> | null {
     const engine = this.getEngine(hotelId);
     if (engine instanceof CloudbedsEngine) {
@@ -165,7 +165,7 @@ export class BookingService {
    */
   async getAvailabilityAndRates(
     hotelId: string,
-    query: RateQuery,
+    query: RateQuery
   ): Promise<{
     availability: RoomAvailability[];
     rates: RoomRate[];
@@ -250,7 +250,7 @@ export class BookingService {
    */
   getBookingSummary(
     request: BookingRequest,
-    rates: RoomRate[],
+    rates: RoomRate[]
   ): {
     nights: number;
     totalGuests: number;

@@ -1,41 +1,42 @@
 ---
+import { DetailPageLayout } from '../../../components/DetailPageLayout';
 import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
-import { DetailPageLayout } from '../../../components/DetailPageLayout';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
   console.log('🎯 Generating static paths for activity pages...');
-  
+
   try {
     const hotels = await getAllHotels();
     const paths = [];
-    
+
     for (const hotel of hotels) {
       console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
-      
+
       // Get full hotel data including activities
       const fullHotel = await getHotelByDomain(hotel.domain);
       if (!fullHotel || !fullHotel.activities) {
         console.log(`⚠️ No activities found for hotel: ${hotel.name}`);
         continue;
       }
-      
+
       // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
       const subdomain = hotel.domain.split('.')[0];
-      
+
       // Generate paths for each activity
       for (const activity of fullHotel.activities) {
         // Create slug from activity name
-        const slug = activity.name.toLowerCase()
+        const slug = activity.name
+          .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
-        
+
         paths.push({
-          params: { 
+          params: {
             hotel: subdomain,
-            slug: slug
+            slug: slug,
           },
           props: {
             activity,
@@ -43,11 +44,11 @@ export async function getStaticPaths() {
             hotelSubdomain: subdomain,
             defaultLanguage: hotel.default_language || 'en-US',
             defaultCurrency: hotel.default_currency || 'USD',
-          }
+          },
         });
       }
     }
-    
+
     console.log(`✅ Generated ${paths.length} activity page paths`);
     return paths;
   } catch (error) {
@@ -60,10 +61,10 @@ const { activity, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = As
 
 // Hotel theme data will be handled globally by Layout.astro
 
-
-
 // Prepare activity data for DetailPageLayout
-const imageUrl = activity.main_photo ? getMediaUrl(activity.main_photo.id, { width: 1200, height: 675, quality: 95 }) : '';
+const imageUrl = activity.main_photo
+  ? getMediaUrl(activity.main_photo.id, { width: 1200, height: 675, quality: 95 })
+  : '';
 const videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
 
 // Process media gallery
@@ -74,12 +75,14 @@ if (activity.media_gallery && Array.isArray(activity.media_gallery)) {
     if (mediaItem && mediaItem.directus_files_id) {
       const file = mediaItem.directus_files_id;
       const isVideo = file.type?.startsWith('video/');
-      const mediaUrl = isVideo ? getMediaUrl(file.id) : getMediaUrl(file.id, { width: 800, height: 600, quality: 90 });
+      const mediaUrl = isVideo
+        ? getMediaUrl(file.id)
+        : getMediaUrl(file.id, { width: 800, height: 600, quality: 90 });
       galleryImages.push({
         id: file.id,
         url: mediaUrl,
         title: file.title || 'Activity Gallery Image',
-        type: isVideo ? 'video' : 'image'
+        type: isVideo ? 'video' : 'image',
       });
     }
   }
@@ -107,7 +110,7 @@ const activityMetadata = {
 const breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Activities', href: `/${hotelSubdomain}#activities` },
-  { label: activity.name }
+  { label: activity.name },
 ];
 ---
 

@@ -2,9 +2,9 @@
  * Booking engine factory
  */
 
-import type { IBookingEngine, IBookingEngineFactory, BookingEngineConfig } from './types';
-import { ConfigurationError } from './types';
 import { CloudbedsEngine } from './cloudbeds-engine';
+import type { BookingEngineConfig, IBookingEngine, IBookingEngineFactory } from './types';
+import { ConfigurationError } from './types';
 
 /**
  * Factory class to create booking engine instances
@@ -23,27 +23,27 @@ export class BookingEngineFactory implements IBookingEngineFactory {
 
   createEngine(type: BookingEngineConfig['type']): IBookingEngine {
     switch (type) {
-    case 'cloudbeds':
-      return new CloudbedsEngine();
+      case 'cloudbeds':
+        return new CloudbedsEngine();
 
-    case 'booking.com':
-      // TODO: Implement Booking.com engine
-      throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+      case 'booking.com':
+        // TODO: Implement Booking.com engine
+        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
 
-    case 'expedia':
-      // TODO: Implement Expedia engine
-      throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+      case 'expedia':
+        // TODO: Implement Expedia engine
+        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
 
-    case 'airbnb':
-      // TODO: Implement Airbnb engine
-      throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+      case 'airbnb':
+        // TODO: Implement Airbnb engine
+        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
 
-    case 'custom':
-      // TODO: Implement custom engine interface
-      throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+      case 'custom':
+        // TODO: Implement custom engine interface
+        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
 
-    default:
-      throw new ConfigurationError(`Unknown booking engine type: ${type}`);
+      default:
+        throw new ConfigurationError(`Unknown booking engine type: ${type}`);
     }
   }
 
@@ -72,23 +72,23 @@ export class BookingEngineFactory implements IBookingEngineFactory {
     }
 
     switch (pmsType) {
-    case 'cloudbeds':
-      return {
-        type: 'cloudbeds',
-        credentials: {
-          clientId: String(hotelData.cloudbeds_client_id || ''),
-          clientSecret: String(hotelData.cloudbeds_client_secret || ''),
-          apiKey: String(hotelData.cloudbeds_api_key || ''),
-          propertyId: String(hotelData.cloudbeds_property_id || ''),
-        },
-        settings: {
-          currency: String(hotelData.default_currency || 'USD'),
-          language: String(hotelData.default_language || 'en-US'),
-        },
-      };
+      case 'cloudbeds':
+        return {
+          type: 'cloudbeds',
+          credentials: {
+            clientId: String(hotelData.cloudbeds_client_id || ''),
+            clientSecret: String(hotelData.cloudbeds_client_secret || ''),
+            apiKey: String(hotelData.cloudbeds_api_key || ''),
+            propertyId: String(hotelData.cloudbeds_property_id || ''),
+          },
+          settings: {
+            currency: String(hotelData.default_currency || 'USD'),
+            language: String(hotelData.default_language || 'en-US'),
+          },
+        };
 
-    default:
-      throw new ConfigurationError(`Unsupported PMS type: ${pmsType}`);
+      default:
+        throw new ConfigurationError(`Unsupported PMS type: ${pmsType}`);
     }
   }
 
@@ -136,7 +136,7 @@ export const getBookingEngineFactory = () => BookingEngineFactory.getInstance();
  * Convenience function to create a booking engine for a hotel
  */
 export const createBookingEngineForHotel = async (
-  hotelData: Record<string, unknown>,
+  hotelData: Record<string, unknown>
 ): Promise<IBookingEngine> => {
   const factory = getBookingEngineFactory();
   return await factory.createFromHotelConfig(hotelData);

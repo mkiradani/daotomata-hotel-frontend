@@ -21,9 +21,9 @@ if (!targetDomain) {
 
     // Map hotel slugs to their actual domains in Directus
     const domainMapping = {
-      'maisondemo': 'maisondemo.com',
-      'demo': 'maisondemo.com',
-      'baberrih': 'baberrih.ma'
+      maisondemo: 'maisondemo.com',
+      demo: 'maisondemo.com',
+      baberrih: 'baberrih.ma',
     };
 
     targetDomain = domainMapping[hotelSlug] || `${hotelSlug}.daotomata.io`;
@@ -40,21 +40,31 @@ const hotel = await getHotelByDomain(targetDomain);
 console.log('🔍 ChatwootWidget - Directus query result:', {
   found: !!hotel,
   name: hotel?.name,
-  hasToken: !!hotel?.chatwoot_website_token
+  hasToken: !!hotel?.chatwoot_website_token,
 });
 
 // Use chatwoot_website_token from Directus hotels table
-const chatwootConfig = hotel?.chatwoot_website_token ? {
-  website_token: hotel.chatwoot_website_token,
-  account_id: null // Not needed for widget initialization
-} : null;
+const chatwootConfig = hotel?.chatwoot_website_token
+  ? {
+      website_token: hotel.chatwoot_website_token,
+      account_id: null, // Not needed for widget initialization
+    }
+  : null;
 
 if (!hotel) {
   console.error('❌ ChatwootWidget - Hotel not found for domain:', targetDomain);
 } else if (hotel && chatwootConfig) {
-  console.log('✅ ChatwootWidget loaded for:', hotel.name, 'Token:', chatwootConfig.website_token?.substring(0, 8) + '...');
+  console.log(
+    '✅ ChatwootWidget loaded for:',
+    hotel.name,
+    'Token:',
+    chatwootConfig.website_token?.substring(0, 8) + '...'
+  );
 } else {
-  console.warn('⚠️ ChatwootWidget - Hotel found but no chatwoot_website_token configured for:', hotel.name);
+  console.warn(
+    '⚠️ ChatwootWidget - Hotel found but no chatwoot_website_token configured for:',
+    hotel.name
+  );
 }
 ---
 
