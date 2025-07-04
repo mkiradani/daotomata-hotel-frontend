@@ -1,4 +1,8 @@
 ---
+// biome-ignore lint/correctness/noUnusedImports: DetailPageLayout is used in JSX below
+import { DetailPageLayout } from '../../../components/DetailPageLayout.tsx';
+// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
+import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
 
 export const prerender = true;
@@ -55,7 +59,15 @@ export async function getStaticPaths() {
   }
 }
 
-const { room, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
+const {
+  room,
+  hotel,
+  hotelSubdomain,
+  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
+  defaultLanguage,
+  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is used in JSX below
+  defaultCurrency,
+} = Astro.props;
 
 // Hotel theme data will be handled globally by Layout.astro
 
@@ -139,15 +151,15 @@ const _availabilityData = {
     title={room.name}
     description={room.description || `Experience luxury and comfort in our ${room.name}.`}
     type="room"
-    imageUrl={imageUrl}
-    videoUrl={videoUrl}
+    imageUrl={_imageUrl}
+    videoUrl={_videoUrl}
     galleryImages={galleryImages}
-    metadata={roomMetadata}
+    metadata={_roomMetadata}
     hotelName={hotel.name}
     hotelSlug={hotelSubdomain}
     defaultCurrency={defaultCurrency}
-    breadcrumbItems={breadcrumbItems}
-    availabilityData={availabilityData}
+    breadcrumbItems={_breadcrumbItems}
+    availabilityData={_availabilityData}
     client:load
   />
 </Layout>

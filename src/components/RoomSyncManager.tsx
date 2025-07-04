@@ -214,6 +214,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                     <div class="flex justify-between items-center mb-4">
                       <h4 class="font-semibold text-warning">🔄 Rooms Ready for Sync</h4>
                       <button
+                        type="button"
                         class={`btn btn-primary btn-sm ${isAutoSyncing.value ? 'loading' : ''}`}
                         onClick$={performAutoSync}
                         disabled={isAutoSyncing.value || isLoading.value}
@@ -225,7 +226,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                     <div class="space-y-2">
                       {syncData.value.syncRecommendations.map((recommendation, index) => (
                         <div
-                          key={index}
+                          key={`${recommendation.directusRoomName}-${index}`}
                           class="flex justify-between items-center bg-warning/10 p-3 rounded-lg"
                         >
                           <div>
@@ -255,7 +256,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                     <div class="space-y-2">
                       {syncResults.value.map((result, index) => (
                         <div
-                          key={index}
+                          key={`${result.roomName}-${result.status}-${index}`}
                           class={`flex justify-between items-center p-3 rounded-lg ${
                             result.status === 'updated' ? 'bg-success/10' : 'bg-error/10'
                           }`}
@@ -322,6 +323,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                 {/* Refresh Button */}
                 <div class="justify-center card-actions">
                   <button
+                    type="button"
                     class={`btn btn-outline ${isLoading.value ? 'loading' : ''}`}
                     onClick$={loadSyncStatus}
                     disabled={isLoading.value || isAutoSyncing.value}

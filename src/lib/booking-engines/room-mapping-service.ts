@@ -41,6 +41,7 @@ export interface MappedRoom {
   directusData: DirectusRoom;
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: This service class provides a logical grouping for room mapping utilities
 export class RoomMappingService {
   /**
    * Map Directus rooms to Cloudbeds rooms by name

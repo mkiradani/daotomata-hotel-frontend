@@ -293,7 +293,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     <label class="label" for="children-select">
                       <span class="label-text">Children</span>
                     </label>
-                    <select id="children-select" class="select-bordered select" bind:value={children}>
+                    <select
+                      id="children-select"
+                      class="select-bordered select"
+                      bind:value={children}
+                    >
                       <option value={0}>0 Children</option>
                       <option value={1}>1 Child</option>
                       <option value={2}>2 Children</option>
@@ -432,6 +436,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 <div class="flex justify-between items-center mb-4">
                   <h4 class="font-semibold text-lg">Complete Your Booking</h4>
                   <button
+                    type="button"
                     class="btn btn-sm btn-ghost"
                     onClick$={() => {
                       showBookingForm.value = false;
@@ -493,10 +498,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
                   <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
                     <div class="form-control">
-                      <label class="label">
+                      <label class="label" for="first-name">
                         <span class="label-text">First Name *</span>
                       </label>
                       <input
+                        id="first-name"
                         type="text"
                         class="input-bordered input"
                         bind:value={guestFirstName}
@@ -506,10 +512,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     </div>
 
                     <div class="form-control">
-                      <label class="label">
+                      <label class="label" for="last-name">
                         <span class="label-text">Last Name *</span>
                       </label>
                       <input
+                        id="last-name"
                         type="text"
                         class="input-bordered input"
                         bind:value={guestLastName}
@@ -519,10 +526,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     </div>
 
                     <div class="form-control">
-                      <label class="label">
+                      <label class="label" for="guest-email">
                         <span class="label-text">Email *</span>
                       </label>
                       <input
+                        id="guest-email"
                         type="email"
                         class="input-bordered input"
                         bind:value={guestEmail}
@@ -532,10 +540,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     </div>
 
                     <div class="form-control">
-                      <label class="label">
+                      <label class="label" for="guest-phone">
                         <span class="label-text">Phone</span>
                       </label>
                       <input
+                        id="guest-phone"
                         type="tel"
                         class="input-bordered input"
                         bind:value={guestPhone}
@@ -545,10 +554,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   </div>
 
                   <div class="form-control">
-                    <label class="label">
+                    <label class="label" for="special-requests">
                       <span class="label-text">Special Requests</span>
                     </label>
                     <textarea
+                      id="special-requests"
                       class="textarea-bordered textarea"
                       bind:value={specialRequests}
                       placeholder="Any special requests or preferences..."
@@ -559,6 +569,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   {/* Booking Actions */}
                   <div class="justify-end pt-4 card-actions">
                     <button
+                      type="button"
                       class="btn-outline btn"
                       onClick$={() => {
                         showBookingForm.value = false;
@@ -569,6 +580,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                       Cancel
                     </button>
                     <button
+                      type="button"
                       class={`btn btn-primary ${isLoading.value ? 'loading' : ''}`}
                       onClick$={submitBooking}
                       disabled={

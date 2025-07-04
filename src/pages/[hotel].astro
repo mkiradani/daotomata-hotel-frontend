@@ -1,5 +1,21 @@
 ---
-import { getAllHotels, getHotelByDomain, getTranslatedContent } from '../lib/directus.js';
+// biome-ignore lint/correctness/noUnusedImports: ActivityCard is used in JSX below
+import { ActivityCard } from '../components/ActivityCard.tsx';
+// biome-ignore lint/correctness/noUnusedImports: FacilityCard is used in JSX below
+import { FacilityCard } from '../components/FacilityCard.tsx';
+// biome-ignore lint/correctness/noUnusedImports: HeroSection is used in JSX below
+import { HeroSection } from '../components/HeroSection.tsx';
+// biome-ignore lint/correctness/noUnusedImports: RoomCard is used in JSX below
+import { RoomCard } from '../components/RoomCard.tsx';
+// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
+import Layout from '../layouts/Layout.astro';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  // biome-ignore lint/correctness/noUnusedImports: getMediaUrl is used multiple times in JSX below
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
 
 export const prerender = true;
 
@@ -38,12 +54,17 @@ export async function getStaticPaths() {
 
 const { hotel: hotelSubdomain } = Astro.params;
 const {
+  // biome-ignore lint/correctness/noUnusedVariables: hotelId is part of the data structure
   hotelId,
+  // biome-ignore lint/correctness/noUnusedVariables: hotelName is used in JSX below
   hotelName,
   hotelDomain,
   defaultLanguage,
+  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is used in JSX below
   defaultCurrency,
+  // biome-ignore lint/correctness/noUnusedVariables: availableLanguages is used in JSX below
   availableLanguages,
+  // biome-ignore lint/correctness/noUnusedVariables: availableCurrencies is used in JSX below
   availableCurrencies,
 } = Astro.props;
 
@@ -237,17 +258,17 @@ console.log(
 >
   <!-- Hero Section -->
   {console.log('🖼️ Hero media debug:', {
-    heroPhoto: heroPhoto,
-    heroPhotoId: heroPhoto?.id,
-    heroVideo: heroVideo,
-    heroVideoId: heroVideo?.id,
-    hotelLogo: hotelLogo,
-    hotelLogoId: hotelLogo?.id
+    heroPhoto: _heroPhoto,
+    heroPhotoId: _heroPhoto?.id,
+    heroVideo: _heroVideo,
+    heroVideoId: _heroVideo?.id,
+    hotelLogo: _hotelLogo,
+    hotelLogoId: _hotelLogo?.id
   })}
   <HeroSection
     hotelName={hotel.name}
-    heroImageUrl={heroPhoto ? getMediaUrl(heroPhoto.id, { width: 1920, height: 1080, quality: 90 }) : undefined}
-    heroVideoUrl={heroVideo ? getMediaUrl(heroVideo.id, { quality: 90 }) : undefined}
+    heroImageUrl={_heroPhoto ? getMediaUrl(_heroPhoto.id, { width: 1920, height: 1080, quality: 90 }) : undefined}
+    heroVideoUrl={_heroVideo ? getMediaUrl(_heroVideo.id, { quality: 90 }) : undefined}
     availableLanguages={availableLanguages}
     availableCurrencies={availableCurrencies}
     currentLanguage={currentLanguage}

@@ -1,4 +1,7 @@
 ---
+// biome-ignore lint/correctness/noUnusedImports: getMediaUrl is used in JSX below
+import { getMediaUrl } from '../lib/directus.js';
+
 export interface Props {
   hotelName: string;
   hotelDomain: string;
@@ -8,10 +11,13 @@ export interface Props {
 }
 
 const {
+  // biome-ignore lint/correctness/noUnusedVariables: hotelName is used in JSX below
   hotelName,
   hotelDomain,
+  // biome-ignore lint/correctness/noUnusedVariables: currentPath is used in JSX below
   currentPath = '',
   themeConfig = {},
+  // biome-ignore lint/correctness/noUnusedVariables: hotelLogo is used in JSX below
   hotelLogo = null,
 } = Astro.props;
 
@@ -63,7 +69,7 @@ const _navigation = components.navigation || {};
     <!-- Navigation Links -->
     <div class="navbar-menu" id="navbar-menu">
       <ul class="navbar-nav">
-        {navItems.map(item => (
+        {_navItems.map(item => (
           <li class="nav-item">
             <a
               href={item.href}
@@ -87,14 +93,14 @@ const _navigation = components.navigation || {};
 </nav>
 
 <style define:vars={{
-  headerBg: header.backgroundColor || colors.background || '#FFFFFF',
-  headerText: header.textColor || colors.text || '#2C2416',
-  navHover: navigation.hoverColor || colors.primary || '#8B7355',
-  primaryColor: colors.primary || '#8B7355',
-  secondaryColor: colors.secondary || '#A0956B',
-  fontHeading: typography.fontHead || 'Montserrat',
-  fontBody: typography.fontBody || 'Montserrat',
-  borderColor: colors.primary || '#8B7355'
+  headerBg: _header.backgroundColor || _colors.background || '#FFFFFF',
+  headerText: _header.textColor || _colors.text || '#2C2416',
+  navHover: _navigation.hoverColor || _colors.primary || '#8B7355',
+  primaryColor: _colors.primary || '#8B7355',
+  secondaryColor: _colors.secondary || '#A0956B',
+  fontHeading: _typography.fontHead || 'Montserrat',
+  fontBody: _typography.fontBody || 'Montserrat',
+  borderColor: _colors.primary || '#8B7355'
 }}>
   .hotel-navbar {
     background-color: var(--headerBg);

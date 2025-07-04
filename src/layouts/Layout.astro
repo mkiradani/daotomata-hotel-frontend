@@ -1,4 +1,8 @@
 ---
+// biome-ignore lint/correctness/noUnusedImports: ChatwootWidget is used in JSX below
+import ChatwootWidget from '../components/ChatwootWidget.astro';
+// biome-ignore lint/correctness/noUnusedImports: Navbar is used in JSX below
+import Navbar from '../components/Navbar.astro';
 import { getMediaUrl } from '../lib/directus.js';
 import { generateThemeCSS, getThemeName } from '../lib/theme.js';
 import '../styles/global.css';
@@ -21,19 +25,26 @@ export interface Props {
 }
 
 const {
+  // biome-ignore lint/correctness/noUnusedVariables: title is used in JSX below
   title,
+  // biome-ignore lint/correctness/noUnusedVariables: description is used in JSX below
   description = 'Hotel website powered by Daotomata Stack',
+  // biome-ignore lint/correctness/noUnusedVariables: domain is used in JSX below
   domain,
+  // biome-ignore lint/correctness/noUnusedVariables: ga4Id is used in JSX below
   ga4Id,
+  // biome-ignore lint/correctness/noUnusedVariables: pixelId is used in JSX below
   pixelId,
   hotel,
   hotelSubdomain,
   // Legacy props for backward compatibility
   themeCSS: legacyThemeCSS,
   themeName: legacyThemeName,
+  // biome-ignore lint/correctness/noUnusedVariables: hotelName is used in JSX below
   hotelName = 'Hotel',
   themeConfig: legacyThemeConfig = {},
   hotelLogo: legacyHotelLogo = null,
+  // biome-ignore lint/correctness/noUnusedVariables: showNavbar is used in JSX below
   showNavbar = true,
 } = Astro.props;
 
@@ -75,9 +86,15 @@ if (hotel && hotelSubdomain) {
   hotelLogo = legacyHotelLogo;
 }
 
-// Generate dynamic favicon URL from hotel logo
+// Generate dynamic favicon URLs from hotel logo
 const _faviconUrl = hotelLogo?.id
   ? getMediaUrl(hotelLogo.id, { width: 32, height: 32, quality: 90, format: 'png' })
+  : '/favicon.svg';
+const _favicon16Url = hotelLogo?.id
+  ? getMediaUrl(hotelLogo.id, { width: 16, height: 16, quality: 90, format: 'png' })
+  : '/favicon.svg';
+const _appleIconUrl = hotelLogo?.id
+  ? getMediaUrl(hotelLogo.id, { width: 180, height: 180, quality: 90, format: 'png' })
   : '/favicon.svg';
 ---
 
@@ -91,9 +108,9 @@ const _faviconUrl = hotelLogo?.id
     <!-- Dynamic favicon based on hotel logo -->
     {hotelLogo && hotelLogo.id ? (
       <>
-        <link rel="icon" type="image/png" sizes="32x32" href={faviconUrl} />
-        <link rel="icon" type="image/png" sizes="16x16" href={getMediaUrl(hotelLogo.id, { width: 16, height: 16, quality: 90, format: 'png' })} />
-        <link rel="apple-touch-icon" sizes="180x180" href={getMediaUrl(hotelLogo.id, { width: 180, height: 180, quality: 90, format: 'png' })} />
+        <link rel="icon" type="image/png" sizes="32x32" href={_faviconUrl} />
+        <link rel="icon" type="image/png" sizes="16x16" href={_favicon16Url} />
+        <link rel="apple-touch-icon" sizes="180x180" href={_appleIconUrl} />
       </>
     ) : (
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

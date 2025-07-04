@@ -1,13 +1,63 @@
 ---
-import { getHotelByDomain } from '../../lib/directus.js';
+// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
+import Layout from '../../layouts/Layout.astro';
+import { getAllHotels, getHotelByDomain } from '../../lib/directus.js';
 
-// Get hotel from domain
-const hotelDomain = Astro.url.hostname;
-const hotel = await getHotelByDomain(hotelDomain);
+export const prerender = true;
 
-if (!hotel) {
-  return Astro.redirect('/404');
+export async function getStaticPaths() {
+  console.log('🎯 Generating static paths for booking pages...');
+
+  try {
+    const hotels = await getAllHotels();
+    console.log(
+      `✅ Found ${hotels.length} hotels:`,
+      hotels.map((h) => h.domain)
+    );
+
+    const paths = [];
+
+    for (const hotelData of hotels) {
+      console.log(`🏨 Processing hotel: ${hotelData.name} (${hotelData.domain})`);
+
+      // Get full hotel data
+      const fullHotel = await getHotelByDomain(hotelData.domain);
+      if (!fullHotel) {
+        console.log(`⚠️ Could not get full data for hotel: ${hotelData.name}`);
+        continue;
+      }
+
+      // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
+      const subdomain = hotelData.domain.split('.')[0];
+
+      paths.push({
+        params: {
+          hotel: subdomain,
+        },
+        props: {
+          hotel: fullHotel,
+          hotelSubdomain: subdomain,
+          defaultLanguage: hotelData.default_language || 'en-US',
+          defaultCurrency: hotelData.default_currency || 'USD',
+        },
+      });
+    }
+
+    console.log(`✅ Generated ${paths.length} booking page paths`);
+    return paths;
+  } catch (error) {
+    console.error('❌ Error generating static paths for booking pages:', error);
+    return [];
+  }
 }
+
+// Get hotel and other data from props
+const {
+  hotel,
+  hotelSubdomain: _hotelSubdomain,
+  defaultLanguage: _defaultLanguage,
+  defaultCurrency: _defaultCurrency,
+} = Astro.props;
 
 const _pageTitle = `Book Your Stay - ${hotel.name}`;
 const _pageDescription = `Book your perfect stay at ${hotel.name}. Check availability, compare rooms, and make your reservation instantly.`;
@@ -22,7 +72,7 @@ const _rooms = url.searchParams.get('rooms') || '1';
 const _roomType = url.searchParams.get('roomType') || '';
 ---
 
-<Layout title={pageTitle} description={pageDescription}>
+<Layout title={_pageTitle} description={_pageDescription}>
   <main class="bg-base-200 min-h-screen">
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-r from-primary/20 to-secondary/20 py-16">
@@ -184,14 +234,12 @@ const _roomType = url.searchParams.get('roomType') || '';
     
     // Get URL parameters for pre-filling
     const urlParams = new URLSearchParams(window.location.search);
-    const prefilledData = {
-      checkIn: urlParams.get('checkin') || '',
-      checkOut: urlParams.get('checkout') || '',
-      adults: parseInt(urlParams.get('adults') || '2'),
-      children: parseInt(urlParams.get('children') || '0'),
-      rooms: parseInt(urlParams.get('rooms') || '1'),
-      roomType: urlParams.get('roomType') || ''
-    };
+    const checkInValue = urlParams.get('checkin') || '';
+    const checkOutValue = urlParams.get('checkout') || '';
+    const adultsValue = parseInt(urlParams.get('adults') || '2');
+    const childrenValue = parseInt(urlParams.get('children') || '0');
+    const roomsValue = parseInt(urlParams.get('rooms') || '1');
+    const roomTypeValue = urlParams.get('roomType') || '';
     
     // Mount the booking widget
     const container = document.getElementById('booking-widget-container');
@@ -242,14 +290,14 @@ const _roomType = url.searchParams.get('roomType') || '';
                   <label class="label">
                     <span class="label-text">Check-in</span>
                   </label>
-                  <input type="date" class="input-bordered input" value="${prefilledData.checkIn}" />
+                  <input type="date" class="input-bordered input" value="${checkIn}" />
                 </div>
-                
+
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Check-out</span>
                   </label>
-                  <input type="date" class="input-bordered input" value="${prefilledData.checkOut}" />
+                  <input type="date" class="input-bordered input" value="${checkOut}" />
                 </div>
                 
                 <div class="form-control">
@@ -257,33 +305,33 @@ const _roomType = url.searchParams.get('roomType') || '';
                     <span class="label-text">Adults</span>
                   </label>
                   <select class="select-bordered select">
-                    <option value="1" ${prefilledData.adults === 1 ? 'selected' : ''}>1 Adult</option>
-                    <option value="2" ${prefilledData.adults === 2 ? 'selected' : ''}>2 Adults</option>
-                    <option value="3" ${prefilledData.adults === 3 ? 'selected' : ''}>3 Adults</option>
-                    <option value="4" ${prefilledData.adults === 4 ? 'selected' : ''}>4 Adults</option>
+                    <option value="1" ${adultsValue === 1 ? 'selected' : ''}>1 Adult</option>
+                    <option value="2" ${adultsValue === 2 ? 'selected' : ''}>2 Adults</option>
+                    <option value="3" ${adultsValue === 3 ? 'selected' : ''}>3 Adults</option>
+                    <option value="4" ${adultsValue === 4 ? 'selected' : ''}>4 Adults</option>
                   </select>
                 </div>
-                
+
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Children</span>
                   </label>
                   <select class="select-bordered select">
-                    <option value="0" ${prefilledData.children === 0 ? 'selected' : ''}>0 Children</option>
-                    <option value="1" ${prefilledData.children === 1 ? 'selected' : ''}>1 Child</option>
-                    <option value="2" ${prefilledData.children === 2 ? 'selected' : ''}>2 Children</option>
-                    <option value="3" ${prefilledData.children === 3 ? 'selected' : ''}>3 Children</option>
+                    <option value="0" ${childrenValue === 0 ? 'selected' : ''}>0 Children</option>
+                    <option value="1" ${childrenValue === 1 ? 'selected' : ''}>1 Child</option>
+                    <option value="2" ${childrenValue === 2 ? 'selected' : ''}>2 Children</option>
+                    <option value="3" ${childrenValue === 3 ? 'selected' : ''}>3 Children</option>
                   </select>
                 </div>
-                
+
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Rooms</span>
                   </label>
                   <select class="select-bordered select">
-                    <option value="1" ${prefilledData.rooms === 1 ? 'selected' : ''}>1 Room</option>
-                    <option value="2" ${prefilledData.rooms === 2 ? 'selected' : ''}>2 Rooms</option>
-                    <option value="3" ${prefilledData.rooms === 3 ? 'selected' : ''}>3 Rooms</option>
+                    <option value="1" ${roomsValue === 1 ? 'selected' : ''}>1 Room</option>
+                    <option value="2" ${roomsValue === 2 ? 'selected' : ''}>2 Rooms</option>
+                    <option value="3" ${roomsValue === 3 ? 'selected' : ''}>3 Rooms</option>
                   </select>
                 </div>
               </div>

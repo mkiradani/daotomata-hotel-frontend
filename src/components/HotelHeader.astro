@@ -1,12 +1,13 @@
 ---
 // Auto-generated Hotel Header Component
+// biome-ignore lint/correctness/noUnusedVariables: hotel is used in JSX below
 const { hotel } = Astro.props;
 ---
 
-<header class="hero min-h-96 bg-gradient-to-r from-primary to-secondary">
-  <div class="hero-content text-center text-neutral-content">
+<header class="bg-gradient-to-r from-primary to-secondary min-h-96 hero">
+  <div class="text-neutral-content text-center hero-content">
     <div class="max-w-md">
-      <h1 class="mb-5 text-5xl font-bold">{hotel.name}</h1>
+      <h1 class="mb-5 font-bold text-5xl">{hotel.name}</h1>
       <p class="mb-5">Bienvenido a una experiencia única</p>
       <button class="btn btn-accent">Reservar Ahora</button>
     </div>
