@@ -118,6 +118,7 @@ export const FacilityCard = component$<FacilityCardProps>(
             {capacity && (
               <div class="badge-outline badge badge-sm">
                 <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <title>Capacity icon</title>
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>
                 {capacity} capacity
@@ -133,6 +134,7 @@ export const FacilityCard = component$<FacilityCardProps>(
             <a href={`/${hotelSlug}/facilities/${facilitySlug}`} class="btn btn-accent btn-sm">
               Learn More
               <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>Arrow right icon</title>
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"

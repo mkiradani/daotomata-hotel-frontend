@@ -1,6 +1,4 @@
 ---
-import { DetailPageLayout } from '../../../components/DetailPageLayout';
-import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
 
 export const prerender = true;
@@ -62,17 +60,17 @@ const { facility, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = As
 // Hotel theme data will be handled globally by Layout.astro
 
 // Prepare facility data for DetailPageLayout
-const imageUrl = facility.main_photo
+const _imageUrl = facility.main_photo
   ? getMediaUrl(facility.main_photo.id, { width: 1200, height: 675, quality: 95 })
   : '';
-const videoUrl = facility.main_video ? getMediaUrl(facility.main_video.id) : undefined;
+const _videoUrl = facility.main_video ? getMediaUrl(facility.main_video.id) : undefined;
 
 // Process media gallery
 const galleryImages = [];
 if (facility.media_gallery && Array.isArray(facility.media_gallery)) {
   for (const mediaItem of facility.media_gallery) {
     // media_gallery now contains objects with directus_files_id
-    if (mediaItem && mediaItem.directus_files_id) {
+    if (mediaItem?.directus_files_id) {
       const file = mediaItem.directus_files_id;
       const isVideo = file.type?.startsWith('video/');
       const mediaUrl = isVideo
@@ -107,7 +105,7 @@ const operatingHoursString = facility.operating_hours
 // Convert amenities array to string array if needed
 const facilityAmenities = Array.isArray(facility.amenities) ? facility.amenities : [];
 
-const facilityMetadata = {
+const _facilityMetadata = {
   facilityCategory: facility.category,
   facilityLocation: facility.location,
   capacity: facility.capacity,
@@ -120,7 +118,7 @@ const facilityMetadata = {
   facilityIsAccessible: facility.is_accessible,
 };
 
-const breadcrumbItems = [
+const _breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Facilities', href: `/${hotelSubdomain}#facilities` },
   { label: facility.name },

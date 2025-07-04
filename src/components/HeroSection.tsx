@@ -23,9 +23,9 @@ export const HeroSection = component$<HeroSectionProps>(
     themeConfig = {},
   }) => {
     // Extract theme configuration
-    const colors = themeConfig?.colors || {};
-    const typography = themeConfig?.typography || {};
-    const layout = themeConfig?.layout || {};
+    const _colors = themeConfig?.colors || {};
+    const _typography = themeConfig?.typography || {};
+    const _layout = themeConfig?.layout || {};
     // For now, we'll use a simpler approach without useVisibleTask$
     // The video will load immediately but with lower priority
 
@@ -80,14 +80,19 @@ export const HeroSection = component$<HeroSectionProps>(
           </div>
 
           <div class="flex justify-center gap-4">
-            <button class="text-lg btn btn-primary">Book Now</button>
-            <button class="btn btn-secondary">Explore</button>
+            <button type="button" class="text-lg btn btn-primary">
+              Book Now
+            </button>
+            <button type="button" class="btn btn-secondary">
+              Explore
+            </button>
           </div>
         </div>
 
         {/* Scroll indicator */}
         <div class="bottom-8 left-1/2 absolute text-white -translate-x-1/2 animate-bounce transform">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <title>Scroll down arrow</title>
             <path
               stroke-linecap="round"
               stroke-linejoin="round"

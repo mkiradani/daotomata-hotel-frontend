@@ -1,15 +1,5 @@
 ---
-import { ActivityCard } from '../components/ActivityCard';
-import { FacilityCard } from '../components/FacilityCard';
-import { HeroSection } from '../components/HeroSection';
-import { RoomCard } from '../components/RoomCard';
-import Layout from '../layouts/Layout.astro';
-import {
-  getAllHotels,
-  getHotelByDomain,
-  getMediaUrl,
-  getTranslatedContent,
-} from '../lib/directus.js';
+import { getAllHotels, getHotelByDomain, getTranslatedContent } from '../lib/directus.js';
 
 export const prerender = true;
 
@@ -104,7 +94,7 @@ const hotel = {
 
 // Generate theme CSS from Directus theme data
 const themeConfig = hotel.theme || {};
-const hotelLogo = hotel.logo || null;
+const _hotelLogo = hotel.logo || null;
 const colors = themeConfig.colors || {};
 const typography = themeConfig.typography || {};
 const layout = themeConfig.layout || {};
@@ -114,7 +104,7 @@ const components = themeConfig.components || {};
 const hotelSlug = hotel.domain.split('.')[0];
 const themeName = `${hotelSlug}-theme`;
 
-const themeCSS = `
+const _themeCSS = `
   /* DaisyUI Custom Theme for ${hotel.name} */
   [data-theme="${themeName}"] {
     color-scheme: light;
@@ -227,8 +217,8 @@ const themeCSS = `
 `;
 
 // Get hero media
-const heroPhoto = hotel.hero_media?.[0]?.main_photo;
-const heroVideo = hotel.hero_media?.[0]?.main_video;
+const _heroPhoto = hotel.hero_media?.[0]?.main_photo;
+const _heroVideo = hotel.hero_media?.[0]?.main_video;
 
 console.log(
   `✅ Hotel loaded: ${hotel.name} (${hotel.rooms?.length || 0} rooms, ${hotel.activities?.length || 0} activities, ${hotel.facilities?.length || 0} facilities)`

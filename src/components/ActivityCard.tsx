@@ -7,7 +7,7 @@ interface ActivityCardProps {
   maxParticipants?: number;
   ageRestriction?: number;
   equipmentProvided?: string[];
-  operatingHours?: any;
+  operatingHours?: Record<string, unknown>;
   defaultCurrency: string;
   imageUrl: string;
   videoUrl?: string;
@@ -23,9 +23,9 @@ export const ActivityCard = component$<ActivityCardProps>(
     description,
     maxParticipants,
     ageRestriction,
-    equipmentProvided,
-    operatingHours,
-    defaultCurrency,
+    equipmentProvided: _equipmentProvided,
+    operatingHours: _operatingHours,
+    defaultCurrency: _defaultCurrency,
     imageUrl,
     videoUrl,
     isLast,
@@ -125,6 +125,7 @@ export const ActivityCard = component$<ActivityCardProps>(
             {maxParticipants && (
               <div class="badge-outline badge badge-sm">
                 <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <title>People icon</title>
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>
                 Max {maxParticipants} people
@@ -133,6 +134,7 @@ export const ActivityCard = component$<ActivityCardProps>(
             {ageRestriction && ageRestriction > 0 && (
               <div class="badge-outline badge badge-sm">
                 <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <title>Age restriction icon</title>
                   <path
                     fill-rule="evenodd"
                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -152,6 +154,7 @@ export const ActivityCard = component$<ActivityCardProps>(
             <a href={`/${hotelSlug}/activities/${activitySlug}`} class="btn btn-secondary btn-sm">
               Learn More
               <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>Arrow right icon</title>
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"

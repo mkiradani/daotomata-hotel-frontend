@@ -1,6 +1,4 @@
 ---
-import ChatwootWidget from '../components/ChatwootWidget.astro';
-import Navbar from '../components/Navbar.astro';
 import { getMediaUrl } from '../lib/directus.js';
 import { generateThemeCSS, getThemeName } from '../lib/theme.js';
 import '../styles/global.css';
@@ -11,14 +9,14 @@ export interface Props {
   domain?: string;
   ga4Id?: string;
   pixelId?: string;
-  hotel?: any; // Hotel data for automatic theme generation
+  hotel?: Record<string, unknown>; // Hotel data for automatic theme generation
   hotelSubdomain?: string; // For theme naming
   // Legacy props for backward compatibility
   themeCSS?: string;
   themeName?: string;
   hotelName?: string;
-  themeConfig?: any;
-  hotelLogo?: any;
+  themeConfig?: Record<string, unknown>;
+  hotelLogo?: Record<string, unknown> | null;
   showNavbar?: boolean;
 }
 
@@ -40,7 +38,10 @@ const {
 } = Astro.props;
 
 // Auto-generate theme from hotel data or use legacy props
-let themeCSS, themeName, themeConfig, hotelLogo;
+let themeCSS: string | undefined,
+    themeName: string | undefined,
+    themeConfig: Record<string, unknown> | undefined,
+    hotelLogo: Record<string, unknown> | null | undefined;
 
 if (hotel && hotelSubdomain) {
   // Generate theme automatically from hotel data
@@ -75,10 +76,9 @@ if (hotel && hotelSubdomain) {
 }
 
 // Generate dynamic favicon URL from hotel logo
-const faviconUrl =
-  hotelLogo && hotelLogo.id
-    ? getMediaUrl(hotelLogo.id, { width: 32, height: 32, quality: 90, format: 'png' })
-    : '/favicon.svg';
+const _faviconUrl = hotelLogo?.id
+  ? getMediaUrl(hotelLogo.id, { width: 32, height: 32, quality: 90, format: 'png' })
+  : '/favicon.svg';
 ---
 
 <!doctype html>

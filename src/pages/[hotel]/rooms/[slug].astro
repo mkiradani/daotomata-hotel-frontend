@@ -1,6 +1,4 @@
 ---
-import { DetailPageLayout } from '../../../components/DetailPageLayout';
-import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
 
 export const prerender = true;
@@ -62,17 +60,17 @@ const { room, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.
 // Hotel theme data will be handled globally by Layout.astro
 
 // Prepare room data for DetailPageLayout
-const imageUrl = room.main_photo
+const _imageUrl = room.main_photo
   ? getMediaUrl(room.main_photo.id, { width: 1200, height: 675, quality: 95 })
   : '';
-const videoUrl = room.main_video ? getMediaUrl(room.main_video.id) : undefined;
+const _videoUrl = room.main_video ? getMediaUrl(room.main_video.id) : undefined;
 
 // Process media gallery
 const galleryImages = [];
 if (room.media_gallery && Array.isArray(room.media_gallery)) {
   for (const mediaItem of room.media_gallery) {
     // media_gallery now contains objects with directus_files_id
-    if (mediaItem && mediaItem.directus_files_id) {
+    if (mediaItem?.directus_files_id) {
       const file = mediaItem.directus_files_id;
       const isVideo = file.type?.startsWith('video/');
       const mediaUrl = isVideo
@@ -101,7 +99,7 @@ galleryImages.sort((a, b) => {
 // Convert amenities array to string array if needed
 const amenities = Array.isArray(room.amenities) ? room.amenities : [];
 
-const roomMetadata = {
+const _roomMetadata = {
   roomType: room.room_type,
   maxOccupancy: room.max_occupancy,
   sizeSqm: room.size_sqm,
@@ -113,14 +111,14 @@ const roomMetadata = {
   basePrice: room.base_price ? `${room.base_price}` : undefined,
 };
 
-const breadcrumbItems = [
+const _breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Rooms', href: `/${hotelSubdomain}#rooms` },
   { label: room.name },
 ];
 
 // TODO: Future Cloudbeds integration
-const availabilityData = {
+const _availabilityData = {
   isAvailable: true,
   nextAvailableDate: undefined,
   priceRange: undefined,

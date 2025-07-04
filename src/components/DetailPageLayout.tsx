@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, useSignal } from '@builder.io/qwik';
 
 interface DetailPageLayoutProps {
   // Basic content
@@ -82,11 +82,11 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
     description,
     type,
     imageUrl,
-    videoUrl,
+    videoUrl: _videoUrl,
     galleryImages = [],
     metadata,
-    hotelName,
-    hotelSlug,
+    hotelName: _hotelName,
+    hotelSlug: _hotelSlug,
     defaultCurrency,
     breadcrumbItems,
     availabilityData,
@@ -187,9 +187,9 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 <div>
                   <h3 class="mb-3 font-semibold text-lg">Amenities</h3>
                   <div class="flex flex-wrap gap-2">
-                    {metadata.amenities.map((amenity, index) => (
+                    {metadata.amenities.map((amenity) => (
                       <span
-                        key={index}
+                        key={amenity}
                         class="bg-primary/10 px-3 py-1 rounded-full text-primary text-sm"
                       >
                         {amenity}
@@ -335,9 +335,9 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 <div>
                   <h3 class="mb-3 font-semibold text-lg">Amenities</h3>
                   <div class="flex flex-wrap gap-2">
-                    {metadata.facilityAmenities.map((amenity, index) => (
+                    {metadata.facilityAmenities.map((amenity) => (
                       <span
-                        key={index}
+                        key={amenity}
                         class="bg-primary/10 px-3 py-1 rounded-full text-primary text-sm"
                       >
                         {amenity}
@@ -384,7 +384,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
           <div class="mx-auto max-w-7xl">
             <div class="flex items-center space-x-2 text-sm">
               {breadcrumbItems.map((item, index) => (
-                <div key={index} class="flex items-center">
+                <div key={`${item.label}-${index}`} class="flex items-center">
                   {index > 0 && <span class="mx-2 text-base-content/50">/</span>}
                   {item.href ? (
                     <a
@@ -451,7 +451,9 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                               class="w-full h-full object-cover"
                               controls
                               preload="metadata"
-                            />
+                            >
+                              <track kind="captions" src="" label="No captions available" default />
+                            </video>
                           ) : (
                             <img
                               src={media.url}
@@ -466,12 +468,14 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                       {galleryImages.length > 1 && (
                         <div class="top-1/2 right-5 left-5 absolute flex justify-between -translate-y-1/2 transform">
                           <button
+                            type="button"
                             onClick$={prevSlide}
                             class="bg-black/50 hover:bg-black/70 border-none text-white btn btn-circle btn-sm"
                           >
                             ❮
                           </button>
                           <button
+                            type="button"
                             onClick$={nextSlide}
                             class="bg-black/50 hover:bg-black/70 border-none text-white btn btn-circle btn-sm"
                           >
@@ -490,6 +494,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                     <div class="flex gap-2 pb-2 overflow-x-auto">
                       {galleryImages.map((media, index) => (
                         <button
+                          type="button"
                           key={`thumb-${media.id}-${index}`}
                           onClick$={() => goToSlide(index)}
                           class={`relative flex-shrink-0 bg-base-200 border-2 w-20 h-16 overflow-hidden transition-colors ${
@@ -519,6 +524,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >
+                                <title>Play video icon</title>
                                 <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                               </svg>
                             </div>
@@ -536,14 +542,14 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
                 {/* Action Buttons */}
                 <div class="space-y-4">
-                  <button class="w-full btn btn-primary btn-lg" onClick$={openBookingModal}>
+                  <button type="button" class="w-full btn btn-primary btn-lg" onClick$={openBookingModal}>
                     {type === 'room'
                       ? 'Check Availability'
                       : type === 'activity'
                         ? 'Reserve Activity'
                         : 'Book Facility'}
                   </button>
-                  <button class="btn-outline w-full btn">Contact Reception</button>
+                  <button type="button" class="btn-outline w-full btn">Contact Reception</button>
                 </div>
               </div>
             </div>
@@ -562,7 +568,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                       ? `Reserve ${title}`
                       : `Book ${title}`}
                 </h3>
-                <button class="btn btn-sm btn-circle btn-ghost" onClick$={closeBookingModal}>
+                <button type="button" class="btn btn-sm btn-circle btn-ghost" onClick$={closeBookingModal}>
                   ✕
                 </button>
               </div>

@@ -1,6 +1,4 @@
 ---
-import { DetailPageLayout } from '../../../components/DetailPageLayout';
-import Layout from '../../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
 
 export const prerender = true;
@@ -62,17 +60,17 @@ const { activity, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } = As
 // Hotel theme data will be handled globally by Layout.astro
 
 // Prepare activity data for DetailPageLayout
-const imageUrl = activity.main_photo
+const _imageUrl = activity.main_photo
   ? getMediaUrl(activity.main_photo.id, { width: 1200, height: 675, quality: 95 })
   : '';
-const videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
+const _videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
 
 // Process media gallery
 const galleryImages = [];
 if (activity.media_gallery && Array.isArray(activity.media_gallery)) {
   for (const mediaItem of activity.media_gallery) {
     // media_gallery now contains objects with directus_files_id
-    if (mediaItem && mediaItem.directus_files_id) {
+    if (mediaItem?.directus_files_id) {
       const file = mediaItem.directus_files_id;
       const isVideo = file.type?.startsWith('video/');
       const mediaUrl = isVideo
@@ -95,7 +93,7 @@ galleryImages.sort((a, b) => {
   return 0;
 });
 
-const activityMetadata = {
+const _activityMetadata = {
   category: activity.category,
   durationMinutes: activity.duration_minutes,
   maxParticipants: activity.max_participants,
@@ -107,7 +105,7 @@ const activityMetadata = {
   bookingRequired: activity.booking_required,
 };
 
-const breadcrumbItems = [
+const _breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Activities', href: `/${hotelSubdomain}#activities` },
   { label: activity.name },

@@ -1,5 +1,4 @@
 ---
-import Layout from '../../layouts/Layout.astro';
 import { getHotelByDomain } from '../../lib/directus.js';
 
 // Get hotel from domain
@@ -10,17 +9,17 @@ if (!hotel) {
   return Astro.redirect('/404');
 }
 
-const pageTitle = `Book Your Stay - ${hotel.name}`;
-const pageDescription = `Book your perfect stay at ${hotel.name}. Check availability, compare rooms, and make your reservation instantly.`;
+const _pageTitle = `Book Your Stay - ${hotel.name}`;
+const _pageDescription = `Book your perfect stay at ${hotel.name}. Check availability, compare rooms, and make your reservation instantly.`;
 
 // Get URL parameters for pre-filling the form
 const url = new URL(Astro.request.url);
-const checkIn = url.searchParams.get('checkin') || '';
-const checkOut = url.searchParams.get('checkout') || '';
-const adults = url.searchParams.get('adults') || '2';
-const children = url.searchParams.get('children') || '0';
-const rooms = url.searchParams.get('rooms') || '1';
-const roomType = url.searchParams.get('roomType') || '';
+const _checkIn = url.searchParams.get('checkin') || '';
+const _checkOut = url.searchParams.get('checkout') || '';
+const _adults = url.searchParams.get('adults') || '2';
+const _children = url.searchParams.get('children') || '0';
+const _rooms = url.searchParams.get('rooms') || '1';
+const _roomType = url.searchParams.get('roomType') || '';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>

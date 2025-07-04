@@ -1,12 +1,10 @@
 ---
-import { getMediaUrl } from '../lib/directus.js';
-
 export interface Props {
   hotelName: string;
   hotelDomain: string;
   currentPath?: string;
-  themeConfig?: any;
-  hotelLogo?: any;
+  themeConfig?: Record<string, unknown>;
+  hotelLogo?: Record<string, unknown> | null;
 }
 
 const {
@@ -21,7 +19,7 @@ const {
 const hotelSubdomain = hotelDomain.split('.')[0];
 
 // Navigation items based on Baberrih's real structure
-const navItems = [
+const _navItems = [
   { name: 'Home', href: `/${hotelSubdomain}` },
   { name: 'Accommodation', href: `/${hotelSubdomain}/accommodation` },
   { name: 'Facilities', href: `/${hotelSubdomain}/facilities` },
@@ -31,11 +29,11 @@ const navItems = [
 ];
 
 // Extract theme configuration
-const colors = themeConfig?.colors || {};
-const typography = themeConfig?.typography || {};
+const _colors = themeConfig?.colors || {};
+const _typography = themeConfig?.typography || {};
 const components = themeConfig?.components || {};
-const header = components.header || {};
-const navigation = components.navigation || {};
+const _header = components.header || {};
+const _navigation = components.navigation || {};
 ---
 
 <nav class="hotel-navbar" id="navbar">

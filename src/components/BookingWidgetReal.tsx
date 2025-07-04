@@ -47,7 +47,7 @@ interface RoomRate {
 }
 
 export const BookingWidgetReal = component$<BookingWidgetRealProps>(
-  ({ hotelDomain, hotelName, defaultCurrency, className = '', compact = false }) => {
+  ({ hotelDomain, hotelName, defaultCurrency: _defaultCurrency, className = '', compact = false }) => {
     // Form state
     const checkIn = useSignal('');
     const checkOut = useSignal('');
@@ -246,10 +246,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
               <div class="space-y-4">
                 <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
                   <div class="form-control">
-                    <label class="label">
+                    <label class="label" for="checkin-date">
                       <span class="label-text">Check-in</span>
                     </label>
                     <input
+                      id="checkin-date"
                       type="date"
                       class="input-bordered input"
                       bind:value={checkIn}
@@ -258,10 +259,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   </div>
 
                   <div class="form-control">
-                    <label class="label">
+                    <label class="label" for="checkout-date">
                       <span class="label-text">Check-out</span>
                     </label>
                     <input
+                      id="checkout-date"
                       type="date"
                       class="input-bordered input"
                       bind:value={checkOut}
@@ -308,6 +310,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 {/* Search Button */}
                 <div class="justify-center card-actions">
                   <button
+                    type="button"
                     class={`btn btn-primary ${isLoading.value ? 'loading' : ''}`}
                     onClick$={searchAvailability}
                     disabled={isLoading.value}
@@ -322,6 +325,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {error.value && (
               <div class="alert alert-error">
                 <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <title>Error icon</title>
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -384,6 +388,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                               </div>
                               <p class="opacity-70 text-sm">per night</p>
                               <button
+                                type="button"
                                 class="mt-2 btn btn-primary btn-sm"
                                 onClick$={() => selectRoom(room)}
                                 disabled={isLoading.value}
@@ -403,6 +408,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {showResults.value && availability.value.length === 0 && !showBookingForm.value && (
               <div class="mt-6 alert alert-info">
                 <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <title>Information icon</title>
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -459,12 +465,12 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                         <div class="text-right">
                           <div class="font-bold text-primary text-xl">
                             {(() => {
-                              const rate = getRoomRate(selectedRoom.value!.roomId);
+                              const rate = getRoomRate(selectedRoom.value?.roomId);
                               return rate
                                 ? formatPrice(rate.totalPrice, rate.currency)
                                 : formatPrice(
-                                    selectedRoom.value!.price,
-                                    selectedRoom.value!.currency
+                                    selectedRoom.value?.price,
+                                    selectedRoom.value?.currency
                                   );
                             })()}
                           </div>

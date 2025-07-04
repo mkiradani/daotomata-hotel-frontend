@@ -37,9 +37,13 @@ export const RestaurantCard = component$<RestaurantCardProps>(
     return (
       <div
         ref={cardRef}
-        class="bg-base-100 border-2 border-base-300 hover:border-accent transition-all duration-300 card overflow-hidden"
-        onMouseEnter$={() => (isHovered.value = true)}
-        onMouseLeave$={() => (isHovered.value = false)}
+        class="bg-base-100 border-2 hover:border-accent border-base-300 overflow-hidden transition-all duration-300 card"
+        onMouseEnter$={() => {
+          isHovered.value = true;
+        }}
+        onMouseLeave$={() => {
+          isHovered.value = false;
+        }}
       >
         {imageUrl && (
           <figure class="relative overflow-hidden">
@@ -79,6 +83,7 @@ export const RestaurantCard = component$<RestaurantCardProps>(
             <a href={`/${hotelSlug}/restaurant`} class="btn btn-accent btn-sm">
               View Menu
               <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>Arrow right icon</title>
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"

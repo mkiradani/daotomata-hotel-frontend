@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request: _request }) => {
   try {
     // For now, return the hotels data that we know exists
     // This will be replaced with actual MCP calls when the connection issue is resolved

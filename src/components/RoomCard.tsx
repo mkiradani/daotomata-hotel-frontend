@@ -132,6 +132,7 @@ export const RoomCard = component$<RoomCardProps>(
             {sizeSqm && (
               <div class="badge-outline badge badge-sm">
                 <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <title>Room size icon</title>
                   <path
                     fill-rule="evenodd"
                     d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z"
@@ -151,12 +152,13 @@ export const RoomCard = component$<RoomCardProps>(
               </div>
             </div>
             <div class="flex gap-2">
-              <button class="btn btn-primary btn-sm" onClick$={openBookingModal}>
+              <button type="button" class="btn btn-primary btn-sm" onClick$={openBookingModal}>
                 Book Now
               </button>
               <a href={`/${hotelSlug}/rooms/${roomSlug}`} class="btn-outline btn btn-sm">
                 Details
                 <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <title>Arrow right icon</title>
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -175,7 +177,7 @@ export const RoomCard = component$<RoomCardProps>(
             <div class="max-w-4xl modal-box">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg">Book {name}</h3>
-                <button class="btn btn-sm btn-circle btn-ghost" onClick$={closeBookingModal}>
+                <button type="button" class="btn btn-sm btn-circle btn-ghost" onClick$={closeBookingModal}>
                   ✕
                 </button>
               </div>
@@ -202,7 +204,7 @@ export const RoomCard = component$<RoomCardProps>(
                   We're implementing the full booking system with Cloudbeds integration.
                 </p>
                 <div class="flex justify-center gap-2">
-                  <button class="btn btn-primary" onClick$={closeBookingModal}>
+                  <button type="button" class="btn btn-primary" onClick$={closeBookingModal}>
                     Contact Reception
                   </button>
                   <a href={`/${hotelSlug}/rooms/${roomSlug}`} class="btn-outline btn">
@@ -212,7 +214,7 @@ export const RoomCard = component$<RoomCardProps>(
               </div>
 
               <div class="modal-action">
-                <button class="btn" onClick$={closeBookingModal}>
+                <button type="button" class="btn" onClick$={closeBookingModal}>
                   Close
                 </button>
               </div>

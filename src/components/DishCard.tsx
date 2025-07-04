@@ -57,17 +57,17 @@ export const DishCard = component$<DishCardProps>(
 
           {ingredients && ingredients.length > 0 && (
             <div class="mb-3">
-              <div class="text-xs text-base-content/50 uppercase tracking-wide mb-1">
+              <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                 Ingredients
               </div>
               <div class="flex flex-wrap gap-1">
-                {ingredients.slice(0, 3).map((ingredient, index) => (
-                  <span key={index} class="badge badge-outline badge-xs">
+                {ingredients.slice(0, 3).map((ingredient) => (
+                  <span key={ingredient} class="badge-outline badge badge-xs">
                     {ingredient}
                   </span>
                 ))}
                 {ingredients.length > 3 && (
-                  <span class="badge badge-outline badge-xs">+{ingredients.length - 3} more</span>
+                  <span class="badge-outline badge badge-xs">+{ingredients.length - 3} more</span>
                 )}
               </div>
             </div>
@@ -75,10 +75,10 @@ export const DishCard = component$<DishCardProps>(
 
           {dietaryOptions && dietaryOptions.length > 0 && (
             <div class="mb-3">
-              <div class="text-xs text-base-content/50 uppercase tracking-wide mb-1">Dietary</div>
+              <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">Dietary</div>
               <div class="flex flex-wrap gap-1">
-                {dietaryOptions.slice(0, 2).map((option, index) => (
-                  <span key={index} class="badge badge-success badge-xs">
+                {dietaryOptions.slice(0, 2).map((option) => (
+                  <span key={option} class="badge badge-success badge-xs">
                     {formatDietaryOption(option)}
                   </span>
                 ))}
@@ -98,10 +98,10 @@ export const DishCard = component$<DishCardProps>(
 
             {allergens && allergens.length > 0 && (
               <div class="text-right">
-                <div class="text-xs text-base-content/50 mb-1">Allergens</div>
-                <div class="flex flex-wrap gap-1 justify-end">
-                  {allergens.slice(0, 2).map((allergen, index) => (
-                    <span key={index} class="badge badge-warning badge-xs">
+                <div class="mb-1 text-xs text-base-content/50">Allergens</div>
+                <div class="flex flex-wrap justify-end gap-1">
+                  {allergens.slice(0, 2).map((allergen) => (
+                    <span key={allergen} class="badge badge-warning badge-xs">
                       {formatAllergen(allergen)}
                     </span>
                   ))}

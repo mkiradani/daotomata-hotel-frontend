@@ -2,10 +2,6 @@
 // Multitenant Chatwoot Widget - Official SDK Integration using Directus
 import { getHotelByDomain } from '../lib/directus.js';
 
-interface Props {
-  domain?: string;
-}
-
 const { domain } = Astro.props;
 
 // Smart domain detection for multitenant setup
@@ -58,7 +54,7 @@ if (!hotel) {
     '✅ ChatwootWidget loaded for:',
     hotel.name,
     'Token:',
-    chatwootConfig.website_token?.substring(0, 8) + '...'
+    `${chatwootConfig.website_token?.substring(0, 8)}...`
   );
 } else {
   console.warn(

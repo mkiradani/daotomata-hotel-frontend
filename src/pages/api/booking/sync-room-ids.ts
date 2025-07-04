@@ -3,7 +3,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { getBookingService, RoomMappingService } from '../../../lib/booking-engines';
+import { getBookingService } from '../../../lib/booking-engines';
 import { getHotelByDomain } from '../../../lib/directus.js';
 
 export const POST: APIRoute = async ({ request }) => {

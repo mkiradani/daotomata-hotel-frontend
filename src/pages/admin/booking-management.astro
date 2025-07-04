@@ -1,5 +1,4 @@
 ---
-import Layout from '../../layouts/Layout.astro';
 import { getHotelByDomain } from '../../lib/directus.js';
 
 // Get hotel from domain
@@ -10,7 +9,7 @@ if (!hotel) {
   return Astro.redirect('/404');
 }
 
-const pageTitle = `Booking Management - ${hotel.name}`;
+const _pageTitle = `Booking Management - ${hotel.name}`;
 ---
 
 <Layout title={pageTitle}>
