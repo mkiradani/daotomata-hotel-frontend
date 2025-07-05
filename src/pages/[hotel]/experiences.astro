@@ -1,0 +1,157 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: ActivityCard is used in JSX below
+import { ActivityCard } from '../../components/ActivityCard.tsx';
+// biome-ignore lint/correctness/noUnusedImports: CollectionPageLayout is used in JSX below
+import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
+import { getAllHotels, getHotelByDomain, getMediaUrl, getTranslatedContent } from '../../lib/directus.js';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  console.log('🏢 Generating static paths for experiences pages...');
+
+  try {
+    const hotels = await getAllHotels();
+    const paths = [];
+
+    for (const hotel of hotels) {
+      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
+
+      // Extract subdomain from full domain (e.g., "baberrih" from "baberrih.ma")
+      const subdomain = hotel.domain.split('.')[0];
+
+      paths.push({
+        params: {
+          hotel: subdomain,
+        },
+        props: {
+          hotel,
+          hotelSubdomain: subdomain,
+          defaultLanguage: hotel.default_language || 'en-US',
+          defaultCurrency: hotel.default_currency || 'USD',
+        },
+      });
+    }
+
+    console.log(`✅ Generated ${paths.length} experiences page paths`);
+    return paths;
+  } catch (error) {
+    console.error('❌ Error generating experiences static paths:', error);
+    return [];
+  }
+}
+
+const {
+  hotel: hotelData,
+  hotelSubdomain,
+  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
+  defaultLanguage,
+  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is part of the data structure for future use
+  defaultCurrency,
+} = Astro.props;
+
+// Get current language (default to English for now)
+const currentLanguage = defaultLanguage || 'en-US';
+
+// Get hotel data with experiences
+const fullHotel = await getHotelByDomain(hotelData.domain);
+
+if (!fullHotel) {
+  throw new Error(`Hotel not found for domain: ${hotelData.domain}`);
+}
+
+// Process hotel data with translations
+const hotel = {
+  id: fullHotel.id,
+  name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
+  description: getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
+  domain: fullHotel.domain,
+  default_currency: fullHotel.default_currency || defaultCurrency,
+
+  // Analytics
+  analytics: fullHotel.analytics || {},
+
+  // Chatwoot
+  chatwoot_website_token: fullHotel.chatwoot_website_token,
+
+  // Theme data from Directus
+  theme: fullHotel.theme || {},
+  logo: fullHotel.logo || null,
+
+  // Contact information
+  contact_email: fullHotel.contact_email || null,
+  contact_phone_calls: fullHotel.contact_phone_calls || null,
+  contact_phone_messages: fullHotel.contact_phone_messages || null,
+  location: fullHotel.location || null,
+
+  // Related data with translations - focus on activities (experiences) for this page
+  activities: fullHotel.activities?.map((activity) => getTranslatedContent(activity, currentLanguage)) || [],
+
+  // Other related data
+  chatwoot_accounts: fullHotel.chatwoot_accounts || [],
+};
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { label: 'Home', href: `/${hotelSubdomain}` },
+  { label: 'Experiences' },
+];
+
+console.log(
+  `✅ Experiences page loaded: ${hotel.name} (${hotel.activities?.length || 0} activities)`
+);
+---
+
+<CollectionPageLayout
+  title={`Experiences - ${hotel.name}`}
+  description={`Discover unique experiences at ${hotel.name}. From adventure activities to cultural tours, create unforgettable memories during your stay.`}
+  pageTitle="Our Experiences"
+  pageDescription="Discover unique experiences designed to create unforgettable memories. From adventure activities to cultural tours, we offer something special for every guest."
+  hotel={hotel}
+  hotelSubdomain={hotelSubdomain}
+  hotelDomain={hotel.domain}
+  items={hotel.activities || []}
+  itemType="experiences"
+  breadcrumbItems={breadcrumbItems}
+  ctaTitle="Ready for Your Next Adventure?"
+  ctaDescription={`Book your stay at ${hotel.name} and unlock access to all our exclusive experiences and activities.`}
+  ctaPrimaryText="Book Now"
+  ctaPrimaryHref={`/${hotelSubdomain}/book`}
+  ctaSecondaryText="Explore More"
+  ctaSecondaryHref={`/${hotelSubdomain}`}
+  gridId="experiencesGrid"
+>
+  <Fragment slot="items">
+    {hotel.activities?.map((activity, index) => {
+      const imageUrl = activity.main_photo ? getMediaUrl(activity.main_photo.id, { width: 800, height: 450, quality: 95 }) : '';
+      const videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
+
+      // Create slug from activity name
+      const activitySlug = activity.name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      console.log(`🎥 Activity ${activity.name}: has video = ${!!activity.main_video}, videoUrl = ${videoUrl}`);
+
+      return (
+        <ActivityCard
+          key={activity.id || index}
+          name={activity.name}
+          description={activity.description}
+          maxParticipants={activity.max_participants}
+          ageRestriction={activity.age_restriction}
+          equipmentProvided={activity.equipment_provided}
+          operatingHours={activity.operating_hours}
+          defaultCurrency={defaultCurrency}
+          imageUrl={imageUrl}
+          videoUrl={videoUrl}
+          isLast={index === hotel.activities.length - 1}
+          isOdd={hotel.activities.length % 2 !== 0}
+          hotelSlug={hotelSubdomain}
+          activitySlug={activitySlug}
+          client:load
+        />
+      );
+    })}
+  </Fragment>
+</CollectionPageLayout>

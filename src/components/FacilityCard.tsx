@@ -99,25 +99,21 @@ export const FacilityCard = component$<FacilityCardProps>(
                 preload="none"
               />
             )}
-            <div class="top-4 right-4 z-10 absolute">
-              <div class="bg-accent/80 backdrop-blur-sm border border-accent-content/20 font-semibold badge badge-accent badge-lg">
-                {facilityType || 'Facility'}
-              </div>
-            </div>
+
           </figure>
         )}
 
         <div class="p-6 card-body">
-          <h3 class="mb-3 font-head text-primary text-xl card-title">{name}</h3>
+          <h3 class="mb-3 font-primary text-primary text-xl card-title">{name}</h3>
 
           <p class="mb-4 text-sm text-base-content/70 line-clamp-3 leading-relaxed">
             {description}
           </p>
 
-          <div class="flex flex-wrap gap-2 mb-6">
+          <div class="flex flex-wrap gap-4 mb-6 text-sm text-base-content/70">
             {capacity && (
-              <div class="badge-outline badge badge-sm">
-                <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex items-center">
+                <svg class="mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <title>Capacity icon</title>
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>

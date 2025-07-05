@@ -113,25 +113,21 @@ export const RoomCard = component$<RoomCardProps>(
                 preload="none"
               />
             )}
-            <div class="top-4 right-4 z-10 absolute">
-              <div class="bg-primary/80 backdrop-blur-sm border border-primary-content/20 font-semibold badge badge-primary badge-lg">
-                {bedConfiguration || 'Room'}
-              </div>
-            </div>
+
           </figure>
         )}
 
         <div class="p-6 card-body">
-          <h3 class="mb-3 font-head text-primary text-xl card-title">{name}</h3>
+          <h3 class="mb-3 font-primary text-primary text-xl card-title">{name}</h3>
 
           <p class="mb-4 text-sm text-base-content/70 line-clamp-3 leading-relaxed">
             {description}
           </p>
 
-          <div class="flex flex-wrap gap-2 mb-6">
+          <div class="flex flex-wrap gap-4 mb-6 text-sm text-base-content/70">
             {sizeSqm && (
-              <div class="badge-outline badge badge-sm">
-                <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex items-center">
+                <svg class="mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <title>Room size icon</title>
                   <path
                     fill-rule="evenodd"

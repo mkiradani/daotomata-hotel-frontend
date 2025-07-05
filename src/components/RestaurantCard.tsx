@@ -69,7 +69,7 @@ export const RestaurantCard = component$<RestaurantCardProps>(
         )}
 
         <div class="p-6 card-body">
-          <h3 class="mb-3 font-head text-primary text-xl card-title">{name}</h3>
+          <h3 class="mb-3 font-primary text-primary text-xl card-title">{name}</h3>
 
           <p class="mb-4 text-sm text-base-content/70 line-clamp-3 leading-relaxed">
             {description}

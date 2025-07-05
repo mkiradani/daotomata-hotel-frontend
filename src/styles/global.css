@@ -1,16 +1,10 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* Multitenant theme variables - loaded dynamically per hotel */
-:root {
-  --c-primary: #174972;
-  --c-secondary: #dfa73f;
-  --c-accent: #ececec;
-  --c-neutral: #ffffff;
-  --font-body: "Playfair Display";
-  --font-head: "Inter";
-  --font-mono: "JetBrains Mono";
-}
+/* Import custom themes */
+@import "./themes.css";
+
+/* Fonts are now defined per theme in themes.css */
 
 /* Custom hotel styles with DaisyUI and theme variables */
 .hotel-hero {
@@ -23,31 +17,24 @@
 
 .hotel-btn {
   @apply btn btn-primary;
-  background-color: var(--accent, var(--c-accent));
-  border-color: var(--accent, var(--c-accent));
 }
 
 .hotel-btn:hover {
   opacity: 0.9;
 }
 
-/* Typography with theme fonts */
-.font-body {
-  font-family: var(--font-body), serif;
+/* DRY Theme System - Typography utility classes for the 3 standard fonts */
+.font-primary {
+  font-family: var(--font-primary);
+  font-weight: var(--font-primary-weight, 400);
 }
 
-.font-heading {
-  font-family: var(--font-head), sans-serif;
+.font-secondary {
+  font-family: var(--font-secondary);
+  font-weight: var(--font-secondary-weight, 400);
 }
 
 .font-mono {
-  font-family: var(--font-mono), monospace;
-}
-
-/* DaisyUI theme overrides for multitenant */
-[data-theme] {
-  --p: var(--c-primary);
-  --s: var(--c-secondary);
-  --a: var(--c-accent);
-  --n: var(--c-neutral);
+  font-family: var(--font-mono);
+  font-weight: var(--font-mono-weight, 400);
 }

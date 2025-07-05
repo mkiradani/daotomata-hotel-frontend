@@ -2,12 +2,23 @@
 // biome-ignore lint/correctness/noUnusedImports: getMediaUrl is used in JSX below
 import { getMediaUrl } from '../lib/directus.js';
 
+interface HotelInfo {
+  id: number;
+  location: string;
+  logo?: {
+    id: string;
+    filename_disk: string;
+    title: string;
+  };
+}
+
 export interface Props {
   hotelName: string;
   hotelDomain: string;
   currentPath?: string;
   themeConfig?: Record<string, unknown>;
   hotelLogo?: Record<string, unknown> | null;
+  hotelInfo?: HotelInfo | null;
 }
 
 const {
@@ -19,10 +30,15 @@ const {
   themeConfig = {},
   // biome-ignore lint/correctness/noUnusedVariables: hotelLogo is used in JSX below
   hotelLogo = null,
+  // biome-ignore lint/correctness/noUnusedVariables: hotelInfo is used in JSX below
+  hotelInfo = null,
 } = Astro.props;
 
 // Extract subdomain from full domain (e.g., "baberrih" from "baberrih.daotomata.io")
 const hotelSubdomain = hotelDomain.split('.')[0];
+
+// Prioritize hotel_info logo over original hotel logo
+const priorityLogo = hotelInfo?.logo || hotelLogo;
 
 // Navigation items based on Baberrih's real structure
 const _navItems = [
@@ -34,274 +50,76 @@ const _navItems = [
   { name: 'Contact', href: `/${hotelSubdomain}/contact` },
 ];
 
-// Extract theme configuration
-const _colors = themeConfig?.colors || {};
-const _typography = themeConfig?.typography || {};
-const components = themeConfig?.components || {};
-const _header = components.header || {};
-const _navigation = components.navigation || {};
+// Theme configuration is handled automatically by DaisyUI via data-theme
 ---
 
-<nav class="hotel-navbar" id="navbar">
-  <div class="navbar-container">
-    <!-- Logo/Brand -->
-    <div class="navbar-brand">
-      <a href={`/${hotelSubdomain}`} class="brand-link">
-        {hotelLogo && hotelLogo.id ? (
-          <img
-            src={getMediaUrl(hotelLogo.id, { height: 40, quality: 90 })}
-            alt={hotelLogo.title || hotelName}
-            class="brand-logo"
-          />
-        ) : (
-          <span class="brand-text">{hotelName}</span>
-        )}
-      </a>
-    </div>
-
+<!-- DaisyUI Navbar with automatic theme support -->
+<div class="top-0 z-50 sticky bg-base-100 border-b border-base-300 navbar" id="navbar">
+  <div class="navbar-start">
     <!-- Mobile menu button -->
-    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-    </button>
-
-    <!-- Navigation Links -->
-    <div class="navbar-menu" id="navbar-menu">
-      <ul class="navbar-nav">
+    <div class="lg:hidden dropdown">
+      <div tabindex="0" role="button" class="btn btn-ghost" id="mobile-menu-btn" aria-label="Toggle menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </div>
+      <ul tabindex="0" class="z-[1] bg-base-100 shadow mt-3 p-2 border border-base-300 rounded-box w-52 menu menu-sm dropdown-content">
         {_navItems.map(item => (
-          <li class="nav-item">
+          <li>
             <a
               href={item.href}
-              class={`nav-link ${currentPath === item.href ? 'active' : ''}`}
-              aria-label={item.name}
+              class={`font-primary ${currentPath === item.href ? 'active text-primary bg-primary/10' : 'text-base-content hover:text-primary'}`}
             >
-              <span class="nav-text">{item.name}</span>
+              {item.name}
             </a>
           </li>
         ))}
+        <li class="mt-2">
+          <a href={`/${hotelSubdomain}/book`} class="btn btn-primary btn-sm">
+            Book Now
+          </a>
+        </li>
       </ul>
-
-      <!-- CTA Button -->
-      <div class="navbar-cta">
-        <a href={`/${hotelSubdomain}/book`} class="btn btn-primary">
-          Book Now
-        </a>
-      </div>
     </div>
+
+    <!-- Logo/Brand -->
+    <a href={`/${hotelSubdomain}`} class="hover:bg-primary/10 font-primary font-bold text-primary text-xl btn btn-ghost">
+      {priorityLogo && priorityLogo.id ? (
+        <img
+          src={getMediaUrl(priorityLogo.id, { height: 40, quality: 90 })}
+          alt={priorityLogo.title || hotelName}
+          class="w-auto h-8"
+        />
+      ) : (
+        <span>{hotelName}</span>
+      )}
+    </a>
   </div>
-</nav>
 
-<style define:vars={{
-  headerBg: _header.backgroundColor || _colors.background || '#FFFFFF',
-  headerText: _header.textColor || _colors.text || '#2C2416',
-  navHover: _navigation.hoverColor || _colors.primary || '#8B7355',
-  primaryColor: _colors.primary || '#8B7355',
-  secondaryColor: _colors.secondary || '#A0956B',
-  fontHeading: _typography.fontHead || 'Montserrat',
-  fontBody: _typography.fontBody || 'Montserrat',
-  borderColor: _colors.primary || '#8B7355'
-}}>
-  .hotel-navbar {
-    background-color: var(--headerBg);
-    border-bottom: 1px solid color-mix(in srgb, var(--borderColor) 20%, transparent);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    transition: all 0.3s ease;
-  }
+  <!-- Desktop Navigation -->
+  <div class="hidden lg:flex navbar-center">
+    <ul class="gap-1 px-1 menu menu-horizontal">
+      {_navItems.map(item => (
+        <li>
+          <a
+            href={item.href}
+            class={`font-primary font-medium ${currentPath === item.href ? 'active text-primary bg-primary/10' : 'text-base-content hover:text-primary hover:bg-primary/5'}`}
+          >
+            {item.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
 
-  .navbar-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 80px;
-  }
+  <!-- CTA Button -->
+  <div class="navbar-end">
+    <a href={`/${hotelSubdomain}/book`} class="font-primary btn btn-primary">
+      Book Now
+    </a>
+  </div>
+</div>
 
-  .navbar-brand .brand-link {
-    text-decoration: none;
-    color: var(--headerText);
-    font-family: var(--fontHeading), sans-serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    transition: color 0.3s ease;
-  }
+<!-- No custom CSS needed - DaisyUI handles all styling automatically -->
 
-  .navbar-brand .brand-link:hover {
-    color: var(--navHover);
-  }
-
-  .brand-logo {
-    height: 40px;
-    width: auto;
-    object-fit: contain;
-    transition: opacity 0.3s ease;
-  }
-
-  .brand-logo:hover {
-    opacity: 0.8;
-  }
-
-  .mobile-menu-btn {
-    display: none;
-    flex-direction: column;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    gap: 0.25rem;
-  }
-
-  .hamburger-line {
-    width: 24px;
-    height: 2px;
-    background-color: var(--headerText);
-    transition: all 0.3s ease;
-  }
-
-  .navbar-menu {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .navbar-nav {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    gap: 1.5rem;
-    align-items: center;
-  }
-
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-    color: var(--headerText);
-    font-family: var(--fontBody), sans-serif;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    position: relative;
-  }
-
-  .nav-link:hover {
-    color: var(--navHover);
-    background-color: color-mix(in srgb, var(--primaryColor) 10%, transparent);
-  }
-
-  .nav-link.active {
-    color: var(--primaryColor);
-    background-color: color-mix(in srgb, var(--primaryColor) 15%, transparent);
-  }
-
-  .nav-icon {
-    font-size: 1rem;
-  }
-
-  .nav-text {
-    font-size: 0.95rem;
-  }
-
-
-
-  /* Mobile Styles */
-  @media (max-width: 768px) {
-    .mobile-menu-btn {
-      display: flex;
-    }
-
-    .navbar-menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background-color: var(--headerBg);
-      border-top: 1px solid color-mix(in srgb, var(--borderColor) 20%, transparent);
-      flex-direction: column;
-      gap: 0;
-      padding: 1rem;
-      transform: translateY(-100%);
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .navbar-menu.active {
-      transform: translateY(0);
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .navbar-nav {
-      flex-direction: column;
-      width: 100%;
-      gap: 0;
-    }
-
-    .nav-item {
-      width: 100%;
-    }
-
-    .nav-link {
-      width: 100%;
-      justify-content: flex-start;
-      padding: 1rem;
-      border-radius: 0;
-      border-bottom: 1px solid color-mix(in srgb, var(--borderColor) 20%, transparent);
-    }
-
-    .navbar-cta {
-      width: 100%;
-      margin-top: 1rem;
-    }
-
-    .navbar-cta .btn {
-      width: 100%;
-    }
-  }
-
-  /* Scroll effect */
-  .hotel-navbar.scrolled {
-    background-color: color-mix(in srgb, var(--headerBg) 95%, transparent);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 20px color-mix(in srgb, var(--primaryColor) 10%, transparent);
-  }
-</style>
-
-<script>
-  // Mobile menu toggle
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const navbarMenu = document.getElementById('navbar-menu');
-  
-  if (mobileMenuBtn && navbarMenu) {
-    mobileMenuBtn.addEventListener('click', () => {
-      navbarMenu.classList.toggle('active');
-    });
-  }
-
-  // Scroll effect
-  const navbar = document.getElementById('navbar');
-  if (navbar) {
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    });
-  }
-
-  // Close mobile menu when clicking outside
-  document.addEventListener('click', (e) => {
-    if (navbarMenu && !navbar?.contains(e.target as Node)) {
-      navbarMenu.classList.remove('active');
-    }
-  });
-</script>
+<!-- DaisyUI dropdown handles mobile menu automatically - no custom JavaScript needed -->

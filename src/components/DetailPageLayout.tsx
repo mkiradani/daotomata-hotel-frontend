@@ -405,13 +405,10 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
         {/* Hero Section */}
         <section class="relative h-96 overflow-hidden">
           <img src={imageUrl} alt={title} class="absolute inset-0 w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-black/40"></div>
+          <div class="absolute inset-0 bg-neutral/40"></div>
           <div class="z-10 relative flex items-end h-full">
             <div class="mx-auto px-4 pb-12 w-full max-w-7xl">
-              <h1 class="mb-4 font-head font-bold text-white text-5xl">{title}</h1>
-              <div class="bg-accent/80 backdrop-blur-sm border border-accent-content/20 font-semibold badge badge-accent badge-lg">
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </div>
+              <h1 class="mb-4 font-primary font-bold text-neutral-content text-5xl">{title}</h1>
             </div>
           </div>
         </section>
@@ -423,10 +420,10 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               {/* Main Content */}
               <div class="space-y-8 lg:col-span-2">
                 <div>
-                  <h2 class="mb-6 font-head font-bold text-3xl">
+                  <h2 class="mb-6 font-primary font-bold text-3xl">
                     About This {type.charAt(0).toUpperCase() + type.slice(1)}
                   </h2>
-                  <div class="font-body text-base-content/80 text-lg leading-relaxed">
+                  <div class="font-secondary text-base-content/80 text-lg leading-relaxed">
                     {description}
                   </div>
                 </div>
@@ -434,7 +431,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 {/* Gallery */}
                 {galleryImages.length > 0 && (
                   <div>
-                    <h3 class="mb-6 font-head font-bold text-2xl">Gallery</h3>
+                    <h3 class="mb-6 font-primary font-bold text-2xl">Gallery</h3>
 
                     {/* Custom Slideshow without scroll */}
                     <div class="relative bg-base-200 mb-4 rounded-lg w-full aspect-[16/10] overflow-hidden">
@@ -470,14 +467,14 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                           <button
                             type="button"
                             onClick$={prevSlide}
-                            class="bg-black/50 hover:bg-black/70 border-none text-white btn btn-circle btn-sm"
+                            class="bg-neutral/50 hover:bg-neutral/70 border-none text-neutral-content btn btn-circle btn-sm"
                           >
                             ❮
                           </button>
                           <button
                             type="button"
                             onClick$={nextSlide}
-                            class="bg-black/50 hover:bg-black/70 border-none text-white btn btn-circle btn-sm"
+                            class="bg-neutral/50 hover:bg-neutral/70 border-none text-neutral-content btn btn-circle btn-sm"
                           >
                             ❯
                           </button>
@@ -485,7 +482,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                       )}
 
                       {/* Counter */}
-                      <div class="top-4 right-4 absolute bg-black/70 px-3 py-1 rounded text-white text-sm">
+                      <div class="top-4 right-4 absolute bg-neutral/70 px-3 py-1 rounded text-neutral-content text-sm">
                         {currentSlide.value + 1} / {galleryImages.length}
                       </div>
                     </div>
@@ -518,9 +515,9 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                             />
                           )}
                           {media.type === 'video' && (
-                            <div class="absolute inset-0 flex justify-center items-center bg-black/30">
+                            <div class="absolute inset-0 flex justify-center items-center bg-neutral/30">
                               <svg
-                                class="w-4 h-4 text-white"
+                                class="w-4 h-4 text-neutral-content"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >

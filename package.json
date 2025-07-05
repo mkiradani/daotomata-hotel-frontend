@@ -4,17 +4,18 @@
   "description": "Astro frontend with Qwik islands for hotel websites",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "pnpm run generate:themes && astro dev",
+    "build": "pnpm run generate:themes && astro build",
     "preview": "astro preview",
     "test": "vitest",
     "test:e2e": "playwright test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "clean": "rm -rf dist .astro",
+    "clean": "rm -rf dist .astro src/generated",
     "astro": "astro",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate:themes": "node scripts/generate-themes.js"
   },
   "dependencies": {
     "@astrojs/vercel": "^5.0.0",

@@ -260,6 +260,8 @@ export async function getHotelByDomain(domain) {
               'calories',
               'allergens',
               'is_available',
+              'price',
+              'is_featured',
               'main_photo.id',
               'main_photo.filename_disk',
               'main_photo.title',
@@ -276,7 +278,7 @@ export async function getHotelByDomain(domain) {
       facilities: facilities || [],
       galleries: galleries || [],
       hero_media: heroMedia || [],
-      restaurant: restaurant || [],
+      restaurant: restaurant && restaurant.length > 0 ? restaurant[0] : null,
       dishes: dishes || [],
     };
   } catch (error) {
@@ -451,4 +453,73 @@ export function getTranslatedContent(item, language = 'en-US', fallbackLanguage 
   }
 
   return item;
+}
+
+/**
+ * Get contact methods for a hotel
+ */
+export async function getContactMethodsByHotelId(hotelId) {
+  try {
+    const contactMethods = await directus.request(
+      readItems('contact_methods', {
+        filter: { hotel_id: { _eq: hotelId } },
+        fields: [
+          'id',
+          'contact_type',
+          'contact_identifier',
+          'name',
+        ],
+      })
+    );
+    return contactMethods || [];
+  } catch (error) {
+    console.error('❌ Error fetching contact methods:', error);
+    return [];
+  }
+}
+
+/**
+ * Get hotel info for a hotel
+ */
+export async function getHotelInfoByHotelId(hotelId) {
+  try {
+    const hotelInfo = await directus.request(
+      readItems('hotel_info', {
+        filter: { hotel_id: { _eq: hotelId } },
+        fields: [
+          'id',
+          'location',
+          'logo.id',
+          'logo.filename_disk',
+          'logo.title',
+        ],
+      })
+    );
+    return hotelInfo?.[0] || null;
+  } catch (error) {
+    console.error('❌ Error fetching hotel info:', error);
+    return null;
+  }
+}
+
+/**
+ * Get social profiles for a hotel
+ */
+export async function getSocialProfilesByHotelId(hotelId) {
+  try {
+    const socialProfiles = await directus.request(
+      readItems('social_profiles', {
+        filter: { hotel_id: { _eq: hotelId } },
+        fields: [
+          'id',
+          'social_platform',
+          'social_url',
+        ],
+      })
+    );
+    return socialProfiles || [];
+  } catch (error) {
+    console.error('❌ Error fetching social profiles:', error);
+    return [];
+  }
 }

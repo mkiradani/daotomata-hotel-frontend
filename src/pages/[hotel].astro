@@ -113,133 +113,16 @@ const hotel = {
   hero_media: hotelData.hero_media || [],
 };
 
-// Generate theme CSS from Directus theme data
-const themeConfig = hotel.theme || {};
-const _hotelLogo = hotel.logo || null;
-const colors = themeConfig.colors || {};
-const typography = themeConfig.typography || {};
-const layout = themeConfig.layout || {};
-const components = themeConfig.components || {};
-
-// Generate DaisyUI theme name based on hotel
+// Simple theme name extraction - no dynamic CSS generation needed
 const hotelSlug = hotel.domain.split('.')[0];
-const themeName = `${hotelSlug}-theme`;
-
-const _themeCSS = `
-  /* DaisyUI Custom Theme for ${hotel.name} */
-  [data-theme="${themeName}"] {
-    color-scheme: light;
-
-    /* DaisyUI Color Variables */
-    --color-primary: ${colors.primary || '#174972'};
-    --color-primary-content: ${components.buttons?.primaryText || '#ffffff'};
-    --color-secondary: ${colors.secondary || '#dfa73f'};
-    --color-secondary-content: ${components.buttons?.secondaryText || '#ffffff'};
-    --color-accent: ${colors.accent || '#ececec'};
-    --color-accent-content: ${colors.text || '#2c3e50'};
-    --color-neutral: ${colors.text || '#2c3e50'};
-    --color-neutral-content: ${colors.background || '#ffffff'};
-    --color-base-100: ${colors.background || '#ffffff'};
-    --color-base-200: ${colors.surface || '#f8f9fa'};
-    --color-base-300: ${components.cards?.borderColor || '#e8f4fd'};
-    --color-base-content: ${colors.text || '#2c3e50'};
-    --color-info: ${colors.primary || '#174972'};
-    --color-info-content: ${components.buttons?.primaryText || '#ffffff'};
-    --color-success: ${colors.success || '#27ae60'};
-    --color-success-content: #ffffff;
-    --color-warning: ${colors.warning || '#f39c12'};
-    --color-warning-content: #ffffff;
-    --color-error: ${colors.error || '#e74c3c'};
-    --color-error-content: #ffffff;
-
-    /* DaisyUI Border Radius Variables */
-    --radius-box: ${layout.borderRadius || '8px'};
-    --radius-field: ${layout.borderRadius || '8px'};
-    --radius-selector: ${layout.borderRadius || '8px'};
-
-    /* Custom Typography Variables */
-    --font-family: ${typography.fontBody || 'Inter, sans-serif'};
-    --font-heading: ${typography.fontHead || 'Inter, sans-serif'};
-    --font-detail: ${typography.fontDetail || 'Inter, serif'};
-  }
-
-  body {
-    font-family: var(--font-family);
-    background-color: var(--c-background);
-    color: var(--c-text);
-  }
-
-  .hotel-hero {
-    color: var(--hero-text-color);
-    text-align: center;
-    position: relative;
-    background-color: red;
-    /* Remove background and padding to let video/image show properly */
-  }
+const themeName = hotel.theme?.name || `${hotelSlug}-theme`;
 
 
 
-  .font-head {
-    font-family: var(--font-heading);
-    font-weight: var(--font-weight-light);
-  }
-
-  .font-detail {
-    font-family: var(--font-detail);
-    font-style: italic;
-  }
-
-
-
-  /* Hero Video/Image - Full Screen */
-  .parallax-video,
-  .parallax-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    object-position: center center;
-  }
-
-  /* Hero Section Responsive */
-  .hotel-hero h1 {
-    font-size: clamp(2.5rem, 8vw, 4rem);
-    line-height: 1.1;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  }
-
-  .hotel-hero p {
-    font-size: clamp(1rem, 3vw, 1.25rem);
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-  }
-
-
-
-  .container {
-    max-width: var(--max-width);
-  }
-
-  /* Enhanced card styles */
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .badge-lg {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.75rem;
-  }
-
-
-`;
-
-// Get hero media
+// Get hero media and hotel logo
 const _heroPhoto = hotel.hero_media?.[0]?.main_photo;
 const _heroVideo = hotel.hero_media?.[0]?.main_video;
+const _hotelLogo = hotel.logo;
 
 console.log(
   `✅ Hotel loaded: ${hotel.name} (${hotel.rooms?.length || 0} rooms, ${hotel.activities?.length || 0} activities, ${hotel.facilities?.length || 0} facilities)`
@@ -280,7 +163,7 @@ console.log(
   {hotel.rooms && hotel.rooms.length > 0 && (
     <section class="px-4 py-20">
       <div class="mx-auto max-w-7xl">
-        <h2 class="mb-16 font-head font-bold text-primary text-4xl text-center">
+        <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
           Our Rooms
         </h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
@@ -324,7 +207,7 @@ console.log(
   {hotel.activities && hotel.activities.length > 0 && (
     <section class="bg-base-200 px-4 py-20">
       <div class="mx-auto max-w-7xl">
-        <h2 class="mb-16 font-head font-bold text-primary text-4xl text-center">
+        <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
           Activities & Experiences
         </h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
@@ -366,7 +249,7 @@ console.log(
   {hotel.facilities && hotel.facilities.length > 0 && (
     <section class="px-4 py-20">
       <div class="mx-auto max-w-7xl">
-        <h2 class="mb-16 font-head font-bold text-primary text-4xl text-center">
+        <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
           Our Facilities
         </h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
@@ -407,7 +290,7 @@ console.log(
   <!-- Footer -->
   <footer class="bg-primary px-4 py-12 text-primary-content">
     <div class="mx-auto max-w-7xl text-white text-center">
-      <h3 class="mb-4 font-head font-bold text-2xl">{hotel.name}</h3>
+      <h3 class="mb-4 font-primary font-bold text-2xl">{hotel.name}</h3>
       <p class="opacity-90 mb-4">Dynamic Multitenant Architecture - Domain: {hotelDomain}</p>
       <p class="opacity-75 text-sm">
         Languages: {availableLanguages.join(', ')} | Currencies: {availableCurrencies.join(', ')}

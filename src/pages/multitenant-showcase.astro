@@ -7,20 +7,20 @@ console.log(`🏨 Found ${hotels.length} hotels for showcase`);
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="maisondemo-theme">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daotomata Hotels - Multitenant Showcase</title>
   <link rel="stylesheet" href="/src/styles/global.css">
 </head>
-<body>
-  <div class="container">
+<body class="bg-base-100 min-h-screen">
+  <div class="mx-auto px-4 py-8 container">
     <!-- Header -->
-    <div class="header">
-      <h1>Daotomata Hotels</h1>
-      <p>Multitenant Hotel Management Platform</p>
-      <p>Choose a hotel to explore our dynamic theming and content system</p>
+    <div class="mb-12 text-center">
+      <h1 class="mb-4 font-primary font-bold text-primary text-4xl">Daotomata Hotels</h1>
+      <p class="mb-2 font-secondary text-base-content/80 text-xl">Multitenant Hotel Management Platform</p>
+      <p class="font-primary text-base-content/60">Choose a hotel to explore our dynamic theming and content system</p>
     </div>
 
       <!-- Hotels Grid -->
@@ -31,7 +31,7 @@ console.log(`🏨 Found ${hotels.length} hotels for showcase`);
           const isBaberrih = subdomain === 'baberrih';
           
           return (
-            <div class="bg-white shadow-lg hover:shadow-xl rounded-xl overflow-hidden transition-shadow duration-300">
+            <div class="bg-base-100 shadow-lg hover:shadow-xl border hover:border-primary border-base-300 rounded-xl overflow-hidden transition-all duration-300 card">
               <!-- Hotel Header -->
               <div class={`h-32 bg-gradient-to-r ${
                 isDemo ? 'from-emerald-400 to-cyan-400' : 

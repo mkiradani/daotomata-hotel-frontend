@@ -3,9 +3,12 @@
 import ChatwootWidget from '../components/ChatwootWidget.astro';
 // biome-ignore lint/correctness/noUnusedImports: Navbar is used in JSX below
 import Navbar from '../components/Navbar.astro';
-import { getMediaUrl } from '../lib/directus.js';
-import { generateThemeCSS, getThemeName } from '../lib/theme.js';
+// biome-ignore lint/correctness/noUnusedImports: Footer is used in JSX below
+import { Footer } from '../components/Footer.tsx';
+import { getMediaUrl, getSocialProfilesByHotelId, getHotelInfoByHotelId } from '../lib/directus.js';
 import '../styles/global.css';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export interface Props {
   title: string;
@@ -15,6 +18,7 @@ export interface Props {
   pixelId?: string;
   hotel?: Record<string, unknown>; // Hotel data for automatic theme generation
   hotelSubdomain?: string; // For theme naming
+  hotelDomain?: string; // Hotel domain for navbar links
   // Legacy props for backward compatibility
   themeCSS?: string;
   themeName?: string;
@@ -37,6 +41,7 @@ const {
   pixelId,
   hotel,
   hotelSubdomain,
+  hotelDomain,
   // Legacy props for backward compatibility
   themeCSS: legacyThemeCSS,
   themeName: legacyThemeName,
@@ -48,39 +53,26 @@ const {
   showNavbar = true,
 } = Astro.props;
 
-// Auto-generate theme from hotel data or use legacy props
-let themeCSS: string | undefined,
-  themeName: string | undefined,
+// Static theme application for static pages
+let themeName: string | undefined,
   themeConfig: Record<string, unknown> | undefined,
   hotelLogo: Record<string, unknown> | null | undefined;
 
 if (hotel && hotelSubdomain) {
-  // Generate theme automatically from hotel data
-  console.log('🎨 Layout.astro - Auto-generating theme for:', hotelSubdomain);
-  console.log('🎨 Hotel data received:', {
-    name: hotel.name,
-    domain: hotel.domain,
-    hasTheme: !!hotel.theme,
-    themeKeys: hotel.theme ? Object.keys(hotel.theme) : [],
-    hasLogo: !!hotel.logo,
-    logoId: hotel.logo?.id,
-  });
+  // Apply static theme name from Directus
+  console.log('🎨 Layout.astro - Applying static theme for:', hotelSubdomain);
 
-  themeCSS = generateThemeCSS(hotel, hotelSubdomain);
-  themeName = getThemeName(hotelSubdomain);
+  themeName = hotel.theme?.name || `${hotelSubdomain}-theme`;
   themeConfig = hotel.theme || {};
   hotelLogo = hotel.logo || null;
 
-  console.log('🎨 Generated theme:', {
+  console.log('🎨 Applied static theme:', {
     themeName,
-    themeConfigKeys: Object.keys(themeConfig),
-    cssLength: themeCSS?.length || 0,
     hotelLogoId: hotelLogo?.id,
   });
 } else {
   // Use legacy props for backward compatibility
   console.log('🎨 Layout.astro - Using legacy theme props');
-  themeCSS = legacyThemeCSS;
   themeName = legacyThemeName;
   themeConfig = legacyThemeConfig;
   hotelLogo = legacyHotelLogo;
@@ -96,6 +88,56 @@ const _favicon16Url = hotelLogo?.id
 const _appleIconUrl = hotelLogo?.id
   ? getMediaUrl(hotelLogo.id, { width: 180, height: 180, quality: 90, format: 'png' })
   : '/favicon.svg';
+
+// Load dynamic Google Fonts from generated configuration
+let googleFontsURL = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'; // fallback
+let hotelFonts = {
+  primary: 'Inter',
+  secondary: 'Playfair Display',
+  mono: 'JetBrains Mono',
+  detail: 'Inter',
+  weights: {
+    primary: '400',
+    secondary: '400',
+    mono: '400',
+    detail: '400'
+  }
+};
+
+try {
+  const fontsConfigPath = join(process.cwd(), 'src/generated/fonts-config.json');
+  const fontsConfig = JSON.parse(readFileSync(fontsConfigPath, 'utf8'));
+
+  if (hotel?.name && fontsConfig.hotels[hotel.name]) {
+    googleFontsURL = fontsConfig.hotels[hotel.name].googleFontsURL;
+    hotelFonts = {
+      ...fontsConfig.hotels[hotel.name].fonts,
+      weights: fontsConfig.hotels[hotel.name].weights
+    };
+    console.log(`🔤 Loading dynamic fonts for ${hotel.name}:`, googleFontsURL);
+    console.log(`🔤 Font configuration:`, hotelFonts);
+  } else {
+    console.log('🔤 Using fallback fonts - hotel not found in fonts config');
+  }
+} catch (error) {
+  console.warn('⚠️ Could not load fonts config, using fallback fonts:', error.message);
+}
+
+// Load social profiles and hotel info for the hotel
+let socialProfiles = [];
+let hotelInfo = null;
+if (hotel?.id) {
+  try {
+    [socialProfiles, hotelInfo] = await Promise.all([
+      getSocialProfilesByHotelId(hotel.id),
+      getHotelInfoByHotelId(hotel.id)
+    ]);
+    console.log(`📱 Loaded ${socialProfiles.length} social profiles for hotel ${hotel.id}`);
+    console.log(`🏨 Loaded hotel info for hotel ${hotel.id}:`, hotelInfo?.location || 'No additional info');
+  } catch (error) {
+    console.warn('⚠️ Could not load social profiles or hotel info:', error.message);
+  }
+}
 ---
 
 <!doctype html>
@@ -121,16 +163,13 @@ const _appleIconUrl = hotelLogo?.id
     
 
     
-    <!-- Dynamic theme CSS -->
-    {themeCSS && (
-      <style set:html={themeCSS} />
-    )}
-    
-    <!-- Google Fonts -->
+    <!-- No dynamic CSS needed - DaisyUI handles themes automatically via data-theme -->
+
+    <!-- Dynamic Google Fonts loaded from generated configuration -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Poppins:wght@300;400;500;700&family=Montserrat:wght@300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap"
+      href={googleFontsURL}
       rel="stylesheet"
     />
     
@@ -172,10 +211,11 @@ const _appleIconUrl = hotelLogo?.id
     {showNavbar && (
       <Navbar
         hotelName={hotelName}
-        hotelDomain={domain || 'demo.localhost'}
+        hotelDomain={hotelDomain || domain || 'demo.localhost'}
         currentPath={Astro.url.pathname}
         themeConfig={themeConfig}
         hotelLogo={hotelLogo}
+        hotelInfo={hotelInfo}
       />
     )}
 
@@ -184,19 +224,55 @@ const _appleIconUrl = hotelLogo?.id
       <slot />
     </main>
 
+    <!-- Footer -->
+    {hotel && hotelSubdomain && (
+      <Footer
+        hotelName={hotelName}
+        hotelSlug={hotelSubdomain}
+        contactEmail={hotel.contact_email}
+        contactPhoneCalls={hotel.contact_phone_calls}
+        contactPhoneMessages={hotel.contact_phone_messages}
+        location={hotel.location}
+        socialProfiles={socialProfiles}
+        hotelInfo={hotelInfo}
+        client:load
+      />
+    )}
+
     <!-- Auto-inject Chatwoot Widget with automatic domain detection -->
     <ChatwootWidget />
   </body>
 </html>
 
-<style>
-  html {
-    font-family: var(--font-family, 'Inter', sans-serif);
+<style define:vars={{
+  fontPrimary: `"${hotelFonts.primary}", sans-serif`,
+  fontSecondary: `"${hotelFonts.secondary}", serif`,
+  fontMono: `"${hotelFonts.mono}", monospace`,
+  fontDetail: `"${hotelFonts.detail}", serif`,
+  fontPrimaryWeight: hotelFonts.weights?.primary || '400',
+  fontSecondaryWeight: hotelFonts.weights?.secondary || '400',
+  fontMonoWeight: hotelFonts.weights?.mono || '400',
+  fontDetailWeight: hotelFonts.weights?.detail || '400'
+}}>
+  :root {
+    --font-primary: var(--fontPrimary);
+    --font-secondary: var(--fontSecondary);
+    --font-mono: var(--fontMono);
+    --font-detail: var(--fontDetail);
+    --font-primary-weight: var(--fontPrimaryWeight);
+    --font-secondary-weight: var(--fontSecondaryWeight);
+    --font-mono-weight: var(--fontMonoWeight);
+    --font-detail-weight: var(--fontDetailWeight);
   }
-  
+
+  html {
+    font-family: var(--font-primary);
+  }
+
   body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    font-family: var(--font-primary);
   }
 </style>

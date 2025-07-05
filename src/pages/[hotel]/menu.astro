@@ -1,0 +1,267 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Breadcrumb } from '../../components/Breadcrumb';
+import { DishCard } from '../../components/DishCard';
+import { getAllHotels, getHotelByDomain, getMediaUrl, getTranslatedContent, getDishesByHotelId } from '../../lib/directus.js';
+
+export async function getStaticPaths() {
+  console.log('🍽️ Generating static paths for menu pages...');
+
+  try {
+    const hotels = await getAllHotels();
+    const paths = [];
+
+    for (const hotel of hotels) {
+      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
+
+      // Extract subdomain from full domain (e.g., "baberrih" from "baberrih.ma")
+      const subdomain = hotel.domain.split('.')[0];
+
+      paths.push({
+        params: {
+          hotel: subdomain,
+        },
+        props: {
+          hotel,
+          hotelSubdomain: subdomain,
+          defaultLanguage: hotel.default_language || 'en-US',
+          defaultCurrency: hotel.default_currency || 'USD',
+        },
+      });
+    }
+
+    console.log(`✅ Generated ${paths.length} menu page paths`);
+    return paths;
+  } catch (error) {
+    console.error('❌ Error generating menu static paths:', error);
+    return [];
+  }
+}
+
+const {
+  hotel: hotelData,
+  hotelSubdomain,
+  defaultLanguage,
+  defaultCurrency,
+} = Astro.props;
+
+// Get current language (default to English for now)
+const currentLanguage = defaultLanguage || 'en-US';
+
+// Get hotel data with restaurant
+const fullHotel = await getHotelByDomain(hotelData.domain);
+
+if (!fullHotel) {
+  throw new Error(`Hotel not found for domain: ${hotelData.domain}`);
+}
+
+// Process hotel data with translations
+const hotel = {
+  id: fullHotel.id,
+  name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
+  description: getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
+  domain: fullHotel.domain,
+  default_currency: fullHotel.default_currency || defaultCurrency,
+
+  // Analytics
+  analytics: fullHotel.analytics || {},
+
+  // Chatwoot
+  chatwoot_website_token: fullHotel.chatwoot_website_token,
+
+  // Theme data from Directus
+  theme: fullHotel.theme || {},
+  logo: fullHotel.logo || null,
+
+  // Contact information
+  contact_email: fullHotel.contact_email || null,
+  contact_phone_calls: fullHotel.contact_phone_calls || null,
+  contact_phone_messages: fullHotel.contact_phone_messages || null,
+  location: fullHotel.location || null,
+
+  // Restaurant data
+  restaurant: fullHotel.restaurant || null,
+
+  // Other related data
+  chatwoot_accounts: fullHotel.chatwoot_accounts || [],
+};
+
+// Get restaurant data
+const restaurant = hotel.restaurant;
+if (!restaurant) {
+  throw new Error(`Restaurant not found for hotel: ${hotel.name}`);
+}
+
+// Process restaurant with translations
+const restaurantData = {
+  id: restaurant.id,
+  name: getTranslatedContent(restaurant, currentLanguage).name || restaurant.name,
+  description: getTranslatedContent(restaurant, currentLanguage).description || restaurant.description,
+  main_photo: restaurant.main_photo,
+  main_video: restaurant.main_video,
+};
+
+// Get all dishes for the hotel
+const allDishes = await getDishesByHotelId(hotel.id);
+const dishes = allDishes.map((dish) => getTranslatedContent(dish, currentLanguage));
+
+console.log(
+  `✅ Menu page loaded: ${hotel.name} - ${restaurantData.name} (${dishes.length} total dishes)`
+);
+
+// Breadcrumb data
+const breadcrumbs = [
+  { label: hotel.name, href: `/${hotelSubdomain}` },
+  { label: 'Restaurant', href: `/${hotelSubdomain}/restaurant` },
+  { label: 'Menu', href: `/${hotelSubdomain}/menu` },
+];
+
+// Hero media URLs
+const heroImageUrl = restaurantData.main_photo ? getMediaUrl(restaurantData.main_photo.id, { width: 1920, height: 1080, quality: 95 }) : '';
+const heroVideoUrl = restaurantData.main_video ? getMediaUrl(restaurantData.main_video.id) : undefined;
+
+// Group dishes by category if they have one
+const groupedDishes = dishes.reduce((acc, dish) => {
+  const category = dish.category || 'Main Menu';
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(dish);
+  return acc;
+}, {});
+
+console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).length} categories, ${dishes.length} total dishes`);
+---
+
+<Layout
+  title={`Menu - ${restaurantData.name} - ${hotel.name}`}
+  description={`Explore our complete menu at ${restaurantData.name}. ${restaurantData.description}`}
+  hotel={hotel}
+  hotelSubdomain={hotelSubdomain}
+  hotelDomain={hotel.domain}
+>
+  <!-- Breadcrumb Navigation -->
+  <Breadcrumb items={breadcrumbs} client:load />
+
+  <!-- Hero Section -->
+  <section class="relative h-[50vh] min-h-[300px] overflow-hidden">
+    {heroVideoUrl ? (
+      <video
+        src={heroVideoUrl}
+        poster={heroImageUrl}
+        autoplay
+        muted
+        loop
+        playsInline
+        class="absolute inset-0 w-full h-full object-cover"
+      >
+        <track kind="captions" src="" label="No captions available" default />
+      </video>
+    ) : (
+      <img
+        src={heroImageUrl}
+        alt={restaurantData.name}
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+    )}
+    
+    <!-- Hero Overlay -->
+    <div class="absolute inset-0 bg-neutral/50"></div>
+    
+    <!-- Hero Content -->
+    <div class="z-10 relative flex justify-center items-center h-full">
+      <div class="mx-auto px-4 max-w-3xl text-neutral-content text-center">
+        <h1 class="mb-4 font-primary font-bold text-3xl md:text-4xl">
+          Our Menu
+        </h1>
+        <p class="font-secondary text-lg">
+          {restaurantData.name}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu Sections -->
+  {dishes && dishes.length > 0 ? (
+    <section class="bg-base-100 py-16">
+      <div class="mx-auto px-4 container">
+        {Object.entries(groupedDishes).map(([category, categoryDishes]) => (
+          <div class="mb-16 last:mb-0">
+            <div class="mb-12 text-center">
+              <h2 class="mb-4 font-primary font-bold text-primary text-2xl md:text-3xl">
+                {category}
+              </h2>
+              {category !== 'Main Menu' && (
+                <div class="mx-auto w-24 h-1 bg-primary/20 rounded"></div>
+              )}
+            </div>
+
+            <!-- Dishes Grid -->
+            <div class="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-8">
+              {categoryDishes.map((dish, index) => {
+                const imageUrl = dish.main_photo ? getMediaUrl(dish.main_photo.id, { width: 600, height: 400, quality: 95 }) : '';
+                
+                return (
+                  <DishCard
+                    key={dish.id || index}
+                    name={dish.name}
+                    description={dish.description}
+                    price={dish.price}
+                    ingredients={dish.ingredients || []}
+                    dietary_options={dish.dietary_options || []}
+                    allergens={dish.allergens || []}
+                    calories={dish.calories}
+                    imageUrl={imageUrl}
+                    isAvailable={dish.is_available}
+                    defaultCurrency={hotel.default_currency}
+                    isLast={index === categoryDishes.length - 1}
+                    isOdd={categoryDishes.length % 2 !== 0}
+                    client:load
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <!-- CTA -->
+        <div class="text-center">
+          <a
+            href={`/${hotelSubdomain}/restaurant`}
+            class="font-secondary btn btn-outline btn-lg"
+          >
+            Back to Restaurant
+          </a>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <!-- No Dishes Message -->
+    <section class="bg-base-100 py-16">
+      <div class="mx-auto px-4 text-center container">
+        <h2 class="mb-4 font-primary font-bold text-primary text-3xl md:text-4xl">
+          Menu Coming Soon
+        </h2>
+        <p class="mx-auto mb-8 max-w-2xl font-secondary text-base-content/80 text-lg">
+          We're working on updating our menu. Please contact us directly for current offerings.
+        </p>
+        
+        <!-- CTAs -->
+        <div class="flex sm:flex-row flex-col justify-center gap-4">
+          <a
+            href={`/${hotelSubdomain}/restaurant`}
+            class="font-secondary btn btn-primary btn-lg"
+          >
+            Back to Restaurant
+          </a>
+          <a
+            href={`/${hotelSubdomain}/contact`}
+            class="btn-outline font-secondary btn btn-lg"
+          >
+            Contact Us
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>

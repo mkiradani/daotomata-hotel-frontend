@@ -1,0 +1,49 @@
+{
+  "generated": "2025-07-05T18:44:58.913Z",
+  "hotels": {
+    "Maison Demo": {
+      "themeName": "maisondemo-theme",
+      "fonts": {
+        "primary": "Fraunces",
+        "secondary": "Tenor Sans",
+        "mono": "IBM Plex Mono",
+        "detail": "Italiana"
+      },
+      "weights": {
+        "primary": "300",
+        "secondary": "400",
+        "mono": "400",
+        "detail": "400"
+      },
+      "styles": {
+        "primary": "normal",
+        "secondary": "normal",
+        "mono": "normal",
+        "detail": "normal"
+      },
+      "googleFontsURL": "https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=Tenor+Sans:wght@400&family=IBM+Plex+Mono:wght@400&family=Italiana:wght@400&display=swap"
+    },
+    "Baberrih Hotel": {
+      "themeName": "baberrih-theme",
+      "fonts": {
+        "primary": "Cormorant Garamond",
+        "secondary": "Cardo",
+        "mono": "IBM Plex Mono",
+        "detail": "Spectral"
+      },
+      "weights": {
+        "primary": "300",
+        "secondary": "400",
+        "mono": "400",
+        "detail": "400"
+      },
+      "styles": {
+        "primary": "normal",
+        "secondary": "normal",
+        "mono": "normal",
+        "detail": "italic"
+      },
+      "googleFontsURL": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&family=Cardo:wght@400&family=IBM+Plex+Mono:wght@400&family=Spectral:ital,wght@1,400&display=swap"
+    }
+  }
+}
