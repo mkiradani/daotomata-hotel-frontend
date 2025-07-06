@@ -5,17 +5,27 @@
 import type { APIRoute } from 'astro';
 import { getBookingService } from '../../../lib/booking-engines';
 import { getHotelByDomain } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { hotelDomain, checkIn, checkOut, adults, children, rooms, roomTypes } = body;
+    const {
+      hotelDomain,
+      checkIn,
+      checkOut,
+      adults,
+      children,
+      rooms,
+      roomTypes,
+    } = body;
 
     // Validate required fields
     if (!hotelDomain || !checkIn || !checkOut || !adults) {
       return new Response(
         JSON.stringify({
-          error: 'Missing required fields: hotelDomain, checkIn, checkOut, adults',
+          error:
+            'Missing required fields: hotelDomain, checkIn, checkOut, adults',
         }),
         {
           status: 400,
@@ -25,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Get hotel data
-    const hotel = await getHotelByDomain(hotelDomain);
+    const hotel = await getHotelByDomain(hotelDomain) as Hotel | null;
     if (!hotel) {
       return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
@@ -47,7 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
       roomTypes: roomTypes || undefined,
     };
 
-    const rates = await bookingService.getRates(hotel.id, query);
+    const rates = await bookingService.getRates(String(hotel.id), query);
 
     return new Response(
       JSON.stringify({

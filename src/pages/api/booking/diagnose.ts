@@ -5,14 +5,16 @@
 import type { APIRoute } from 'astro';
 import { hasBookingCapabilities } from '../../../lib/booking-engines';
 import { getHotelByDomain } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
 
 export const GET: APIRoute = async ({ url }) => {
   try {
     const searchParams = new URL(url).searchParams;
-    const hotelDomain = searchParams.get('hotelDomain') || new URL(url).hostname;
+    const hotelDomain =
+      searchParams.get('hotelDomain') || new URL(url).hostname;
 
     // Get hotel data
-    const hotel = await getHotelByDomain(hotelDomain);
+    const hotel = await getHotelByDomain(hotelDomain) as Hotel | null;
     if (!hotel) {
       return new Response(
         JSON.stringify({
@@ -41,9 +43,13 @@ export const GET: APIRoute = async ({ url }) => {
         hasBookingCapabilities,
         cloudbeds: {
           client_id: hotel.cloudbeds_client_id ? '✅ Configured' : '❌ Missing',
-          client_secret: hotel.cloudbeds_client_secret ? '✅ Configured' : '❌ Missing',
+          client_secret: hotel.cloudbeds_client_secret
+            ? '✅ Configured'
+            : '❌ Missing',
           api_key: hotel.cloudbeds_api_key ? '✅ Configured' : '❌ Missing',
-          property_id: hotel.cloudbeds_property_id ? '✅ Configured' : '❌ Missing',
+          property_id: hotel.cloudbeds_property_id
+            ? '✅ Configured'
+            : '❌ Missing',
         },
         other: {
           default_currency: hotel.default_currency || 'Not set',
@@ -52,46 +58,62 @@ export const GET: APIRoute = async ({ url }) => {
       },
       rooms: {
         total: hotel.rooms ? hotel.rooms.length : 0,
-        withPmsId: hotel.rooms ? hotel.rooms.filter((r) => r.pms_room_id).length : 0,
-        withoutPmsId: hotel.rooms ? hotel.rooms.filter((r) => !r.pms_room_id).length : 0,
+        withPmsId: hotel.rooms
+          ? hotel.rooms.filter(r => (r as any).pms_room_id).length
+          : 0,
+        withoutPmsId: hotel.rooms
+          ? hotel.rooms.filter(r => !(r as any).pms_room_id).length
+          : 0,
         list: hotel.rooms
-          ? hotel.rooms.map((room) => ({
-              id: room.id,
-              name: room.name,
-              room_type: room.room_type,
-              pms_room_id: room.pms_room_id || 'Not set',
-              max_occupancy: room.max_occupancy,
-            }))
+          ? hotel.rooms.map(room => ({
+            id: room.id,
+            name: room.name,
+            room_type: (room as any).room_type,
+            pms_room_id: (room as any).pms_room_id || 'Not set',
+            max_occupancy: (room as any).max_occupancy,
+          }))
           : [],
       },
-      issues: [],
-      recommendations: [],
+      issues: [] as string[],
+      recommendations: [] as string[],
     };
 
     // Identify issues and recommendations
     if (!hasCapabilities) {
-      diagnostics.issues.push('Hotel does not have booking capabilities configured');
-      diagnostics.recommendations.push('Configure Cloudbeds credentials in Directus');
+      diagnostics.issues.push(
+        'Hotel does not have booking capabilities configured'
+      );
+      diagnostics.recommendations.push(
+        'Configure Cloudbeds credentials in Directus'
+      );
     }
 
     if (!hotel.cloudbeds_client_id) {
       diagnostics.issues.push('Missing Cloudbeds Client ID');
-      diagnostics.recommendations.push('Set cloudbeds_client_id field in hotels table');
+      diagnostics.recommendations.push(
+        'Set cloudbeds_client_id field in hotels table'
+      );
     }
 
     if (!hotel.cloudbeds_client_secret) {
       diagnostics.issues.push('Missing Cloudbeds Client Secret');
-      diagnostics.recommendations.push('Set cloudbeds_client_secret field in hotels table');
+      diagnostics.recommendations.push(
+        'Set cloudbeds_client_secret field in hotels table'
+      );
     }
 
     if (!hotel.cloudbeds_api_key) {
       diagnostics.issues.push('Missing Cloudbeds API Key');
-      diagnostics.recommendations.push('Set cloudbeds_api_key field in hotels table');
+      diagnostics.recommendations.push(
+        'Set cloudbeds_api_key field in hotels table'
+      );
     }
 
     if (!hotel.cloudbeds_property_id) {
       diagnostics.issues.push('Missing Cloudbeds Property ID');
-      diagnostics.recommendations.push('Set cloudbeds_property_id field in hotels table');
+      diagnostics.recommendations.push(
+        'Set cloudbeds_property_id field in hotels table'
+      );
     }
 
     if (hotel.rooms && hotel.rooms.length === 0) {
@@ -100,8 +122,12 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     if (hotel.rooms && diagnostics.rooms.withoutPmsId > 0) {
-      diagnostics.issues.push(`${diagnostics.rooms.withoutPmsId} rooms missing PMS room IDs`);
-      diagnostics.recommendations.push('Use the room sync functionality to map room IDs');
+      diagnostics.issues.push(
+        `${diagnostics.rooms.withoutPmsId} rooms missing PMS room IDs`
+      );
+      diagnostics.recommendations.push(
+        'Use the room sync functionality to map room IDs'
+      );
     }
 
     // Test connection if all credentials are present
@@ -109,7 +135,9 @@ export const GET: APIRoute = async ({ url }) => {
     if (hasCapabilities) {
       try {
         // Try to initialize the booking service
-        const { getBookingService } = await import('../../../lib/booking-engines');
+        const { getBookingService } = await import(
+          '../../../lib/booking-engines'
+        );
         const bookingService = getBookingService();
         await bookingService.initializeForHotel(hotel);
 
@@ -123,7 +151,9 @@ export const GET: APIRoute = async ({ url }) => {
           message: error instanceof Error ? error.message : 'Unknown error',
           error: error instanceof Error ? error.stack : undefined,
         };
-        diagnostics.issues.push(`Connection test failed: ${connectionTest.message}`);
+        diagnostics.issues.push(
+          `Connection test failed: ${connectionTest.message}`
+        );
       }
     }
 
@@ -162,10 +192,13 @@ export const POST: APIRoute = async ({ request }) => {
     const { hotelDomain, action } = body;
 
     if (!hotelDomain) {
-      return new Response(JSON.stringify({ error: 'Missing hotelDomain parameter' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Missing hotelDomain parameter' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Get hotel data
@@ -182,7 +215,9 @@ export const POST: APIRoute = async ({ request }) => {
     switch (action) {
       case 'test-connection':
         try {
-          const { getBookingService } = await import('../../../lib/booking-engines');
+          const { getBookingService } = await import(
+            '../../../lib/booking-engines'
+          );
           const bookingService = getBookingService();
           await bookingService.initializeForHotel(hotel);
 
@@ -202,7 +237,9 @@ export const POST: APIRoute = async ({ request }) => {
 
       case 'test-availability':
         try {
-          const { getBookingService } = await import('../../../lib/booking-engines');
+          const { getBookingService } = await import(
+            '../../../lib/booking-engines'
+          );
           const bookingService = getBookingService();
           await bookingService.initializeForHotel(hotel);
 
@@ -212,11 +249,14 @@ export const POST: APIRoute = async ({ request }) => {
           const dayAfter = new Date();
           dayAfter.setDate(dayAfter.getDate() + 2);
 
-          const availability = await bookingService.checkAvailability(hotel.id, {
-            checkIn: tomorrow.toISOString().split('T')[0],
-            checkOut: dayAfter.toISOString().split('T')[0],
-            adults: 2,
-          });
+          const availability = await bookingService.checkAvailability(
+            String((hotel as any).id),
+            {
+              checkIn: tomorrow.toISOString().split('T')[0],
+              checkOut: dayAfter.toISOString().split('T')[0],
+              adults: 2,
+            }
+          );
 
           result = {
             status: 'success',

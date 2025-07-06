@@ -6,6 +6,7 @@ import type { APIRoute } from 'astro';
 import type { BookingRequest } from '../../../lib/booking-engines';
 import { getBookingService } from '../../../lib/booking-engines';
 import { getHotelByDomain } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -14,14 +15,17 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Validate required fields
     if (!hotelDomain) {
-      return new Response(JSON.stringify({ error: 'Missing required field: hotelDomain' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Missing required field: hotelDomain' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Get hotel data
-    const hotel = await getHotelByDomain(hotelDomain);
+    const hotel = await getHotelByDomain(hotelDomain) as Hotel | null;
     if (!hotel) {
       return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
@@ -34,7 +38,9 @@ export const POST: APIRoute = async ({ request }) => {
     await bookingService.initializeForHotel(hotel);
 
     // Validate booking request
-    const validation = bookingService.validateBookingRequest(bookingData as BookingRequest);
+    const validation = bookingService.validateBookingRequest(
+      bookingData as BookingRequest
+    );
     if (!validation.valid) {
       return new Response(
         JSON.stringify({
@@ -50,7 +56,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Create booking
     const bookingResponse = await bookingService.createBooking(
-      hotel.id,
+      String(hotel.id),
       bookingData as BookingRequest
     );
 

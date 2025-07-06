@@ -5,6 +5,7 @@
 import type { APIRoute } from 'astro';
 import { getBookingService } from '../../../lib/booking-engines';
 import { getHotelByDomain } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
 
 export const GET: APIRoute = async ({ url }) => {
   try {
@@ -12,14 +13,17 @@ export const GET: APIRoute = async ({ url }) => {
     const hotelDomain = searchParams.get('hotelDomain');
 
     if (!hotelDomain) {
-      return new Response(JSON.stringify({ error: 'Missing required parameter: hotelDomain' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameter: hotelDomain' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Get hotel data with rooms
-    const hotel = await getHotelByDomain(hotelDomain);
+    const hotel = await getHotelByDomain(hotelDomain) as Hotel | null;
     if (!hotel) {
       return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
@@ -32,8 +36,8 @@ export const GET: APIRoute = async ({ url }) => {
     await bookingService.initializeForHotel(hotel);
 
     // Get mapping statistics
-    const mappingStats = bookingService.getRoomMappingStats(hotel.id);
-    const mappedRooms = bookingService.getMappedRooms(hotel.id);
+    const mappingStats = bookingService.getRoomMappingStats(String(hotel.id));
+    const mappedRooms = bookingService.getMappedRooms(String(hotel.id));
 
     return new Response(
       JSON.stringify({
@@ -46,12 +50,12 @@ export const GET: APIRoute = async ({ url }) => {
         mappingStats,
         mappedRooms,
         directusRooms:
-          hotel.rooms?.map((room) => ({
+          hotel.rooms?.map(room => ({
             id: room.id,
             name: room.name,
-            room_type: room.room_type,
-            max_occupancy: room.max_occupancy,
-            pms_room_id: room.pms_room_id,
+            room_type: (room as any).room_type,
+            max_occupancy: (room as any).max_occupancy,
+            pms_room_id: (room as any).pms_room_id,
           })) || [],
       }),
       {

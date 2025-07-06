@@ -13,18 +13,19 @@ interface ContactFormData {
 export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse request body
-    const body = await request.json() as ContactFormData;
-    
+    const body = (await request.json()) as ContactFormData;
+
     // Validate required fields
     if (!body.hotel_id || !body.email || !body.message) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: 'Missing required fields: hotel_id, email, and message are required' 
+        JSON.stringify({
+          success: false,
+          message:
+            'Missing required fields: hotel_id, email, and message are required',
         }),
-        { 
+        {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -33,13 +34,13 @@ export const POST: APIRoute = async ({ request }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(body.email)) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: 'Invalid email format' 
+        JSON.stringify({
+          success: false,
+          message: 'Invalid email format',
         }),
-        { 
+        {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -47,13 +48,13 @@ export const POST: APIRoute = async ({ request }) => {
     // Validate message length
     if (body.message.length < 10) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: 'Message must be at least 10 characters long' 
+        JSON.stringify({
+          success: false,
+          message: 'Message must be at least 10 characters long',
         }),
-        { 
+        {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -79,7 +80,7 @@ export const POST: APIRoute = async ({ request }) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DIRECTUS_TOKEN}`,
+        Authorization: `Bearer ${DIRECTUS_TOKEN}`,
       },
       body: JSON.stringify(contactData),
     });
@@ -91,15 +92,15 @@ export const POST: APIRoute = async ({ request }) => {
         statusText: directusResponse.statusText,
         error: errorText,
       });
-      
+
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: 'Failed to submit contact form. Please try again later.' 
+        JSON.stringify({
+          success: false,
+          message: 'Failed to submit contact form. Please try again later.',
         }),
-        { 
+        {
           status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -112,28 +113,27 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: 'Contact form submitted successfully',
-        id: result.data?.id 
+        id: result.data?.id,
       }),
-      { 
+      {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
-
   } catch (error) {
     console.error('❌ Contact form API error:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: 'Internal server error. Please try again later.' 
+      JSON.stringify({
+        success: false,
+        message: 'Internal server error. Please try again later.',
       }),
-      { 
+      {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

@@ -5,6 +5,8 @@
 import type { APIRoute } from 'astro';
 import { getBookingService } from '../../../lib/booking-engines';
 import { getHotelByDomain } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
+import { updateItem } from '@directus/sdk';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -12,14 +14,17 @@ export const POST: APIRoute = async ({ request }) => {
     const { hotelDomain, autoUpdate = false } = body;
 
     if (!hotelDomain) {
-      return new Response(JSON.stringify({ error: 'Missing required parameter: hotelDomain' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameter: hotelDomain' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Get hotel data with rooms
-    const hotel = await getHotelByDomain(hotelDomain);
+    const hotel = await getHotelByDomain(hotelDomain) as Hotel | null;
     if (!hotel) {
       return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
@@ -32,14 +37,17 @@ export const POST: APIRoute = async ({ request }) => {
     await bookingService.initializeForHotel(hotel);
 
     // Get mapping statistics
-    const mappingStats = bookingService.getRoomMappingStats(hotel.id);
-    const mappedRooms = bookingService.getMappedRooms(hotel.id);
+    const mappingStats = bookingService.getRoomMappingStats(String(hotel.id));
+    const mappedRooms = bookingService.getMappedRooms(String(hotel.id));
 
     if (!mappingStats || !mappedRooms) {
-      return new Response(JSON.stringify({ error: 'Failed to get room mapping data' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Failed to get room mapping data' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Prepare sync recommendations
@@ -47,7 +55,9 @@ export const POST: APIRoute = async ({ request }) => {
     const directusRooms = hotel.rooms || [];
 
     for (const mappedRoom of mappedRooms) {
-      const directusRoom = directusRooms.find((r) => r.id === mappedRoom.directusId);
+      const directusRoom = directusRooms.find(
+        r => r.id === mappedRoom.directusId
+      );
 
       if (directusRoom && !directusRoom.cloudbeds_room_id) {
         syncRecommendations.push({
@@ -70,8 +80,7 @@ export const POST: APIRoute = async ({ request }) => {
         for (const recommendation of syncRecommendations) {
           try {
             await directus.request(
-              // @ts-ignore - Directus types
-              directus.updateItem('rooms', recommendation.directusRoomId, {
+              updateItem('rooms', recommendation.directusRoomId, {
                 cloudbeds_room_id: recommendation.suggestedPmsRoomId,
               })
             );
@@ -88,7 +97,10 @@ export const POST: APIRoute = async ({ request }) => {
               roomName: recommendation.directusRoomName,
               cloudbedsRoomId: recommendation.suggestedPmsRoomId,
               status: 'error',
-              error: updateError instanceof Error ? updateError.message : 'Unknown error',
+              error:
+                updateError instanceof Error
+                  ? updateError.message
+                  : 'Unknown error',
             });
           }
         }
@@ -112,8 +124,12 @@ export const POST: APIRoute = async ({ request }) => {
           totalRooms: mappingStats.totalDirectusRooms,
           mappedRooms: mappingStats.mappedRooms,
           roomsNeedingSync: syncRecommendations.length,
-          roomsUpdated: autoUpdate ? updatedRooms.filter((r) => r.status === 'updated').length : 0,
-          roomsWithErrors: autoUpdate ? updatedRooms.filter((r) => r.status === 'error').length : 0,
+          roomsUpdated: autoUpdate
+            ? updatedRooms.filter(r => r.status === 'updated').length
+            : 0,
+          roomsWithErrors: autoUpdate
+            ? updatedRooms.filter(r => r.status === 'error').length
+            : 0,
         },
       }),
       {
@@ -143,10 +159,13 @@ export const GET: APIRoute = async ({ url }) => {
     const hotelDomain = searchParams.get('hotelDomain');
 
     if (!hotelDomain) {
-      return new Response(JSON.stringify({ error: 'Missing required parameter: hotelDomain' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameter: hotelDomain' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Get hotel data with rooms
@@ -163,13 +182,13 @@ export const GET: APIRoute = async ({ url }) => {
     await bookingService.initializeForHotel(hotel);
 
     // Get current sync status
-    const mappingStats = bookingService.getRoomMappingStats(hotel.id);
+    const mappingStats = bookingService.getRoomMappingStats(String((hotel as any).id));
     const directusRooms = hotel.rooms || [];
 
     const syncStatus = {
       totalRooms: directusRooms.length,
-      roomsWithPmsId: directusRooms.filter((r) => r.pms_room_id).length,
-      roomsWithoutPmsId: directusRooms.filter((r) => !r.pms_room_id).length,
+      roomsWithPmsId: directusRooms.filter(r => r.pms_room_id).length,
+      roomsWithoutPmsId: directusRooms.filter(r => !r.pms_room_id).length,
       mappingCoverage: mappingStats
         ? (mappingStats.mappedRooms / mappingStats.totalDirectusRooms) * 100
         : 0,
@@ -179,13 +198,13 @@ export const GET: APIRoute = async ({ url }) => {
       JSON.stringify({
         success: true,
         hotel: {
-          id: hotel.id,
-          name: hotel.name,
-          domain: hotel.domain,
+          id: (hotel as any).id,
+          name: (hotel as any).name,
+          domain: (hotel as any).domain,
         },
         syncStatus,
         mappingStats,
-        rooms: directusRooms.map((room) => ({
+        rooms: directusRooms.map(room => ({
           id: room.id,
           name: room.name,
           room_type: room.room_type,
