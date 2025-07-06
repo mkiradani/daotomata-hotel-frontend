@@ -61,6 +61,7 @@ All commands are run from the root of the project, from a terminal:
 ## ⚙️ Configuration
 
 1. Copy the environment variables:
+
    ```bash
    cp .env.example .env
    ```
@@ -75,11 +76,13 @@ All commands are run from the root of the project, from a terminal:
 This project uses Husky to enforce code quality through Git hooks:
 
 ### Pre-commit Hook
+
 - **Trigger**: Before every commit
 - **Action**: Runs `pnpm build` to ensure code compiles
 - **Purpose**: Prevents committing broken code
 
 ### Pre-push Hook
+
 - **Trigger**: Before every push to remote
 - **Actions**:
   1. Build verification (`pnpm build`)
@@ -88,6 +91,7 @@ This project uses Husky to enforce code quality through Git hooks:
 - **Purpose**: Comprehensive quality check before sharing code
 
 ### Bypassing Hooks (Emergency Only)
+
 ```bash
 # Skip pre-commit (not recommended)
 git commit --no-verify -m "emergency fix"
@@ -120,11 +124,13 @@ pnpm preview
 ## 🏗️ Development
 
 1. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 2. Start the development server:
+
    ```bash
    pnpm dev
    ```
