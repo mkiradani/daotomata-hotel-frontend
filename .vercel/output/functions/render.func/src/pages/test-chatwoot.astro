@@ -1,0 +1,85 @@
+---
+// Test page for Chatwoot widget debugging
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatwoot Test</title>
+  </head>
+  <body>
+    <h1>Chatwoot Widget Test</h1>
+    <p>This page tests the Chatwoot widget with a known working token.</p>
+
+    <script>
+      console.log('🔧 TEST PAGE: Starting Chatwoot test...');
+
+      // Store configuration globally
+      window.chatwootConfig = {
+        websiteToken: 'c1tUUkn7q77JMA7RSGBJGTof',
+        hotelName: 'Baberrih Hotel',
+        baseUrl: 'https://chat.daotomata.io',
+      };
+
+      // Chatwoot Settings
+      window.chatwootSettings = {
+        hideMessageBubble: false,
+        position: 'right',
+        locale: 'es',
+        type: 'standard',
+        darkMode: 'auto',
+        launcherTitle: 'Chat con Baberrih Hotel',
+      };
+
+      console.log('🔧 TEST PAGE: Configuration set:', window.chatwootConfig);
+
+      // Load Chatwoot SDK
+      (function (d, t) {
+        const BASE_URL = window.chatwootConfig.baseUrl;
+        const g = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+        g.src = BASE_URL + '/packs/js/sdk.js';
+        g.defer = true;
+        g.async = true;
+
+        console.log('🔧 TEST PAGE: Loading SDK from:', g.src);
+
+        g.onerror = function () {
+          console.error('❌ TEST PAGE: Failed to load SDK');
+        };
+
+        g.onload = function () {
+          console.log('🔧 TEST PAGE: SDK loaded, initializing...');
+
+          try {
+            window.chatwootSDK.run({
+              websiteToken: window.chatwootConfig.websiteToken,
+              baseUrl: BASE_URL,
+            });
+            console.log('✅ TEST PAGE: Chatwoot initialized');
+          } catch (error) {
+            console.error('❌ TEST PAGE: Error initializing:', error);
+          }
+        };
+
+        s.parentNode.insertBefore(g, s);
+      })(document, 'script');
+
+      // Listen for ready event
+      window.addEventListener('chatwoot:ready', function () {
+        console.log('✅ TEST PAGE: Chatwoot ready event fired');
+
+        setTimeout(function () {
+          const widget = document.querySelector('#chatwoot_live_chat_widget');
+          if (widget) {
+            console.log('✅ TEST PAGE: Widget found in DOM');
+          } else {
+            console.warn('⚠️ TEST PAGE: Widget not found in DOM');
+          }
+        }, 2000);
+      });
+    </script>
+  </body>
+</html>

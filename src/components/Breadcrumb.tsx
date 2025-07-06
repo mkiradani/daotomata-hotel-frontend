@@ -11,6 +11,11 @@ interface BreadcrumbProps {
 }
 
 export const Breadcrumb = component$<BreadcrumbProps>(({ items }) => {
+  // Guard against undefined items
+  if (!items || items.length === 0) {
+    return null;
+  }
+
   return (
     <nav class="bg-base-200/50 px-4 py-3 border-b border-base-300">
       <div class="mx-auto max-w-7xl">

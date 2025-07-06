@@ -1,21 +1,23 @@
 import qwik from "@qwikdev/astro";
 import tailwindcss from "@tailwindcss/vite";
+import vercel from "@astrojs/vercel/serverless";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [qwik()],
+  adapter: vercel(),
   server: {
     host: true,
     port: 4321,
   },
-  // Output configuration for multitenant SSG
-  output: "static",
+  // Output configuration for multitenant SSR (Server-Side Rendering)
+  output: "server",
 
-  // Production site configuration
+  // Production site configuration for wildcard subdomain support
   site:
     process.env.NODE_ENV === "production"
-      ? "https://yourdomain.com"
-      : "http://localhost:4322",
+      ? "https://daotomata.io"
+      : "http://localhost:4321",
 
   vite: {
     plugins: [tailwindcss()],
