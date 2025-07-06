@@ -2,11 +2,11 @@
  * API endpoint for synchronizing PMS room IDs between Directus and Cloudbeds
  */
 
-import type { APIRoute } from 'astro';
-import { getBookingService } from '../../../lib/booking-engines';
-import { getHotelByDomain } from '../../../lib/directus.js';
-import type { Hotel } from '../../../types/hotel.js';
-import { updateItem } from '@directus/sdk';
+import type { APIRoute } from "astro";
+import { getBookingService } from "../../../lib/booking-engines";
+import { getHotelByDomain } from "../../../lib/directus.js";
+import type { Hotel } from "../../../types/hotel.js";
+import { updateItem } from "@directus/sdk";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -15,20 +15,20 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (!hotelDomain) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameter: hotelDomain' }),
+        JSON.stringify({ error: "Missing required parameter: hotelDomain" }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     // Get hotel data with rooms
-    const hotel = await getHotelByDomain(hotelDomain) as Hotel | null;
+    const hotel = (await getHotelByDomain(hotelDomain)) as Hotel | null;
     if (!hotel) {
-      return new Response(JSON.stringify({ error: 'Hotel not found' }), {
+      return new Response(JSON.stringify({ error: "Hotel not found" }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -42,11 +42,11 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (!mappingStats || !mappedRooms) {
       return new Response(
-        JSON.stringify({ error: 'Failed to get room mapping data' }),
+        JSON.stringify({ error: "Failed to get room mapping data" }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -56,7 +56,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     for (const mappedRoom of mappedRooms) {
       const directusRoom = directusRooms.find(
-        r => r.id === mappedRoom.directusId
+        (r) => r.id === mappedRoom.directusId,
       );
 
       if (directusRoom && !directusRoom.cloudbeds_room_id) {
@@ -65,7 +65,7 @@ export const POST: APIRoute = async ({ request }) => {
           directusRoomName: mappedRoom.name,
           suggestedPmsRoomId: mappedRoom.cloudbedsId,
           cloudbedsRoomName: mappedRoom.cloudbedsData.name,
-          confidence: 'high', // Since it's already mapped
+          confidence: "high", // Since it's already mapped
         });
       }
     }
@@ -75,37 +75,37 @@ export const POST: APIRoute = async ({ request }) => {
     if (autoUpdate && syncRecommendations.length > 0) {
       try {
         // Import Directus client
-        const { directus } = await import('../../../lib/directus.js');
+        const { directus } = await import("../../../lib/directus.js");
 
         for (const recommendation of syncRecommendations) {
           try {
             await directus.request(
-              updateItem('rooms', recommendation.directusRoomId, {
+              updateItem("rooms", recommendation.directusRoomId, {
                 cloudbeds_room_id: recommendation.suggestedPmsRoomId,
-              })
+              }),
             );
 
             updatedRooms.push({
               roomId: recommendation.directusRoomId,
               roomName: recommendation.directusRoomName,
               cloudbedsRoomId: recommendation.suggestedPmsRoomId,
-              status: 'updated',
+              status: "updated",
             });
           } catch (updateError) {
             updatedRooms.push({
               roomId: recommendation.directusRoomId,
               roomName: recommendation.directusRoomName,
               cloudbedsRoomId: recommendation.suggestedPmsRoomId,
-              status: 'error',
+              status: "error",
               error:
                 updateError instanceof Error
                   ? updateError.message
-                  : 'Unknown error',
+                  : "Unknown error",
             });
           }
         }
       } catch (error) {
-        console.error('Failed to update rooms:', error);
+        console.error("Failed to update rooms:", error);
       }
     }
 
@@ -125,30 +125,30 @@ export const POST: APIRoute = async ({ request }) => {
           mappedRooms: mappingStats.mappedRooms,
           roomsNeedingSync: syncRecommendations.length,
           roomsUpdated: autoUpdate
-            ? updatedRooms.filter(r => r.status === 'updated').length
+            ? updatedRooms.filter((r) => r.status === "updated").length
             : 0,
           roomsWithErrors: autoUpdate
-            ? updatedRooms.filter(r => r.status === 'error').length
+            ? updatedRooms.filter((r) => r.status === "error").length
             : 0,
         },
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } catch (error) {
-    console.error('Room sync error:', error);
+    console.error("Room sync error:", error);
 
     return new Response(
       JSON.stringify({
-        error: 'Failed to sync room IDs',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to sync room IDs",
+        details: error instanceof Error ? error.message : "Unknown error",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };
@@ -156,24 +156,24 @@ export const POST: APIRoute = async ({ request }) => {
 export const GET: APIRoute = async ({ url }) => {
   try {
     const searchParams = new URL(url).searchParams;
-    const hotelDomain = searchParams.get('hotelDomain');
+    const hotelDomain = searchParams.get("hotelDomain");
 
     if (!hotelDomain) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameter: hotelDomain' }),
+        JSON.stringify({ error: "Missing required parameter: hotelDomain" }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     // Get hotel data with rooms
     const hotel = await getHotelByDomain(hotelDomain);
     if (!hotel) {
-      return new Response(JSON.stringify({ error: 'Hotel not found' }), {
+      return new Response(JSON.stringify({ error: "Hotel not found" }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -182,13 +182,17 @@ export const GET: APIRoute = async ({ url }) => {
     await bookingService.initializeForHotel(hotel);
 
     // Get current sync status
-    const mappingStats = bookingService.getRoomMappingStats(String((hotel as any).id));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hotelData = hotel as any;
+    const mappingStats = bookingService.getRoomMappingStats(
+      String(hotelData.id),
+    );
     const directusRooms = hotel.rooms || [];
 
     const syncStatus = {
       totalRooms: directusRooms.length,
-      roomsWithPmsId: directusRooms.filter(r => r.pms_room_id).length,
-      roomsWithoutPmsId: directusRooms.filter(r => !r.pms_room_id).length,
+      roomsWithPmsId: directusRooms.filter((r) => r.pms_room_id).length,
+      roomsWithoutPmsId: directusRooms.filter((r) => !r.pms_room_id).length,
       mappingCoverage: mappingStats
         ? (mappingStats.mappedRooms / mappingStats.totalDirectusRooms) * 100
         : 0,
@@ -198,13 +202,13 @@ export const GET: APIRoute = async ({ url }) => {
       JSON.stringify({
         success: true,
         hotel: {
-          id: (hotel as any).id,
-          name: (hotel as any).name,
-          domain: (hotel as any).domain,
+          id: hotelData.id,
+          name: hotelData.name,
+          domain: hotelData.domain,
         },
         syncStatus,
         mappingStats,
-        rooms: directusRooms.map(room => ({
+        rooms: directusRooms.map((room) => ({
           id: room.id,
           name: room.name,
           room_type: room.room_type,
@@ -214,21 +218,21 @@ export const GET: APIRoute = async ({ url }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } catch (error) {
-    console.error('Room sync status error:', error);
+    console.error("Room sync status error:", error);
 
     return new Response(
       JSON.stringify({
-        error: 'Failed to get room sync status',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get room sync status",
+        details: error instanceof Error ? error.message : "Unknown error",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };
