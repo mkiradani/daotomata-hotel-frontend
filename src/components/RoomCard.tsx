@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 
 interface RoomCardProps {
   name: string;
@@ -49,15 +49,15 @@ export const RoomCard = component$<RoomCardProps>(
 
       const handleMouseEnter = () => {
         isHovered.value = true;
-        const img = card.querySelector('img') as HTMLImageElement;
-        const video = card.querySelector('video') as HTMLVideoElement;
+        const img = card.querySelector("img") as HTMLImageElement;
+        const video = card.querySelector("video") as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = '0';
+          img.style.opacity = "0";
         }
 
         if (video && videoUrl) {
-          video.style.opacity = '1';
+          video.style.opacity = "1";
           if (!video.src) {
             video.src = videoUrl;
             video.load();
@@ -68,26 +68,26 @@ export const RoomCard = component$<RoomCardProps>(
 
       const handleMouseLeave = () => {
         isHovered.value = false;
-        const img = card.querySelector('img') as HTMLImageElement;
-        const video = card.querySelector('video') as HTMLVideoElement;
+        const img = card.querySelector("img") as HTMLImageElement;
+        const video = card.querySelector("video") as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = '1';
+          img.style.opacity = "1";
         }
 
         if (video) {
-          video.style.opacity = '0';
+          video.style.opacity = "0";
           video.pause();
           video.currentTime = 0;
         }
       };
 
-      card.addEventListener('mouseenter', handleMouseEnter);
-      card.addEventListener('mouseleave', handleMouseLeave);
+      card.addEventListener("mouseenter", handleMouseEnter);
+      card.addEventListener("mouseleave", handleMouseLeave);
 
       return () => {
-        card.removeEventListener('mouseenter', handleMouseEnter);
-        card.removeEventListener('mouseleave', handleMouseLeave);
+        card.removeEventListener("mouseenter", handleMouseEnter);
+        card.removeEventListener("mouseleave", handleMouseLeave);
       };
     });
 
@@ -95,7 +95,7 @@ export const RoomCard = component$<RoomCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? 'md:col-span-2' : ''
+          isOdd && isLast ? "md:col-span-2" : ""
         }`}
       >
         {imageUrl && (
@@ -113,12 +113,13 @@ export const RoomCard = component$<RoomCardProps>(
                 preload="none"
               />
             )}
-
           </figure>
         )}
 
         <div class="p-6 card-body">
-          <h3 class="mb-3 font-primary text-primary text-xl card-title">{name}</h3>
+          <h3 class="mb-3 font-primary text-primary text-xl card-title">
+            {name}
+          </h3>
 
           <p class="mb-4 text-sm text-base-content/70 line-clamp-3 leading-relaxed">
             {description}
@@ -127,7 +128,11 @@ export const RoomCard = component$<RoomCardProps>(
           <div class="flex flex-wrap gap-4 mb-6 text-sm text-base-content/70">
             {sizeSqm && (
               <div class="flex items-center">
-                <svg class="mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  class="mr-1 w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <title>Room size icon</title>
                   <path
                     fill-rule="evenodd"
@@ -142,18 +147,32 @@ export const RoomCard = component$<RoomCardProps>(
 
           <div class="justify-between items-center pt-4 border-t border-base-200 card-actions">
             <div class="text-left">
-              <div class="text-xs text-base-content/50 uppercase tracking-wide">From</div>
+              <div class="text-xs text-base-content/50 uppercase tracking-wide">
+                From
+              </div>
               <div class="font-bold text-primary text-2xl">
-                {defaultCurrency} {basePrice || 'Contact'}
+                {defaultCurrency} {basePrice || "Contact"}
               </div>
             </div>
             <div class="flex gap-2">
-              <button type="button" class="btn btn-primary btn-sm" onClick$={openBookingModal}>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                onClick$={openBookingModal}
+              >
                 Book Now
               </button>
-              <a href={`/${hotelSlug}/rooms/${roomSlug}`} class="btn-outline btn btn-sm">
+              <a
+                href={`/${hotelSlug}/rooms/${roomSlug}`}
+                class="btn-outline btn btn-sm"
+              >
                 Details
-                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  class="ml-1 w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <title>Arrow right icon</title>
                   <path
                     stroke-linecap="round"
@@ -186,7 +205,9 @@ export const RoomCard = component$<RoomCardProps>(
                 <div class="flex justify-between items-center">
                   <div>
                     <h4 class="font-semibold">{name}</h4>
-                    <p class="opacity-70 text-sm">{bedConfiguration || 'Room'}</p>
+                    <p class="opacity-70 text-sm">
+                      {bedConfiguration || "Room"}
+                    </p>
                   </div>
                   <div class="text-right">
                     <div class="font-bold text-primary text-2xl">
@@ -201,13 +222,21 @@ export const RoomCard = component$<RoomCardProps>(
               <div class="py-8 text-center">
                 <p class="mb-4 text-lg">Booking functionality coming soon!</p>
                 <p class="opacity-70 mb-6 text-sm">
-                  We're implementing the full booking system with Cloudbeds integration.
+                  We're implementing the full booking system with Cloudbeds
+                  integration.
                 </p>
                 <div class="flex justify-center gap-2">
-                  <button type="button" class="btn btn-primary" onClick$={closeBookingModal}>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    onClick$={closeBookingModal}
+                  >
                     Contact Reception
                   </button>
-                  <a href={`/${hotelSlug}/rooms/${roomSlug}`} class="btn-outline btn">
+                  <a
+                    href={`/${hotelSlug}/rooms/${roomSlug}`}
+                    class="btn-outline btn"
+                  >
                     View Room Details
                   </a>
                 </div>
@@ -224,5 +253,5 @@ export const RoomCard = component$<RoomCardProps>(
         )}
       </div>
     );
-  }
+  },
 );

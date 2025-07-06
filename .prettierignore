@@ -1,0 +1,24 @@
+# Files with complex script syntax that need manual formatting
+src/components/ChatwootWidget.astro
+src/components/ActivityGrid.astro
+src/components/HotelHeader.astro
+src/components/Navbar.astro
+src/components/RoomGrid.astro
+src/layouts/Layout.astro
+src/pages/multitenant-showcase.astro
+
+# Non-code files
+src/lib/booking-engines/README.md
+
+# Generated files
+src/generated/
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+
+# Build outputs
+public/build/

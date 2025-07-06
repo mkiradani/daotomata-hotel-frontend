@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 
 interface RestaurantCardProps {
   name: string;
@@ -19,16 +19,16 @@ export const RestaurantCard = component$<RestaurantCardProps>(
 
       if (!cardRef.value) return;
 
-      const video = cardRef.value.querySelector('video');
+      const video = cardRef.value.querySelector("video");
       if (!video) return;
 
       if (isHovered.value) {
-        video.style.opacity = '1';
+        video.style.opacity = "1";
         video.play().catch(() => {
           // Video play failed, ignore
         });
       } else {
-        video.style.opacity = '0';
+        video.style.opacity = "0";
         video.pause();
         video.currentTime = 0;
       }
@@ -69,7 +69,9 @@ export const RestaurantCard = component$<RestaurantCardProps>(
         )}
 
         <div class="p-6 card-body">
-          <h3 class="mb-3 font-primary text-primary text-xl card-title">{name}</h3>
+          <h3 class="mb-3 font-primary text-primary text-xl card-title">
+            {name}
+          </h3>
 
           <p class="mb-4 text-sm text-base-content/70 line-clamp-3 leading-relaxed">
             {description}
@@ -77,12 +79,19 @@ export const RestaurantCard = component$<RestaurantCardProps>(
 
           <div class="justify-between items-center pt-4 border-t border-base-200 card-actions">
             <div class="text-left">
-              <div class="text-xs text-base-content/50 uppercase tracking-wide">Dining</div>
+              <div class="text-xs text-base-content/50 uppercase tracking-wide">
+                Dining
+              </div>
               <div class="font-semibold text-primary text-lg">Available</div>
             </div>
             <a href={`/${hotelSlug}/restaurant`} class="btn btn-accent btn-sm">
               View Menu
-              <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                class="ml-1 w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <title>Arrow right icon</title>
                 <path
                   stroke-linecap="round"
@@ -96,5 +105,5 @@ export const RestaurantCard = component$<RestaurantCardProps>(
         </div>
       </div>
     );
-  }
+  },
 );
