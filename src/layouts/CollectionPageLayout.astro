@@ -3,25 +3,46 @@
 import { Breadcrumb } from '../components/Breadcrumb.tsx';
 import Layout from './Layout.astro';
 
+// Define types for better type safety
+interface Hotel {
+  analytics?: {
+    ga4_id?: string;
+    pixel_id?: string;
+  };
+  [key: string]: unknown;
+}
+
+interface CollectionItem {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface MediaOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+}
+
 interface Props {
   // Page metadata
   title: string;
   description: string;
   pageTitle: string;
   pageDescription: string;
-  
+
   // Hotel data
-  hotel: any;
+  hotel: Hotel;
   hotelSubdomain: string;
   hotelDomain: string;
-  
+
   // Collection data
-  items: any[];
+  items: CollectionItem[];
   itemType: 'rooms' | 'facilities' | 'experiences';
-  
+
   // Breadcrumb
   breadcrumbItems: Array<{ label: string; href?: string }>;
-  
+
   // CTA configuration
   ctaTitle: string;
   ctaDescription: string;
@@ -29,7 +50,7 @@ interface Props {
   ctaPrimaryHref: string;
   ctaSecondaryText: string;
   ctaSecondaryHref: string;
-  
+
   // Grid configuration
   gridId: string;
 }
@@ -55,22 +76,23 @@ const {
 } = Astro.props;
 
 // Helper function to create slug from name
-const createSlug = (name: string) => {
-  return name.toLowerCase()
+const _createSlug = (name: string) => {
+  return name
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 };
 
 // Helper function to get media URL
-const getMediaUrl = (id: string, options?: any) => {
+const _getMediaUrl = (id: string, options?: MediaOptions) => {
   const baseUrl = `https://directus.daotomata.io/assets/${id}`;
   if (!options) return baseUrl;
-  
+
   const params = new URLSearchParams();
   if (options.width) params.append('width', options.width.toString());
   if (options.height) params.append('height', options.height.toString());
   if (options.quality) params.append('quality', options.quality.toString());
-  
+
   return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 };
 ---
@@ -96,7 +118,9 @@ const getMediaUrl = (id: string, options?: any) => {
         <h1 class="mb-6 font-primary font-bold text-primary text-5xl">
           {pageTitle}
         </h1>
-        <p class="mx-auto max-w-3xl text-base-content/80 text-xl leading-relaxed">
+        <p
+          class="mx-auto max-w-3xl text-base-content/80 text-xl leading-relaxed"
+        >
           {pageDescription}
         </p>
       </div>
@@ -104,35 +128,46 @@ const getMediaUrl = (id: string, options?: any) => {
   </section>
 
   <!-- Items Grid Section -->
-  {items && items.length > 0 ? (
-    <section class="bg-base-200 px-4 py-16">
-      <div class="mx-auto max-w-7xl container">
-        <!-- Items Grid -->
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2" id={gridId}>
-          <slot name="items" />
-        </div>
-      </div>
-    </section>
-  ) : (
-    <!-- No Items Available -->
-    <section class="bg-base-200 px-4 py-16">
-      <div class="mx-auto max-w-7xl text-center container">
-        <div class="bg-base-100 mx-auto p-8 border border-base-300 rounded-lg max-w-md">
-          <div class="mb-4 text-base-content/50">
-            <svg class="mx-auto w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5" />
-            </svg>
+  {
+    items && items.length > 0 ? (
+      <section class="bg-base-200 px-4 py-16">
+        <div class="mx-auto max-w-7xl container">
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2" id={gridId}>
+            <slot name="items" />
           </div>
-          <h3 class="mb-2 font-primary font-semibold text-primary text-xl">
-            No {itemType} Available
-          </h3>
-          <p class="text-sm text-base-content/70">
-            We're currently updating our {itemType}. Please check back soon or contact us for more information.
-          </p>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    ) : (
+      <section class="bg-base-200 px-4 py-16">
+        <div class="mx-auto max-w-7xl text-center container">
+          <div class="bg-base-100 mx-auto p-8 border border-base-300 rounded-lg max-w-md">
+            <div class="mb-4 text-base-content/50">
+              <svg
+                class="mx-auto w-16 h-16"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5"
+                />
+              </svg>
+            </div>
+            <h3 class="mb-2 font-primary font-semibold text-primary text-xl">
+              No {itemType} Available
+            </h3>
+            <p class="text-sm text-base-content/70">
+              We&apos;re currently updating our {itemType}. Please check back
+              soon or contact us for more information.
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <!-- Call to Action Section -->
   <section class="bg-base-100 px-4 py-16 border-t border-base-300">
@@ -144,16 +179,10 @@ const getMediaUrl = (id: string, options?: any) => {
         {ctaDescription}
       </p>
       <div class="flex sm:flex-row flex-col justify-center gap-4">
-        <a 
-          href={ctaPrimaryHref} 
-          class="btn btn-primary btn-lg"
-        >
+        <a href={ctaPrimaryHref} class="btn btn-primary btn-lg">
           {ctaPrimaryText}
         </a>
-        <a 
-          href={ctaSecondaryHref} 
-          class="btn-outline btn btn-lg"
-        >
+        <a href={ctaSecondaryHref} class="btn-outline btn btn-lg">
           {ctaSecondaryText}
         </a>
       </div>
@@ -161,7 +190,9 @@ const getMediaUrl = (id: string, options?: any) => {
   </section>
 </Layout>
 
-<script define:vars={{ createSlug, getMediaUrl, itemType }}>
+<script
+  define:vars={{ createSlug: _createSlug, getMediaUrl: _getMediaUrl, itemType }}
+>
   // Export helper functions for use in slot content
   window.createSlug = createSlug;
   window.getMediaUrl = getMediaUrl;

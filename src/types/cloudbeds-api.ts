@@ -43,7 +43,7 @@ export interface CloudbedsRoomResponse {
   };
 }
 
-export interface CloudbedsRoomsListResponse extends CloudbedsListResponse<CloudbedsRoomResponse> { }
+export type CloudbedsRoomsListResponse = CloudbedsListResponse<CloudbedsRoomResponse>;
 
 // Availability-related types
 export interface CloudbedsAvailabilityResponse extends CloudbedsBaseResponse {

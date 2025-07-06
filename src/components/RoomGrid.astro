@@ -1,6 +1,5 @@
 ---
 // Auto-generated Room Grid Component
-// biome-ignore lint/correctness/noUnusedVariables: rooms is used in JSX below
 const { rooms } = Astro.props;
 ---
 
@@ -12,7 +11,9 @@ const { rooms } = Astro.props;
           <h3 class="card-title">{room.name_es}</h3>
           <p>{room.description_es}</p>
           <div class="justify-between items-center card-actions">
-            <span class="font-bold text-primary text-2xl">€{room.base_price}</span>
+            <span class="font-bold text-primary text-2xl">
+              €{room.base_price}
+            </span>
             <button class="btn btn-primary">Reservar</button>
           </div>
         </div>

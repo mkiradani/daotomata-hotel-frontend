@@ -1,9 +1,11 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: DetailPageLayout is used in JSX below
 import { DetailPageLayout } from '../../../components/DetailPageLayout.tsx';
-// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
 import Layout from '../../../layouts/Layout.astro';
-import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+} from '../../../lib/directus.js';
 
 export const prerender = true;
 
@@ -59,15 +61,8 @@ export async function getStaticPaths() {
   }
 }
 
-const {
-  room,
-  hotel,
-  hotelSubdomain,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
-  defaultLanguage,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is used in JSX below
-  defaultCurrency,
-} = Astro.props;
+const { room, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } =
+  Astro.props;
 
 // Hotel theme data will be handled globally by Layout.astro
 
@@ -139,7 +134,8 @@ const _availabilityData = {
 
 <Layout
   title={`${room.name} - ${hotel.name}`}
-  description={room.description || `Experience luxury in our ${room.name} at ${hotel.name}`}
+  description={room.description ||
+    `Experience luxury in our ${room.name} at ${hotel.name}`}
   domain={hotel.domain}
   ga4Id={hotel.analytics?.ga4_id}
   pixelId={hotel.analytics?.pixel_id}
@@ -149,7 +145,8 @@ const _availabilityData = {
 >
   <DetailPageLayout
     title={room.name}
-    description={room.description || `Experience luxury and comfort in our ${room.name}.`}
+    description={room.description ||
+      `Experience luxury and comfort in our ${room.name}.`}
     type="room"
     imageUrl={_imageUrl}
     videoUrl={_videoUrl}

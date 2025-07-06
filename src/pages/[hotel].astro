@@ -1,18 +1,12 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: ActivityCard is used in JSX below
 import { ActivityCard } from '../components/ActivityCard.tsx';
-// biome-ignore lint/correctness/noUnusedImports: FacilityCard is used in JSX below
 import { FacilityCard } from '../components/FacilityCard.tsx';
-// biome-ignore lint/correctness/noUnusedImports: HeroSection is used in JSX below
 import { HeroSection } from '../components/HeroSection.tsx';
-// biome-ignore lint/correctness/noUnusedImports: RoomCard is used in JSX below
 import { RoomCard } from '../components/RoomCard.tsx';
-// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
 import Layout from '../layouts/Layout.astro';
 import {
   getAllHotels,
   getHotelByDomain,
-  // biome-ignore lint/correctness/noUnusedImports: getMediaUrl is used multiple times in JSX below
   getMediaUrl,
   getTranslatedContent,
 } from '../lib/directus.js';
@@ -26,10 +20,10 @@ export async function getStaticPaths() {
     const hotels = await getAllHotels();
     console.log(
       `✅ Found ${hotels.length} hotels:`,
-      hotels.map((h) => h.domain)
+      hotels.map(h => h.domain)
     );
 
-    return hotels.map((hotel) => {
+    return hotels.map(hotel => {
       // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
       const subdomain = hotel.domain.split('.')[0];
       return {
@@ -54,21 +48,18 @@ export async function getStaticPaths() {
 
 const { hotel: hotelSubdomain } = Astro.params;
 const {
-  // biome-ignore lint/correctness/noUnusedVariables: hotelId is part of the data structure
   hotelId,
-  // biome-ignore lint/correctness/noUnusedVariables: hotelName is used in JSX below
   hotelName,
   hotelDomain,
   defaultLanguage,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is used in JSX below
   defaultCurrency,
-  // biome-ignore lint/correctness/noUnusedVariables: availableLanguages is used in JSX below
   availableLanguages,
-  // biome-ignore lint/correctness/noUnusedVariables: availableCurrencies is used in JSX below
   availableCurrencies,
 } = Astro.props;
 
-console.log(`🏨 Loading hotel data for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`);
+console.log(
+  `🏨 Loading hotel data for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
+);
 
 // Load complete hotel data from Directus using full domain
 const hotelData = await getHotelByDomain(hotelDomain);
@@ -97,15 +88,25 @@ const hotel = {
   logo: hotelData.logo || null,
 
   // Related data with translations
-  rooms: hotelData.rooms?.map((room) => getTranslatedContent(room, currentLanguage)) || [],
+  rooms:
+    hotelData.rooms?.map(room => getTranslatedContent(room, currentLanguage)) ||
+    [],
   activities:
-    hotelData.activities?.map((activity) => getTranslatedContent(activity, currentLanguage)) || [],
+    hotelData.activities?.map(activity =>
+      getTranslatedContent(activity, currentLanguage)
+    ) || [],
   facilities:
-    hotelData.facilities?.map((facility) => getTranslatedContent(facility, currentLanguage)) || [],
+    hotelData.facilities?.map(facility =>
+      getTranslatedContent(facility, currentLanguage)
+    ) || [],
   galleries:
-    hotelData.galleries?.map((gallery) => getTranslatedContent(gallery, currentLanguage)) || [],
+    hotelData.galleries?.map(gallery =>
+      getTranslatedContent(gallery, currentLanguage)
+    ) || [],
   menu_items:
-    hotelData.menu_items?.map((item) => getTranslatedContent(item, currentLanguage)) || [],
+    hotelData.menu_items?.map(item =>
+      getTranslatedContent(item, currentLanguage)
+    ) || [],
 
   // Other related data
   analytics: hotelData.analytics || null,
@@ -115,9 +116,7 @@ const hotel = {
 
 // Simple theme name extraction - no dynamic CSS generation needed
 const hotelSlug = hotel.domain.split('.')[0];
-const themeName = hotel.theme?.name || `${hotelSlug}-theme`;
-
-
+const _themeName = hotel.theme?.name || `${hotelSlug}-theme`;
 
 // Get hero media and hotel logo
 const _heroPhoto = hotel.hero_media?.[0]?.main_photo;
@@ -140,18 +139,24 @@ console.log(
   showNavbar={true}
 >
   <!-- Hero Section -->
-  {console.log('🖼️ Hero media debug:', {
-    heroPhoto: _heroPhoto,
-    heroPhotoId: _heroPhoto?.id,
-    heroVideo: _heroVideo,
-    heroVideoId: _heroVideo?.id,
-    hotelLogo: _hotelLogo,
-    hotelLogoId: _hotelLogo?.id
-  })}
+  {
+    console.log('🖼️ Hero media debug:', {
+      heroPhoto: _heroPhoto,
+      heroPhotoId: _heroPhoto?.id,
+      heroVideo: _heroVideo,
+      heroVideoId: _heroVideo?.id,
+      hotelLogo: _hotelLogo,
+      hotelLogoId: _hotelLogo?.id,
+    })
+  }
   <HeroSection
     hotelName={hotel.name}
-    heroImageUrl={_heroPhoto ? getMediaUrl(_heroPhoto.id, { width: 1920, height: 1080, quality: 90 }) : undefined}
-    heroVideoUrl={_heroVideo ? getMediaUrl(_heroVideo.id, { quality: 90 }) : undefined}
+    heroImageUrl={_heroPhoto
+      ? getMediaUrl(_heroPhoto.id, { width: 1920, height: 1080, quality: 90 })
+      : undefined}
+    heroVideoUrl={_heroVideo
+      ? getMediaUrl(_heroVideo.id, { quality: 90 })
+      : undefined}
     availableLanguages={availableLanguages}
     availableCurrencies={availableCurrencies}
     currentLanguage={currentLanguage}
@@ -160,146 +165,189 @@ console.log(
   />
 
   <!-- Rooms Section -->
-  {hotel.rooms && hotel.rooms.length > 0 && (
-    <section class="px-4 py-20">
-      <div class="mx-auto max-w-7xl">
-        <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
-          Our Rooms
-        </h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {hotel.rooms.map((room, index) => {
-            const imageUrl = room.main_photo ? getMediaUrl(room.main_photo.id, { width: 800, height: 450, quality: 95 }) : '';
-            const videoUrl = room.main_video ? getMediaUrl(room.main_video.id) : undefined;
+  {
+    hotel.rooms && hotel.rooms.length > 0 && (
+      <section class="px-4 py-20">
+        <div class="mx-auto max-w-7xl">
+          <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
+            Our Rooms
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {hotel.rooms.map((room, index) => {
+              const imageUrl = room.main_photo
+                ? getMediaUrl(room.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                    quality: 95,
+                  })
+                : '';
+              const videoUrl = room.main_video
+                ? getMediaUrl(room.main_video.id)
+                : undefined;
 
-            // Create slug from room name
-            const roomSlug = room.name.toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+              // Create slug from room name
+              const roomSlug = room.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
 
-            console.log(`🎥 Room ${room.name}: has video = ${!!room.main_video}, videoUrl = ${videoUrl}`);
+              console.log(
+                `🎥 Room ${room.name}: has video = ${!!room.main_video}, videoUrl = ${videoUrl}`
+              );
 
-            return (
-              <RoomCard
-                key={room.id || index}
-                name={room.name}
-                description={room.description}
-                roomType={room.room_type}
-                maxOccupancy={room.max_occupancy}
-                sizeSqm={room.size_sqm}
-                basePrice={room.base_price}
-                defaultCurrency={defaultCurrency}
-                imageUrl={imageUrl}
-                videoUrl={videoUrl}
-                isLast={index === hotel.rooms.length - 1}
-                isOdd={hotel.rooms.length % 2 !== 0}
-                hotelSlug={hotelSubdomain}
-                roomSlug={roomSlug}
-                client:load
-              />
-            );
-          })}
+              return (
+                <RoomCard
+                  key={room.id || index}
+                  name={room.name}
+                  description={room.description}
+                  roomType={room.room_type}
+                  maxOccupancy={room.max_occupancy}
+                  sizeSqm={room.size_sqm}
+                  basePrice={room.base_price}
+                  defaultCurrency={defaultCurrency}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotel.rooms.length - 1}
+                  isOdd={hotel.rooms.length % 2 !== 0}
+                  hotelSlug={hotelSubdomain}
+                  roomSlug={roomSlug}
+                  client:load
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Activities Section -->
-  {hotel.activities && hotel.activities.length > 0 && (
-    <section class="bg-base-200 px-4 py-20">
-      <div class="mx-auto max-w-7xl">
-        <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
-          Activities & Experiences
-        </h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {hotel.activities.map((activity, index) => {
-            const imageUrl = activity.main_photo ? getMediaUrl(activity.main_photo.id, { width: 800, height: 450, quality: 95 }) : '';
-            const videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
+  {
+    hotel.activities && hotel.activities.length > 0 && (
+      <section class="bg-base-200 px-4 py-20">
+        <div class="mx-auto max-w-7xl">
+          <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
+            Activities & Experiences
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {hotel.activities.map((activity, index) => {
+              const imageUrl = activity.main_photo
+                ? getMediaUrl(activity.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                    quality: 95,
+                  })
+                : '';
+              const videoUrl = activity.main_video
+                ? getMediaUrl(activity.main_video.id)
+                : undefined;
 
-            // Create slug from activity name
-            const activitySlug = activity.name.toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+              // Create slug from activity name
+              const activitySlug = activity.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
 
-            return (
-              <ActivityCard
-                key={activity.id || index}
-                name={activity.name}
-                description={activity.description}
-                category={activity.category}
-                durationMinutes={activity.duration_minutes}
-                difficultyLevel={activity.difficulty_level}
-                price={activity.price}
-                defaultCurrency={defaultCurrency}
-                imageUrl={imageUrl}
-                videoUrl={videoUrl}
-                isLast={index === hotel.activities.length - 1}
-                isOdd={hotel.activities.length % 2 !== 0}
-                hotelSlug={hotelSubdomain}
-                activitySlug={activitySlug}
-                client:load
-              />
-            );
-          })}
+              return (
+                <ActivityCard
+                  key={activity.id || index}
+                  name={activity.name}
+                  description={activity.description}
+                  category={activity.category}
+                  durationMinutes={activity.duration_minutes}
+                  difficultyLevel={activity.difficulty_level}
+                  price={activity.price}
+                  defaultCurrency={defaultCurrency}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotel.activities.length - 1}
+                  isOdd={hotel.activities.length % 2 !== 0}
+                  hotelSlug={hotelSubdomain}
+                  activitySlug={activitySlug}
+                  client:load
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Facilities Section -->
-  {hotel.facilities && hotel.facilities.length > 0 && (
-    <section class="px-4 py-20">
-      <div class="mx-auto max-w-7xl">
-        <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
-          Our Facilities
-        </h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {hotel.facilities.map((facility, index) => {
-            const imageUrl = facility.main_photo ? getMediaUrl(facility.main_photo.id, { width: 800, height: 450, quality: 95 }) : '';
-            const videoUrl = facility.main_video ? getMediaUrl(facility.main_video.id) : undefined;
+  {
+    hotel.facilities && hotel.facilities.length > 0 && (
+      <section class="px-4 py-20">
+        <div class="mx-auto max-w-7xl">
+          <h2 class="mb-16 font-primary font-bold text-primary text-4xl text-center">
+            Our Facilities
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {hotel.facilities.map((facility, index) => {
+              const imageUrl = facility.main_photo
+                ? getMediaUrl(facility.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                    quality: 95,
+                  })
+                : '';
+              const videoUrl = facility.main_video
+                ? getMediaUrl(facility.main_video.id)
+                : undefined;
 
-            // Create slug from facility name
-            const facilitySlug = facility.name.toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+              // Create slug from facility name
+              const facilitySlug = facility.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
 
-            console.log(`🎥 Facility ${facility.name}: has video = ${!!facility.main_video}, videoUrl = ${videoUrl}`);
+              console.log(
+                `🎥 Facility ${facility.name}: has video = ${!!facility.main_video}, videoUrl = ${videoUrl}`
+              );
 
-            return (
-              <FacilityCard
-                key={facility.id || index}
-                name={facility.name}
-                description={facility.description}
-                facilityType={facility.facility_type}
-                capacity={facility.capacity}
-                accessType={facility.access_type}
-                imageUrl={imageUrl}
-                videoUrl={videoUrl}
-                isLast={index === hotel.facilities.length - 1}
-                isOdd={hotel.facilities.length % 2 !== 0}
-                hotelSlug={hotelSubdomain}
-                facilitySlug={facilitySlug}
-                client:load
-              />
-            );
-          })}
+              return (
+                <FacilityCard
+                  key={facility.id || index}
+                  name={facility.name}
+                  description={facility.description}
+                  facilityType={facility.facility_type}
+                  capacity={facility.capacity}
+                  accessType={facility.access_type}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotel.facilities.length - 1}
+                  isOdd={hotel.facilities.length % 2 !== 0}
+                  hotelSlug={hotelSubdomain}
+                  facilitySlug={facilitySlug}
+                  client:load
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Footer -->
   <footer class="bg-primary px-4 py-12 text-primary-content">
     <div class="mx-auto max-w-7xl text-white text-center">
       <h3 class="mb-4 font-primary font-bold text-2xl">{hotel.name}</h3>
-      <p class="opacity-90 mb-4">Dynamic Multitenant Architecture - Domain: {hotelDomain}</p>
-      <p class="opacity-75 text-sm">
-        Languages: {availableLanguages.join(', ')} | Currencies: {availableCurrencies.join(', ')}
+      <p class="opacity-90 mb-4">
+        Dynamic Multitenant Architecture - Domain: {hotelDomain}
       </p>
-      {hotel.chatwoot_accounts?.[0] && (
-        <p class="opacity-75 mt-2 text-sm">
-          Chat Account: {hotel.chatwoot_accounts[0].account_id}
-        </p>
-      )}
+      <p class="opacity-75 text-sm">
+        Languages: {availableLanguages.join(', ')} | Currencies: {
+          availableCurrencies.join(', ')
+        }
+      </p>
+      {
+        hotel.chatwoot_accounts?.[0] && (
+          <p class="opacity-75 mt-2 text-sm">
+            Chat Account: {hotel.chatwoot_accounts[0].account_id}
+          </p>
+        )
+      }
     </div>
   </footer>
 </Layout>
@@ -307,7 +355,9 @@ console.log(
 <script>
   // Parallax scroll effect for hero section
   function initParallax() {
-    const parallaxElements = document.querySelectorAll('.parallax-video, .parallax-image');
+    const parallaxElements = document.querySelectorAll(
+      '.parallax-video, .parallax-image'
+    );
 
     function updateParallax() {
       const scrolled = window.pageYOffset;
@@ -324,7 +374,9 @@ console.log(
       if (!ticking) {
         requestAnimationFrame(updateParallax);
         ticking = true;
-        setTimeout(() => { ticking = false; }, 16); // ~60fps
+        setTimeout(() => {
+          ticking = false;
+        }, 16); // ~60fps
       }
     }
 

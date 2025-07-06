@@ -57,9 +57,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     // Form state
     const checkIn = useSignal('');
     const checkOut = useSignal('');
-    const adults = useSignal(2);
-    const children = useSignal(0);
-    const rooms = useSignal(1);
+    const adults = useSignal('2');
+    const children = useSignal('0');
+    const rooms = useSignal('1');
 
     // UI state
     const isLoading = useSignal(false);
@@ -106,16 +106,18 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             hotelDomain,
             checkIn: checkIn.value,
             checkOut: checkOut.value,
-            adults: adults.value,
-            children: children.value > 0 ? children.value : undefined,
-            rooms: rooms.value,
+            adults: parseInt(adults.value),
+            children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+            rooms: parseInt(rooms.value),
           }),
         });
 
         const availabilityData = await availabilityResponse.json();
 
         if (!availabilityData.success) {
-          throw new Error(availabilityData.error || 'Failed to check availability');
+          throw new Error(
+            availabilityData.error || 'Failed to check availability'
+          );
         }
 
         // Call rates API
@@ -126,9 +128,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             hotelDomain,
             checkIn: checkIn.value,
             checkOut: checkOut.value,
-            adults: adults.value,
-            children: children.value > 0 ? children.value : undefined,
-            rooms: rooms.value,
+            adults: parseInt(adults.value),
+            children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+            rooms: parseInt(rooms.value),
           }),
         });
 
@@ -142,7 +144,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
         rates.value = ratesData.rates || [];
         showResults.value = true;
       } catch (err) {
-        error.value = err instanceof Error ? err.message : 'Failed to search availability';
+        error.value =
+          err instanceof Error ? err.message : 'Failed to search availability';
         availability.value = [];
         rates.value = [];
         showResults.value = false;
@@ -177,9 +180,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             hotelDomain,
             checkIn: checkIn.value,
             checkOut: checkOut.value,
-            adults: adults.value,
-            children: children.value > 0 ? children.value : undefined,
-            rooms: rooms.value,
+            adults: parseInt(adults.value),
+            children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+            rooms: parseInt(rooms.value),
             roomType: selectedRoom.value.roomType,
             guestInfo: {
               firstName: guestFirstName.value,
@@ -210,11 +213,14 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           specialRequests.value = '';
         } else {
           throw new Error(
-            bookingData.error || bookingData.booking?.error || 'Failed to create booking'
+            bookingData.error ||
+              bookingData.booking?.error ||
+              'Failed to create booking'
           );
         }
       } catch (err) {
-        error.value = err instanceof Error ? err.message : 'Failed to create booking';
+        error.value =
+          err instanceof Error ? err.message : 'Failed to create booking';
       } finally {
         isLoading.value = false;
       }
@@ -236,7 +242,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     };
 
     const getRoomRate = (roomId: string) => {
-      return rates.value.find((rate) => rate.roomId === roomId);
+      return rates.value.find(rate => rate.roomId === roomId);
     };
 
     return (
@@ -273,7 +279,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                       type="date"
                       class="input-bordered input"
                       bind:value={checkOut}
-                      min={checkIn.value || new Date().toISOString().split('T')[0]}
+                      min={
+                        checkIn.value || new Date().toISOString().split('T')[0]
+                      }
                     />
                   </div>
 
@@ -281,7 +289,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     <label class="label" for="adults-select">
                       <span class="label-text">Adults</span>
                     </label>
-                    <select id="adults-select" class="select-bordered select" bind:value={adults}>
+                    <select
+                      id="adults-select"
+                      class="select-bordered select"
+                      bind:value={adults}
+                    >
                       <option value={1}>1 Adult</option>
                       <option value={2}>2 Adults</option>
                       <option value={3}>3 Adults</option>
@@ -309,7 +321,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     <label class="label" for="rooms-select">
                       <span class="label-text">Rooms</span>
                     </label>
-                    <select id="rooms-select" class="select-bordered select" bind:value={rooms}>
+                    <select
+                      id="rooms-select"
+                      class="select-bordered select"
+                      bind:value={rooms}
+                    >
                       <option value={1}>1 Room</option>
                       <option value={2}>2 Rooms</option>
                       <option value={3}>3 Rooms</option>
@@ -334,7 +350,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {/* Error Message */}
             {error.value && (
               <div class="alert alert-error">
-                <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                <svg
+                  class="stroke-current w-6 h-6 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
                   <title>Error icon</title>
                   <path
                     stroke-linecap="round"
@@ -348,87 +368,113 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             )}
 
             {/* Results */}
-            {showResults.value && availability.value.length > 0 && !showBookingForm.value && (
-              <div class="mt-6">
-                <h4 class="mb-4 font-semibold text-lg">
-                  Available Rooms ({calculateNights()} nights)
-                </h4>
+            {showResults.value &&
+              availability.value.length > 0 &&
+              !showBookingForm.value && (
+                <div class="mt-6">
+                  <h4 class="mb-4 font-semibold text-lg">
+                    Available Rooms ({calculateNights()} nights)
+                  </h4>
 
-                <div class="space-y-4">
-                  {availability.value.map((room) => {
-                    const rate = getRoomRate(room.roomId);
-                    const displayName = room.directusRoom?.name || room.roomType;
-                    const description = room.directusRoom?.description;
+                  <div class="space-y-4">
+                    {availability.value.map(room => {
+                      const rate = getRoomRate(room.roomId);
+                      const displayName =
+                        room.directusRoom?.name || room.roomType;
+                      const description = room.directusRoom?.description;
 
-                    return (
-                      <div key={room.roomId} class="bg-base-200 card">
-                        <div class="card-body">
-                          <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                              <h5 class="text-base card-title">{displayName}</h5>
-                              {description && <p class="opacity-70 mb-2 text-sm">{description}</p>}
-                              <p class="opacity-70 text-sm">
-                                Max occupancy: {room.maxOccupancy} guests
-                              </p>
-                              {room.directusRoom?.size_sqm && (
-                                <p class="opacity-70 text-sm">
-                                  Size: {room.directusRoom.size_sqm} m²
-                                </p>
-                              )}
-                              {rate && (
-                                <div class="mt-2">
-                                  <p class="text-sm">
-                                    Base price: {formatPrice(rate.basePrice, rate.currency)} per
-                                    night
+                      return (
+                        <div key={room.roomId} class="bg-base-200 card">
+                          <div class="card-body">
+                            <div class="flex justify-between items-start">
+                              <div class="flex-1">
+                                <h5 class="text-base card-title">
+                                  {displayName}
+                                </h5>
+                                {description && (
+                                  <p class="opacity-70 mb-2 text-sm">
+                                    {description}
                                   </p>
-                                  {rate.taxes && rate.taxes > 0 && (
+                                )}
+                                <p class="opacity-70 text-sm">
+                                  Max occupancy: {room.maxOccupancy} guests
+                                </p>
+                                {room.directusRoom?.size_sqm && (
+                                  <p class="opacity-70 text-sm">
+                                    Size: {room.directusRoom.size_sqm} m²
+                                  </p>
+                                )}
+                                {rate && (
+                                  <div class="mt-2">
                                     <p class="text-sm">
-                                      Taxes: {formatPrice(rate.taxes, rate.currency)}
+                                      Base price:{' '}
+                                      {formatPrice(
+                                        rate.basePrice,
+                                        rate.currency
+                                      )}{' '}
+                                      per night
                                     </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-
-                            <div class="text-right">
-                              <div class="font-bold text-primary text-2xl">
-                                {rate
-                                  ? formatPrice(rate.totalPrice, rate.currency)
-                                  : formatPrice(room.price, room.currency)}
+                                    {rate.taxes && rate.taxes > 0 && (
+                                      <p class="text-sm">
+                                        Taxes:{' '}
+                                        {formatPrice(rate.taxes, rate.currency)}
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                              <p class="opacity-70 text-sm">per night</p>
-                              <button
-                                type="button"
-                                class="mt-2 btn btn-primary btn-sm"
-                                onClick$={() => selectRoom(room)}
-                                disabled={isLoading.value}
-                              >
-                                Book Now
-                              </button>
+
+                              <div class="text-right">
+                                <div class="font-bold text-primary text-2xl">
+                                  {rate
+                                    ? formatPrice(
+                                        rate.totalPrice,
+                                        rate.currency
+                                      )
+                                    : formatPrice(room.price, room.currency)}
+                                </div>
+                                <p class="opacity-70 text-sm">per night</p>
+                                <button
+                                  type="button"
+                                  class="mt-2 btn btn-primary btn-sm"
+                                  onClick$={() => selectRoom(room)}
+                                  disabled={isLoading.value}
+                                >
+                                  Book Now
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {showResults.value && availability.value.length === 0 && !showBookingForm.value && (
-              <div class="mt-6 alert alert-info">
-                <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
-                  <title>Information icon</title>
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>No rooms available for the selected dates. Please try different dates.</span>
-              </div>
-            )}
+            {showResults.value &&
+              availability.value.length === 0 &&
+              !showBookingForm.value && (
+                <div class="mt-6 alert alert-info">
+                  <svg
+                    class="stroke-current w-6 h-6 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <title>Information icon</title>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>
+                    No rooms available for the selected dates. Please try
+                    different dates.
+                  </span>
+                </div>
+              )}
 
             {/* Booking Form */}
             {showBookingForm.value && selectedRoom.value && (
@@ -451,7 +497,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 <div class="bg-primary/10 mb-6 card">
                   <div class="card-body">
                     <h5 class="font-semibold">
-                      {selectedRoom.value.directusRoom?.name || selectedRoom.value.roomType}
+                      {selectedRoom.value.directusRoom?.name ||
+                        selectedRoom.value.roomType}
                     </h5>
                     <div class="gap-4 grid grid-cols-2 text-sm">
                       <div>
@@ -468,7 +515,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                       <div>
                         <p>
                           <strong>Guests:</strong> {adults.value} adults
-                          {children.value > 0 ? `, ${children.value} children` : ''}
+                          {parseInt(children.value) > 0
+                            ? `, ${children.value} children`
+                            : ''}
                         </p>
                         <p>
                           <strong>Rooms:</strong> {rooms.value}
@@ -476,7 +525,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                         <div class="text-right">
                           <div class="font-bold text-primary text-xl">
                             {(() => {
-                              const rate = getRoomRate(selectedRoom.value?.roomId);
+                              const rate = getRoomRate(
+                                selectedRoom.value?.roomId
+                              );
                               return rate
                                 ? formatPrice(rate.totalPrice, rate.currency)
                                 : formatPrice(

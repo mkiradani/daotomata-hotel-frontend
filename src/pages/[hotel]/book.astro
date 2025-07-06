@@ -1,5 +1,4 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
 import Layout from '../../layouts/Layout.astro';
 import { getAllHotels, getHotelByDomain } from '../../lib/directus.js';
 
@@ -12,13 +11,15 @@ export async function getStaticPaths() {
     const hotels = await getAllHotels();
     console.log(
       `✅ Found ${hotels.length} hotels:`,
-      hotels.map((h) => h.domain)
+      hotels.map(h => h.domain)
     );
 
     const paths = [];
 
     for (const hotelData of hotels) {
-      console.log(`🏨 Processing hotel: ${hotelData.name} (${hotelData.domain})`);
+      console.log(
+        `🏨 Processing hotel: ${hotelData.name} (${hotelData.domain})`
+      );
 
       // Get full hotel data
       const fullHotel = await getHotelByDomain(hotelData.domain);
@@ -75,7 +76,9 @@ const _roomType = url.searchParams.get('roomType') || '';
 <Layout title={_pageTitle} description={_pageDescription}>
   <main class="bg-base-200 min-h-screen">
     <!-- Hero Section -->
-    <section class="relative bg-gradient-to-r from-primary/20 to-secondary/20 py-16">
+    <section
+      class="relative bg-gradient-to-r from-primary/20 to-secondary/20 py-16"
+    >
       <div class="mx-auto px-4 container">
         <div class="text-center">
           <h1 class="mb-4 font-bold text-primary text-4xl md:text-6xl">
@@ -86,7 +89,7 @@ const _roomType = url.searchParams.get('roomType') || '';
           </p>
           <div class="mx-auto max-w-2xl">
             <p class="opacity-70 text-lg">
-              Experience luxury and comfort with our seamless booking system. 
+              Experience luxury and comfort with our seamless booking system.
               Check real-time availability and secure your perfect room today.
             </p>
           </div>
@@ -108,9 +111,12 @@ const _roomType = url.searchParams.get('roomType') || '';
             <div class="bg-base-100 shadow-xl card">
               <div class="text-center card-body">
                 <div class="mb-4 text-4xl">⚡</div>
-                <h3 class="justify-center text-primary card-title">Instant Confirmation</h3>
+                <h3 class="justify-center text-primary card-title">
+                  Instant Confirmation
+                </h3>
                 <p class="opacity-70">
-                  Get immediate booking confirmation with real-time availability from our property management system.
+                  Get immediate booking confirmation with real-time availability
+                  from our property management system.
                 </p>
               </div>
             </div>
@@ -118,9 +124,12 @@ const _roomType = url.searchParams.get('roomType') || '';
             <div class="bg-base-100 shadow-xl card">
               <div class="text-center card-body">
                 <div class="mb-4 text-4xl">🔒</div>
-                <h3 class="justify-center text-primary card-title">Secure Booking</h3>
+                <h3 class="justify-center text-primary card-title">
+                  Secure Booking
+                </h3>
                 <p class="opacity-70">
-                  Your personal information and payment details are protected with industry-standard security.
+                  Your personal information and payment details are protected
+                  with industry-standard security.
                 </p>
               </div>
             </div>
@@ -128,9 +137,12 @@ const _roomType = url.searchParams.get('roomType') || '';
             <div class="bg-base-100 shadow-xl card">
               <div class="text-center card-body">
                 <div class="mb-4 text-4xl">💰</div>
-                <h3 class="justify-center text-primary card-title">Best Rates</h3>
+                <h3 class="justify-center text-primary card-title">
+                  Best Rates
+                </h3>
                 <p class="opacity-70">
-                  Book directly with us for the best available rates and exclusive offers.
+                  Book directly with us for the best available rates and
+                  exclusive offers.
                 </p>
               </div>
             </div>
@@ -142,56 +154,76 @@ const _roomType = url.searchParams.get('roomType') || '';
               <h2 class="justify-center mb-6 text-primary text-2xl card-title">
                 Why Book Direct with {hotel.name}?
               </h2>
-              
+
               <div class="gap-6 grid grid-cols-1 md:grid-cols-2">
                 <div class="space-y-4">
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">✅</div>
                     <div>
-                      <h4 class="font-semibold text-primary">Best Price Guarantee</h4>
-                      <p class="opacity-70 text-sm">We match any lower rate you find elsewhere</p>
+                      <h4 class="font-semibold text-primary">
+                        Best Price Guarantee
+                      </h4>
+                      <p class="opacity-70 text-sm">
+                        We match any lower rate you find elsewhere
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">🎁</div>
                     <div>
-                      <h4 class="font-semibold text-primary">Exclusive Perks</h4>
-                      <p class="opacity-70 text-sm">Special amenities and upgrades for direct bookings</p>
+                      <h4 class="font-semibold text-primary">
+                        Exclusive Perks
+                      </h4>
+                      <p class="opacity-70 text-sm">
+                        Special amenities and upgrades for direct bookings
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">📞</div>
                     <div>
                       <h4 class="font-semibold text-primary">Direct Support</h4>
-                      <p class="opacity-70 text-sm">Speak directly with our team for personalized service</p>
+                      <p class="opacity-70 text-sm">
+                        Speak directly with our team for personalized service
+                      </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="space-y-4">
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">🔄</div>
                     <div>
-                      <h4 class="font-semibold text-primary">Flexible Cancellation</h4>
-                      <p class="opacity-70 text-sm">More flexible cancellation policies</p>
+                      <h4 class="font-semibold text-primary">
+                        Flexible Cancellation
+                      </h4>
+                      <p class="opacity-70 text-sm">
+                        More flexible cancellation policies
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">⭐</div>
                     <div>
-                      <h4 class="font-semibold text-primary">Loyalty Benefits</h4>
-                      <p class="opacity-70 text-sm">Earn points and enjoy member-exclusive rates</p>
+                      <h4 class="font-semibold text-primary">
+                        Loyalty Benefits
+                      </h4>
+                      <p class="opacity-70 text-sm">
+                        Earn points and enjoy member-exclusive rates
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div class="flex items-start space-x-3">
                     <div class="text-2xl">🏨</div>
                     <div>
                       <h4 class="font-semibold text-primary">Room Upgrades</h4>
-                      <p class="opacity-70 text-sm">Complimentary upgrades based on availability</p>
+                      <p class="opacity-70 text-sm">
+                        Complimentary upgrades based on availability
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -201,16 +233,31 @@ const _roomType = url.searchParams.get('roomType') || '';
 
           <!-- Contact Information -->
           <div class="mt-12 text-center">
-            <h3 class="mb-4 font-bold text-primary text-2xl">Need Help with Your Booking?</h3>
+            <h3 class="mb-4 font-bold text-primary text-2xl">
+              Need Help with Your Booking?
+            </h3>
             <p class="opacity-70 mb-6 text-lg">
-              Our reservation team is here to assist you with any questions or special requests.
+              Our reservation team is here to assist you with any questions or
+              special requests.
             </p>
-            
-            <div class="flex md:flex-row flex-col justify-center items-center md:space-x-8 space-y-4 md:space-y-0">
+
+            <div
+              class="flex md:flex-row flex-col justify-center items-center md:space-x-8 space-y-4 md:space-y-0"
+            >
               <!-- Phone and email fields not available in new structure -->
               <div class="btn-outline btn btn-primary">
-                <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                <svg
+                  class="mr-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  ></path>
                 </svg>
                 Contact Hotel
               </div>
@@ -222,25 +269,23 @@ const _roomType = url.searchParams.get('roomType') || '';
   </main>
 
   <!-- Initialize Booking Widget -->
-  <script type="module">
-    import { BookingWidgetReal } from '../../components/BookingWidgetReal';
-    
+  <script type="module" define:vars={{ hotel }}>
     // Get hotel data from the page
-    const hotelData = {
+    const _hotelData = {
       domain: window.location.hostname,
       name: JSON.stringify(hotel.name),
-      currency: JSON.stringify(hotel.default_currency || 'USD')
+      currency: JSON.stringify(hotel.default_currency || 'USD'),
     };
-    
+
     // Get URL parameters for pre-filling
     const urlParams = new URLSearchParams(window.location.search);
-    const checkInValue = urlParams.get('checkin') || '';
-    const checkOutValue = urlParams.get('checkout') || '';
+    const checkIn = urlParams.get('checkin') || '';
+    const checkOut = urlParams.get('checkout') || '';
     const adultsValue = parseInt(urlParams.get('adults') || '2');
     const childrenValue = parseInt(urlParams.get('children') || '0');
     const roomsValue = parseInt(urlParams.get('rooms') || '1');
-    const roomTypeValue = urlParams.get('roomType') || '';
-    
+    const _roomTypeValue = urlParams.get('roomType') || '';
+
     // Mount the booking widget
     const container = document.getElementById('booking-widget-container');
     if (container) {
@@ -261,7 +306,7 @@ const _roomType = url.searchParams.get('roomType') || '';
           </div>
         </div>
       `;
-      
+
       // In a real Qwik app, this would be handled by the framework
       // For now, we'll show a message about the booking system
       setTimeout(() => {
@@ -347,22 +392,30 @@ const _roomType = url.searchParams.get('roomType') || '';
               <div class="text-center">
                 <p class="mb-4">For immediate assistance with your booking:</p>
                 <div class="flex sm:flex-row flex-col justify-center gap-4">
-                  ${hotel.phone ? `
+                  ${
+                    hotel.phone
+                      ? `
                     <a href="tel:${hotel.phone}" class="btn-outline btn btn-primary">
                       <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                       </svg>
                       Call ${hotel.phone}
                     </a>
-                  ` : ''}
-                  ${hotel.email ? `
+                  `
+                      : ''
+                  }
+                  ${
+                    hotel.email
+                      ? `
                     <a href="mailto:${hotel.email}" class="btn-outline btn btn-primary">
                       <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                       </svg>
                       Email Us
                     </a>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                 </div>
               </div>
             </div>
@@ -370,10 +423,12 @@ const _roomType = url.searchParams.get('roomType') || '';
         `;
       }, 1000);
     }
-    
+
     // Function to show coming soon message
-    window.showComingSoon = function() {
-      alert('🚀 Booking functionality coming soon!\n\nWe are implementing the full booking system with Cloudbeds integration. For now, please contact us directly to make a reservation.');
+    window.showComingSoon = function () {
+      alert(
+        '🚀 Booking functionality coming soon!\n\nWe are implementing the full booking system with Cloudbeds integration. For now, please contact us directly to make a reservation.'
+      );
     };
   </script>
 </Layout>

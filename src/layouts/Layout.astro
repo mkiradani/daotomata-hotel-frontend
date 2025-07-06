@@ -1,14 +1,11 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: ChatwootWidget is used in JSX below
 import ChatwootWidget from '../components/ChatwootWidget.astro';
-// biome-ignore lint/correctness/noUnusedImports: Navbar is used in JSX below
-import Navbar from '../components/Navbar.astro';
-// biome-ignore lint/correctness/noUnusedImports: Footer is used in JSX below
 import { Footer } from '../components/Footer.tsx';
-import { getMediaUrl, getSocialProfilesByHotelId, getHotelInfoByHotelId } from '../lib/directus.js';
+import Navbar from '../components/Navbar.astro';
+import { getHotelInfoByHotelId, getMediaUrl, getSocialProfilesByHotelId } from '../lib/directus.js';
 import '../styles/global.css';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export interface Props {
   title: string;
@@ -29,15 +26,10 @@ export interface Props {
 }
 
 const {
-  // biome-ignore lint/correctness/noUnusedVariables: title is used in JSX below
   title,
-  // biome-ignore lint/correctness/noUnusedVariables: description is used in JSX below
   description = 'Hotel website powered by Daotomata Stack',
-  // biome-ignore lint/correctness/noUnusedVariables: domain is used in JSX below
   domain,
-  // biome-ignore lint/correctness/noUnusedVariables: ga4Id is used in JSX below
   ga4Id,
-  // biome-ignore lint/correctness/noUnusedVariables: pixelId is used in JSX below
   pixelId,
   hotel,
   hotelSubdomain,
@@ -45,17 +37,15 @@ const {
   // Legacy props for backward compatibility
   themeCSS: legacyThemeCSS,
   themeName: legacyThemeName,
-  // biome-ignore lint/correctness/noUnusedVariables: hotelName is used in JSX below
   hotelName = 'Hotel',
   themeConfig: legacyThemeConfig = {},
   hotelLogo: legacyHotelLogo = null,
-  // biome-ignore lint/correctness/noUnusedVariables: showNavbar is used in JSX below
   showNavbar = true,
 } = Astro.props;
 
 // Static theme application for static pages
 let themeName: string | undefined,
-  themeConfig: Record<string, unknown> | undefined,
+  _themeConfig: Record<string, unknown> | undefined,
   hotelLogo: Record<string, unknown> | null | undefined;
 
 if (hotel && hotelSubdomain) {
@@ -63,7 +53,7 @@ if (hotel && hotelSubdomain) {
   console.log('🎨 Layout.astro - Applying static theme for:', hotelSubdomain);
 
   themeName = hotel.theme?.name || `${hotelSubdomain}-theme`;
-  themeConfig = hotel.theme || {};
+  _themeConfig = hotel.theme || {};
   hotelLogo = hotel.logo || null;
 
   console.log('🎨 Applied static theme:', {
@@ -74,7 +64,7 @@ if (hotel && hotelSubdomain) {
   // Use legacy props for backward compatibility
   console.log('🎨 Layout.astro - Using legacy theme props');
   themeName = legacyThemeName;
-  themeConfig = legacyThemeConfig;
+  _themeConfig = legacyThemeConfig;
   hotelLogo = legacyHotelLogo;
 }
 
@@ -90,7 +80,8 @@ const _appleIconUrl = hotelLogo?.id
   : '/favicon.svg';
 
 // Load dynamic Google Fonts from generated configuration
-let googleFontsURL = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'; // fallback
+let googleFontsURL =
+  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'; // fallback
 let hotelFonts = {
   primary: 'Inter',
   secondary: 'Playfair Display',
@@ -100,8 +91,8 @@ let hotelFonts = {
     primary: '400',
     secondary: '400',
     mono: '400',
-    detail: '400'
-  }
+    detail: '400',
+  },
 };
 
 try {
@@ -112,7 +103,7 @@ try {
     googleFontsURL = fontsConfig.hotels[hotel.name].googleFontsURL;
     hotelFonts = {
       ...fontsConfig.hotels[hotel.name].fonts,
-      weights: fontsConfig.hotels[hotel.name].weights
+      weights: fontsConfig.hotels[hotel.name].weights,
     };
     console.log(`🔤 Loading dynamic fonts for ${hotel.name}:`, googleFontsURL);
     console.log(`🔤 Font configuration:`, hotelFonts);
@@ -130,10 +121,13 @@ if (hotel?.id) {
   try {
     [socialProfiles, hotelInfo] = await Promise.all([
       getSocialProfilesByHotelId(hotel.id),
-      getHotelInfoByHotelId(hotel.id)
+      getHotelInfoByHotelId(hotel.id),
     ]);
     console.log(`📱 Loaded ${socialProfiles.length} social profiles for hotel ${hotel.id}`);
-    console.log(`🏨 Loaded hotel info for hotel ${hotel.id}:`, hotelInfo?.location || 'No additional info');
+    console.log(
+      `🏨 Loaded hotel info for hotel ${hotel.id}:`,
+      hotelInfo?.location || 'No additional info'
+    );
   } catch (error) {
     console.warn('⚠️ Could not load social profiles or hotel info:', error.message);
   }
@@ -177,18 +171,19 @@ if (hotel?.id) {
     {ga4Id && (
       <>
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
-        <script>
+        <script define:vars={{ ga4Id }}>
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
+          function gtag(){window.dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '{ga4Id}');
+          gtag('config', ga4Id);
         </script>
       </>
     )}
     
     <!-- Meta Pixel -->
     {pixelId && (
-      <script>
+      <script define:vars={{ pixelId }}>
+        /* eslint-disable @typescript-eslint/no-unused-expressions */
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
         n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -197,11 +192,12 @@ if (hotel?.id) {
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '{pixelId}');
-        fbq('track', 'PageView');
+        /* eslint-enable @typescript-eslint/no-unused-expressions */
+        window.fbq('init', pixelId);
+        window.fbq('track', 'PageView');
       </script>
       <noscript>
-        <img height="1" width="1" style="display:none"
+        <img height="1" width="1" style="display:none" alt=""
              src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`} />
       </noscript>
     )}
@@ -213,7 +209,7 @@ if (hotel?.id) {
         hotelName={hotelName}
         hotelDomain={hotelDomain || domain || 'demo.localhost'}
         currentPath={Astro.url.pathname}
-        themeConfig={themeConfig}
+        themeConfig={_themeConfig}
         hotelLogo={hotelLogo}
         hotelInfo={hotelInfo}
       />

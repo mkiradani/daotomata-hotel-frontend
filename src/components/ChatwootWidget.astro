@@ -65,16 +65,13 @@ if (!hotel) {
 ---
 
 {chatwootConfig?.website_token && hotel && (
-  <script is:inline define:vars={{
-    websiteToken: chatwootConfig.website_token,
-    hotelName: hotel.name
-  }}>
+  <script is:inline define:vars={{ websiteToken: chatwootConfig.website_token, hotelName: hotel.name }}>
     console.log('🔧 CHATWOOT SCRIPT STARTING - Token:', websiteToken.substring(0, 8) + '...', 'Hotel:', hotelName);
 
     // Store configuration globally for debugging
     window.chatwootConfig = {
-      websiteToken: websiteToken,
-      hotelName: hotelName,
+      websiteToken,
+      hotelName,
       baseUrl: "https://chat.daotomata.io"
     };
 
@@ -94,8 +91,8 @@ if (!hotel) {
 
     // Official Chatwoot SDK Integration
     (function(d,t) {
-      var BASE_URL = window.chatwootConfig.baseUrl;
-      var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+      const BASE_URL = window.chatwootConfig.baseUrl;
+      const g=d.createElement(t),s=d.getElementsByTagName(t)[0];
       g.src=BASE_URL+"/packs/js/sdk.js";
       g.defer=true;
       g.async=true;
@@ -216,7 +213,7 @@ if (!hotel) {
                       }, 200);
                     }
                   }
-                } catch (e) {
+                } catch {
                   // Ignore parsing errors for non-JSON messages
                 }
               });

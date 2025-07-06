@@ -1,6 +1,5 @@
 ---
 // Auto-generated Activity Grid Component
-// biome-ignore lint/correctness/noUnusedVariables: activities is used in JSX below
 const { activities } = Astro.props;
 ---
 
@@ -12,8 +11,12 @@ const { activities } = Astro.props;
           <h3 class="card-title">{activity.name_es}</h3>
           <p>{activity.description_es}</p>
           <div class="flex justify-between items-center">
-            <span class="badge badge-secondary">{activity.duration_minutes} min</span>
-            <span class="font-bold text-primary text-xl">€{activity.price}</span>
+            <span class="badge badge-secondary">
+              {activity.duration_minutes} min
+            </span>
+            <span class="font-bold text-primary text-xl">
+              €{activity.price}
+            </span>
           </div>
         </div>
       </div>

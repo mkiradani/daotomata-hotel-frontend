@@ -1,9 +1,12 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: FacilityCard is used in JSX below
 import { FacilityCard } from '../../components/FacilityCard.tsx';
-// biome-ignore lint/correctness/noUnusedImports: CollectionPageLayout is used in JSX below
 import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
-import { getAllHotels, getHotelByDomain, getMediaUrl, getTranslatedContent } from '../../lib/directus.js';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../../lib/directus.js';
 
 export const prerender = true;
 
@@ -28,7 +31,6 @@ export async function getStaticPaths() {
           hotel,
           hotelSubdomain: subdomain,
           defaultLanguage: hotel.default_language || 'en-US',
-          defaultCurrency: hotel.default_currency || 'USD',
         },
       });
     }
@@ -41,14 +43,7 @@ export async function getStaticPaths() {
   }
 }
 
-const {
-  hotel: hotelData,
-  hotelSubdomain,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
-  defaultLanguage,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is part of the data structure for future use
-  defaultCurrency,
-} = Astro.props;
+const { hotel: hotelData, hotelSubdomain, defaultLanguage } = Astro.props;
 
 // Get current language from URL or use default
 const currentLanguage = defaultLanguage;
@@ -65,7 +60,7 @@ const hotel = {
   id: fullHotel.id,
   name: fullHotel.name,
   domain: fullHotel.domain,
-  
+
   // Analytics and integrations
   analytics: {
     ga4_id: fullHotel.ga4_token,
@@ -84,18 +79,21 @@ const hotel = {
   location: fullHotel.location || null,
 
   // Related data with translations - focus on facilities for this page
-  facilities: fullHotel.facilities?.map((facility) => getTranslatedContent(facility, currentLanguage)) || [],
+  facilities:
+    fullHotel.facilities?.map(facility =>
+      getTranslatedContent(facility, currentLanguage)
+    ) || [],
 
   // Other related data
   chatwoot_accounts: fullHotel.chatwoot_accounts || [],
 };
 
 // Get hotel domain and slug
-const hotelDomain = hotel.domain;
-const hotelSlug = hotelSubdomain;
+const _hotelDomain = hotel.domain;
+const _hotelSlug = hotelSubdomain;
 
 // Breadcrumb items following the same pattern as detail pages
-const breadcrumbItems = [
+const _breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Facilities' },
 ];
@@ -112,10 +110,10 @@ console.log(
   pageDescription="Experience our world-class facilities designed to enhance your stay. From relaxation to recreation, we provide everything you need for an unforgettable experience."
   hotel={hotel}
   hotelSubdomain={hotelSubdomain}
-  hotelDomain={hotelDomain}
+  hotelDomain={_hotelDomain}
   items={hotel.facilities || []}
   itemType="facilities"
-  breadcrumbItems={breadcrumbItems}
+  breadcrumbItems={_breadcrumbItems}
   ctaTitle="Ready to Experience Our Facilities?"
   ctaDescription={`Book your stay at ${hotel.name} and enjoy access to all our exceptional facilities and amenities.`}
   ctaPrimaryText="Book Now"
@@ -125,34 +123,47 @@ console.log(
   gridId="facilitiesGrid"
 >
   <Fragment slot="items">
-    {hotel.facilities?.map((facility, index) => {
-      const imageUrl = facility.main_photo ? getMediaUrl(facility.main_photo.id, { width: 800, height: 450, quality: 95 }) : '';
-      const videoUrl = facility.main_video ? getMediaUrl(facility.main_video.id) : undefined;
+    {
+      hotel.facilities?.map((facility, index) => {
+        const imageUrl = facility.main_photo
+          ? getMediaUrl(facility.main_photo.id, {
+              width: 800,
+              height: 450,
+              quality: 95,
+            })
+          : '';
+        const videoUrl = facility.main_video
+          ? getMediaUrl(facility.main_video.id)
+          : undefined;
 
-      // Create slug from facility name
-      const facilitySlug = facility.name.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+        // Create slug from facility name
+        const facilitySlug = facility.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
 
-      console.log(`🎥 Facility ${facility.name}: has video = ${!!facility.main_video}, videoUrl = ${videoUrl}`);
+        console.log(
+          `🎥 Facility ${facility.name}: has video = ${!!facility.main_video}, videoUrl = ${videoUrl}`
+        );
 
-      return (
-        <FacilityCard
-          key={facility.id || index}
-          name={facility.name}
-          description={facility.description}
-          facilityType={facility.facility_type}
-          capacity={facility.capacity}
-          accessType={facility.access_type}
-          imageUrl={imageUrl}
-          videoUrl={videoUrl}
-          isLast={index === hotel.facilities.length - 1}
-          isOdd={hotel.facilities.length % 2 !== 0}
-          hotelSlug={hotelSubdomain}
-          facilitySlug={facilitySlug}
-          client:load
-        />
-      );
-    })}
+        return (
+          <FacilityCard
+            key={facility.id || index}
+            name={facility.name}
+            description={facility.description}
+            facilityType={facility.facility_type}
+            capacity={facility.capacity}
+            accessType={facility.access_type}
+            imageUrl={imageUrl}
+            videoUrl={videoUrl}
+            isLast={index === hotel.facilities.length - 1}
+            isOdd={hotel.facilities.length % 2 !== 0}
+            hotelSlug={hotelSubdomain}
+            facilitySlug={facilitySlug}
+            client:load
+          />
+        );
+      })
+    }
   </Fragment>
 </CollectionPageLayout>

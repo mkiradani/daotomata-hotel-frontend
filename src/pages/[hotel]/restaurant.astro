@@ -1,8 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Breadcrumb } from '../../components/Breadcrumb';
-import { DishCard } from '../../components/DishCard';
-import { getAllHotels, getHotelByDomain, getMediaUrl, getTranslatedContent } from '../../lib/directus.js';
+import { Breadcrumb } from '../../components/Breadcrumb.tsx';
+import { DishCard } from '../../components/DishCard.tsx';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../../lib/directus.js';
 
 export async function getStaticPaths() {
   console.log('🍽️ Generating static paths for restaurant pages...');
@@ -38,12 +43,7 @@ export async function getStaticPaths() {
   }
 }
 
-const {
-  hotel: hotelData,
-  hotelSubdomain,
-  defaultLanguage,
-  defaultCurrency,
-} = Astro.props;
+const { hotel: hotelData, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
 
 // Get current language (default to English for now)
 const currentLanguage = defaultLanguage || 'en-US';
@@ -59,7 +59,8 @@ if (!fullHotel) {
 const hotel = {
   id: fullHotel.id,
   name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
-  description: getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
+  description:
+    getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
   domain: fullHotel.domain,
   default_currency: fullHotel.default_currency || defaultCurrency,
 
@@ -83,7 +84,10 @@ const hotel = {
   restaurant: fullHotel.restaurant || null,
 
   // Featured dishes
-  dishes: fullHotel.dishes?.filter(dish => dish.is_featured === true).map((dish) => getTranslatedContent(dish, currentLanguage)) || [],
+  dishes:
+    fullHotel.dishes
+      ?.filter((dish) => dish.is_featured === true)
+      .map((dish) => getTranslatedContent(dish, currentLanguage)) || [],
 
   // Other related data
   chatwoot_accounts: fullHotel.chatwoot_accounts || [],
@@ -99,7 +103,8 @@ if (!restaurant) {
 const restaurantData = {
   id: restaurant.id,
   name: getTranslatedContent(restaurant, currentLanguage).name || restaurant.name,
-  description: getTranslatedContent(restaurant, currentLanguage).description || restaurant.description,
+  description:
+    getTranslatedContent(restaurant, currentLanguage).description || restaurant.description,
   main_photo: restaurant.main_photo,
   main_video: restaurant.main_video,
 };
@@ -109,16 +114,22 @@ console.log(
 );
 
 // Breadcrumb data
-const breadcrumbs = [
+const _breadcrumbs = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Restaurant', href: `/${hotelSubdomain}/restaurant` },
 ];
 
 // Hero media URLs
-const heroImageUrl = restaurantData.main_photo ? getMediaUrl(restaurantData.main_photo.id, { width: 1920, height: 1080, quality: 95 }) : '';
-const heroVideoUrl = restaurantData.main_video ? getMediaUrl(restaurantData.main_video.id) : undefined;
+const _heroImageUrl = restaurantData.main_photo
+  ? getMediaUrl(restaurantData.main_photo.id, { width: 1920, height: 1080, quality: 95 })
+  : '';
+const heroVideoUrl = restaurantData.main_video
+  ? getMediaUrl(restaurantData.main_video.id)
+  : undefined;
 
-console.log(`🎥 Restaurant ${restaurantData.name}: has video = ${!!restaurantData.main_video}, videoUrl = ${heroVideoUrl}`);
+console.log(
+  `🎥 Restaurant ${restaurantData.name}: has video = ${!!restaurantData.main_video}, videoUrl = ${heroVideoUrl}`
+);
 ---
 
 <Layout
@@ -129,14 +140,14 @@ console.log(`🎥 Restaurant ${restaurantData.name}: has video = ${!!restaurantD
   hotelDomain={hotel.domain}
 >
   <!-- Breadcrumb Navigation -->
-  <Breadcrumb items={breadcrumbs} client:load />
+  <Breadcrumb items={_breadcrumbs} client:load />
 
   <!-- Hero Section -->
   <section class="relative h-[60vh] min-h-[400px] overflow-hidden">
     {heroVideoUrl ? (
       <video
         src={heroVideoUrl}
-        poster={heroImageUrl}
+        poster={_heroImageUrl}
         autoplay
         muted
         loop
@@ -147,7 +158,7 @@ console.log(`🎥 Restaurant ${restaurantData.name}: has video = ${!!restaurantD
       </video>
     ) : (
       <img
-        src={heroImageUrl}
+        src={_heroImageUrl}
         alt={restaurantData.name}
         class="absolute inset-0 w-full h-full object-cover"
       />
@@ -186,7 +197,7 @@ console.log(`🎥 Restaurant ${restaurantData.name}: has video = ${!!restaurantD
             Featured Dishes
           </h2>
           <p class="mx-auto max-w-2xl font-secondary text-base-content/80 text-lg">
-            Discover our chef's signature creations and most beloved specialties
+            Discover our chef&apos;s signature creations and most beloved specialties
           </p>
         </div>
 

@@ -1,9 +1,11 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: DetailPageLayout is used in JSX below
 import { DetailPageLayout } from '../../../components/DetailPageLayout.tsx';
-// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
 import Layout from '../../../layouts/Layout.astro';
-import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+} from '../../../lib/directus.js';
 
 export const prerender = true;
 
@@ -59,25 +61,22 @@ export async function getStaticPaths() {
   }
 }
 
-const {
-  activity,
-  hotel,
-  hotelSubdomain,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
-  defaultLanguage,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is used in JSX below
-  defaultCurrency,
-} = Astro.props;
+const { activity, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } =
+  Astro.props;
 
 // Hotel theme data will be handled globally by Layout.astro
 
 // Prepare activity data for DetailPageLayout
-// biome-ignore lint/correctness/noUnusedVariables: imageUrl is used in JSX below
 const imageUrl = activity.main_photo
-  ? getMediaUrl(activity.main_photo.id, { width: 1200, height: 675, quality: 95 })
+  ? getMediaUrl(activity.main_photo.id, {
+      width: 1200,
+      height: 675,
+      quality: 95,
+    })
   : '';
-// biome-ignore lint/correctness/noUnusedVariables: videoUrl is used in JSX below
-const videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
+const videoUrl = activity.main_video
+  ? getMediaUrl(activity.main_video.id)
+  : undefined;
 
 // Process media gallery
 const galleryImages = [];
@@ -107,7 +106,6 @@ galleryImages.sort((a, b) => {
   return 0;
 });
 
-// biome-ignore lint/correctness/noUnusedVariables: activityMetadata is used in JSX below
 const activityMetadata = {
   category: activity.category,
   durationMinutes: activity.duration_minutes,
@@ -120,7 +118,6 @@ const activityMetadata = {
   bookingRequired: activity.booking_required,
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: breadcrumbItems is used in JSX below
 const breadcrumbItems = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Activities', href: `/${hotelSubdomain}#activities` },
@@ -130,7 +127,8 @@ const breadcrumbItems = [
 
 <Layout
   title={`${activity.name} - ${hotel.name}`}
-  description={activity.description || `Join our exciting ${activity.name} activity at ${hotel.name}`}
+  description={activity.description ||
+    `Join our exciting ${activity.name} activity at ${hotel.name}`}
   domain={hotel.domain}
   ga4Id={hotel.analytics?.ga4_id}
   pixelId={hotel.analytics?.pixel_id}
@@ -140,7 +138,8 @@ const breadcrumbItems = [
 >
   <DetailPageLayout
     title={activity.name}
-    description={activity.description || `Experience our exciting ${activity.name} activity.`}
+    description={activity.description ||
+      `Experience our exciting ${activity.name} activity.`}
     type="activity"
     imageUrl={imageUrl}
     videoUrl={videoUrl}

@@ -1,9 +1,11 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: DetailPageLayout is used in JSX below
 import { DetailPageLayout } from '../../../components/DetailPageLayout.tsx';
-// biome-ignore lint/correctness/noUnusedImports: Layout is used in JSX below
 import Layout from '../../../layouts/Layout.astro';
-import { getAllHotels, getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+} from '../../../lib/directus.js';
 
 export const prerender = true;
 
@@ -59,23 +61,22 @@ export async function getStaticPaths() {
   }
 }
 
-const {
-  facility,
-  hotel,
-  hotelSubdomain,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
-  defaultLanguage,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is used in JSX below
-  defaultCurrency,
-} = Astro.props;
+const { facility, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } =
+  Astro.props;
 
 // Hotel theme data will be handled globally by Layout.astro
 
 // Prepare facility data for DetailPageLayout
 const _imageUrl = facility.main_photo
-  ? getMediaUrl(facility.main_photo.id, { width: 1200, height: 675, quality: 95 })
+  ? getMediaUrl(facility.main_photo.id, {
+      width: 1200,
+      height: 675,
+      quality: 95,
+    })
   : '';
-const _videoUrl = facility.main_video ? getMediaUrl(facility.main_video.id) : undefined;
+const _videoUrl = facility.main_video
+  ? getMediaUrl(facility.main_video.id)
+  : undefined;
 
 // Process media gallery
 const galleryImages = [];
@@ -115,7 +116,9 @@ const operatingHoursString = facility.operating_hours
   : null;
 
 // Convert amenities array to string array if needed
-const facilityAmenities = Array.isArray(facility.amenities) ? facility.amenities : [];
+const facilityAmenities = Array.isArray(facility.amenities)
+  ? facility.amenities
+  : [];
 
 const _facilityMetadata = {
   facilityCategory: facility.category,
@@ -123,7 +126,9 @@ const _facilityMetadata = {
   capacity: facility.capacity,
   operatingHours: operatingHoursString,
   facilityBookingRequired: facility.booking_required,
-  pricePerHour: facility.price_per_hour ? `${facility.price_per_hour}` : undefined,
+  pricePerHour: facility.price_per_hour
+    ? `${facility.price_per_hour}`
+    : undefined,
   facilityAmenities: facilityAmenities,
   facilityAgeRestriction: facility.age_restriction,
   dressCode: facility.dress_code,
@@ -139,7 +144,8 @@ const _breadcrumbItems = [
 
 <Layout
   title={`${facility.name} - ${hotel.name}`}
-  description={facility.description || `Enjoy our ${facility.name} facility at ${hotel.name}`}
+  description={facility.description ||
+    `Enjoy our ${facility.name} facility at ${hotel.name}`}
   domain={hotel.domain}
   ga4Id={hotel.analytics?.ga4_id}
   pixelId={hotel.analytics?.pixel_id}
@@ -149,7 +155,8 @@ const _breadcrumbItems = [
 >
   <DetailPageLayout
     title={facility.name}
-    description={facility.description || `Experience our ${facility.name} facility.`}
+    description={facility.description ||
+      `Experience our ${facility.name} facility.`}
     type="facility"
     imageUrl={_imageUrl}
     videoUrl={_videoUrl}

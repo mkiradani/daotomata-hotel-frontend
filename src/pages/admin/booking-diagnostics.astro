@@ -13,51 +13,87 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
 ---
 
 <Layout title={pageTitle}>
-  <main class="min-h-screen bg-base-200">
-    <div class="container mx-auto px-4 py-8">
+  <main class="bg-base-200 min-h-screen">
+    <div class="mx-auto px-4 py-8 container">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold text-primary mb-2">Booking System Diagnostics</h1>
-        <p class="text-lg opacity-70">Diagnose and troubleshoot booking system configuration for {hotel.name}</p>
+        <h1 class="mb-2 font-bold text-primary text-4xl">
+          Booking System Diagnostics
+        </h1>
+        <p class="opacity-70 text-lg">
+          Diagnose and troubleshoot booking system configuration for {
+            hotel.name
+          }
+        </p>
       </div>
 
       <!-- Diagnostics Results -->
       <div id="diagnostics-container" class="space-y-6">
         <!-- Loading State -->
-        <div class="card bg-base-100 shadow-xl">
+        <div class="bg-base-100 shadow-xl card">
           <div class="card-body">
             <div class="flex justify-center py-8">
-              <span class="loading loading-spinner loading-lg text-primary"></span>
+              <span class="text-primary loading loading-spinner loading-lg"
+              ></span>
             </div>
-            <p class="text-center opacity-70">Running diagnostics...</p>
+            <p class="opacity-70 text-center">Running diagnostics...</p>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="mt-8">
-        <div class="card bg-base-100 shadow-xl">
+        <div class="bg-base-100 shadow-xl card">
           <div class="card-body">
-            <h3 class="card-title text-primary mb-4">Quick Actions</h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h3 class="mb-4 text-primary card-title">Quick Actions</h3>
+
+            <div class="gap-4 grid grid-cols-1 md:grid-cols-3">
               <button id="refresh-diagnostics" class="btn btn-primary">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                <svg
+                  class="mr-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  ></path>
                 </svg>
                 Refresh Diagnostics
               </button>
-              
-              <button id="test-connection" class="btn btn-outline">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+
+              <button id="test-connection" class="btn-outline btn">
+                <svg
+                  class="mr-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
                 Test Connection
               </button>
-              
-              <button id="test-availability" class="btn btn-outline">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h3z"/>
+
+              <button id="test-availability" class="btn-outline btn">
+                <svg
+                  class="mr-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h3z"
+                  ></path>
                 </svg>
                 Test Availability
               </button>
@@ -70,18 +106,20 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
 
   <script>
     const hotelDomain = window.location.hostname;
-    let currentDiagnostics = null;
+    let _currentDiagnostics = null;
 
     // Load diagnostics
     async function loadDiagnostics() {
-      const container = document.getElementById('diagnostics-container');
-      
+      const _container = document.getElementById('diagnostics-container');
+
       try {
-        const response = await fetch(`/api/booking/diagnose?hotelDomain=${encodeURIComponent(hotelDomain)}`);
+        const response = await fetch(
+          `/api/booking/diagnose?hotelDomain=${encodeURIComponent(hotelDomain)}`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
-          currentDiagnostics = data.diagnostics;
+          _currentDiagnostics = data.diagnostics;
           renderDiagnostics(data.diagnostics, data.connectionTest);
         } else {
           renderError(data.error || 'Failed to load diagnostics');
@@ -94,16 +132,16 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
     // Render diagnostics results
     function renderDiagnostics(diagnostics, connectionTest) {
       const container = document.getElementById('diagnostics-container');
-      
+
       const hasIssues = diagnostics.issues.length > 0;
       const statusColor = hasIssues ? 'error' : 'success';
       const statusIcon = hasIssues ? '❌' : '✅';
-      
+
       container.innerHTML = `
         <!-- Overall Status -->
         <div class="alert alert-${statusColor}">
           <div class="flex items-center">
-            <span class="text-2xl mr-3">${statusIcon}</span>
+            <span class="mr-3 text-2xl">${statusIcon}</span>
             <div>
               <h3 class="font-bold">
                 ${hasIssues ? 'Configuration Issues Detected' : 'System Configuration OK'}
@@ -116,10 +154,10 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
         </div>
 
         <!-- Hotel Information -->
-        <div class="card bg-base-100 shadow-xl">
+        <div class="bg-base-100 shadow-xl card">
           <div class="card-body">
-            <h3 class="card-title text-primary">Hotel Information</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h3 class="text-primary card-title">Hotel Information</h3>
+            <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
                 <p><strong>Name:</strong> ${diagnostics.hotel.name}</p>
                 <p><strong>Domain:</strong> ${diagnostics.hotel.domain}</p>
@@ -133,21 +171,21 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
         </div>
 
         <!-- Configuration Status -->
-        <div class="card bg-base-100 shadow-xl">
+        <div class="bg-base-100 shadow-xl card">
           <div class="card-body">
-            <h3 class="card-title text-primary">Configuration Status</h3>
+            <h3 class="text-primary card-title">Configuration Status</h3>
             
             <div class="space-y-4">
               <div>
-                <h4 class="font-semibold mb-2">Booking Capabilities</h4>
+                <h4 class="mb-2 font-semibold">Booking Capabilities</h4>
                 <div class="badge ${diagnostics.configuration.hasBookingCapabilities ? 'badge-success' : 'badge-error'}">
                   ${diagnostics.configuration.hasBookingCapabilities ? '✅ Enabled' : '❌ Disabled'}
                 </div>
               </div>
               
               <div>
-                <h4 class="font-semibold mb-2">Cloudbeds Configuration</h4>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <h4 class="mb-2 font-semibold">Cloudbeds Configuration</h4>
+                <div class="gap-2 grid grid-cols-2 md:grid-cols-4">
                   <div class="badge ${diagnostics.configuration.cloudbeds.client_id.includes('✅') ? 'badge-success' : 'badge-error'}">
                     Client ID: ${diagnostics.configuration.cloudbeds.client_id}
                   </div>
@@ -164,7 +202,7 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
               </div>
               
               <div>
-                <h4 class="font-semibold mb-2">Other Settings</h4>
+                <h4 class="mb-2 font-semibold">Other Settings</h4>
                 <p><strong>Default Currency:</strong> ${diagnostics.configuration.other.default_currency}</p>
                 <p><strong>Default Language:</strong> ${diagnostics.configuration.other.default_language}</p>
               </div>
@@ -173,19 +211,19 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
         </div>
 
         <!-- Room Information -->
-        <div class="card bg-base-100 shadow-xl">
+        <div class="bg-base-100 shadow-xl card">
           <div class="card-body">
-            <h3 class="card-title text-primary">Room Configuration</h3>
+            <h3 class="text-primary card-title">Room Configuration</h3>
             
-            <div class="stats stats-vertical lg:stats-horizontal shadow mb-4">
+            <div class="shadow mb-4 stats stats-vertical lg:stats-horizontal">
               <div class="stat">
                 <div class="stat-title">Total Rooms</div>
-                <div class="stat-value text-primary">${diagnostics.rooms.total}</div>
+                <div class="text-primary stat-value">${diagnostics.rooms.total}</div>
               </div>
               
               <div class="stat">
                 <div class="stat-title">With PMS ID</div>
-                <div class="stat-value text-success">${diagnostics.rooms.withPmsId}</div>
+                <div class="text-success stat-value">${diagnostics.rooms.withPmsId}</div>
               </div>
               
               <div class="stat">
@@ -194,7 +232,9 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
               </div>
             </div>
             
-            ${diagnostics.rooms.list.length > 0 ? `
+            ${
+              diagnostics.rooms.list.length > 0
+                ? `
               <div class="overflow-x-auto">
                 <table class="table table-zebra">
                   <thead>
@@ -206,7 +246,9 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
                     </tr>
                   </thead>
                   <tbody>
-                    ${diagnostics.rooms.list.map(room => `
+                    ${diagnostics.rooms.list
+                      .map(
+                        room => `
                       <tr>
                         <td>${room.name}</td>
                         <td>${room.room_type}</td>
@@ -217,54 +259,74 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
                           </span>
                         </td>
                       </tr>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                   </tbody>
                 </table>
               </div>
-            ` : '<p class="text-center opacity-70">No rooms configured</p>'}
+            `
+                : '<p class="opacity-70 text-center">No rooms configured</p>'
+            }
           </div>
         </div>
 
         <!-- Issues and Recommendations -->
-        ${diagnostics.issues.length > 0 ? `
-          <div class="card bg-base-100 shadow-xl">
+        ${
+          diagnostics.issues.length > 0
+            ? `
+          <div class="bg-base-100 shadow-xl card">
             <div class="card-body">
-              <h3 class="card-title text-error">Issues Found</h3>
-              <ul class="list-disc list-inside space-y-1">
+              <h3 class="text-error card-title">Issues Found</h3>
+              <ul class="space-y-1 list-disc list-inside">
                 ${diagnostics.issues.map(issue => `<li class="text-error">${issue}</li>`).join('')}
               </ul>
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
-        ${diagnostics.recommendations.length > 0 ? `
-          <div class="card bg-base-100 shadow-xl">
+        ${
+          diagnostics.recommendations.length > 0
+            ? `
+          <div class="bg-base-100 shadow-xl card">
             <div class="card-body">
-              <h3 class="card-title text-warning">Recommendations</h3>
-              <ul class="list-disc list-inside space-y-1">
+              <h3 class="text-warning card-title">Recommendations</h3>
+              <ul class="space-y-1 list-disc list-inside">
                 ${diagnostics.recommendations.map(rec => `<li class="text-warning">${rec}</li>`).join('')}
               </ul>
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- Connection Test Results -->
-        ${connectionTest ? `
-          <div class="card bg-base-100 shadow-xl">
+        ${
+          connectionTest
+            ? `
+          <div class="bg-base-100 shadow-xl card">
             <div class="card-body">
-              <h3 class="card-title text-primary">Connection Test</h3>
+              <h3 class="text-primary card-title">Connection Test</h3>
               <div class="alert ${connectionTest.status === 'success' ? 'alert-success' : 'alert-error'}">
                 <span>${connectionTest.message}</span>
               </div>
-              ${connectionTest.error ? `
+              ${
+                connectionTest.error
+                  ? `
                 <details class="mt-4">
-                  <summary class="cursor-pointer font-semibold">Error Details</summary>
-                  <pre class="text-xs mt-2 p-2 bg-base-200 rounded overflow-x-auto">${connectionTest.error}</pre>
+                  <summary class="font-semibold cursor-pointer">Error Details</summary>
+                  <pre class="bg-base-200 mt-2 p-2 rounded overflow-x-auto text-xs">${connectionTest.error}</pre>
                 </details>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       `;
     }
 
@@ -273,7 +335,7 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
       const container = document.getElementById('diagnostics-container');
       container.innerHTML = `
         <div class="alert alert-error">
-          <svg class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <svg class="stroke-current w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>Error loading diagnostics: ${error}</span>
@@ -284,11 +346,11 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
     // Test action
     async function testAction(action) {
       const button = document.getElementById(`test-${action}`);
-      const originalText = button.textContent;
-      
+      const _originalText = button.textContent;
+
       button.classList.add('loading');
       button.disabled = true;
-      
+
       try {
         const response = await fetch('/api/booking/diagnose', {
           method: 'POST',
@@ -298,12 +360,15 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
             action: `test-${action}`,
           }),
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success && data.result) {
-          const status = data.result.status === 'success' ? 'success' : 'error';
-          alert(`${action.charAt(0).toUpperCase() + action.slice(1)} Test: ${data.result.message}`);
+          const _status =
+            data.result.status === 'success' ? 'success' : 'error';
+          alert(
+            `${action.charAt(0).toUpperCase() + action.slice(1)} Test: ${data.result.message}`
+          );
         } else {
           alert(`Test failed: ${data.error || 'Unknown error'}`);
         }
@@ -316,9 +381,15 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
     }
 
     // Event listeners
-    document.getElementById('refresh-diagnostics')?.addEventListener('click', loadDiagnostics);
-    document.getElementById('test-connection')?.addEventListener('click', () => testAction('connection'));
-    document.getElementById('test-availability')?.addEventListener('click', () => testAction('availability'));
+    document
+      .getElementById('refresh-diagnostics')
+      ?.addEventListener('click', loadDiagnostics);
+    document
+      .getElementById('test-connection')
+      ?.addEventListener('click', () => testAction('connection'));
+    document
+      .getElementById('test-availability')
+      ?.addEventListener('click', () => testAction('availability'));
 
     // Load diagnostics on page load
     loadDiagnostics();

@@ -1,5 +1,4 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: getMediaUrl is used in JSX below
 import { getMediaUrl } from '../lib/directus.js';
 
 interface HotelInfo {
@@ -22,15 +21,11 @@ export interface Props {
 }
 
 const {
-  // biome-ignore lint/correctness/noUnusedVariables: hotelName is used in JSX below
   hotelName,
   hotelDomain,
-  // biome-ignore lint/correctness/noUnusedVariables: currentPath is used in JSX below
   currentPath = '',
-  themeConfig = {},
-  // biome-ignore lint/correctness/noUnusedVariables: hotelLogo is used in JSX below
+  themeConfig: _themeConfig = {},
   hotelLogo = null,
-  // biome-ignore lint/correctness/noUnusedVariables: hotelInfo is used in JSX below
   hotelInfo = null,
 } = Astro.props;
 
@@ -54,26 +49,48 @@ const _navItems = [
 ---
 
 <!-- DaisyUI Navbar with automatic theme support -->
-<div class="top-0 z-50 sticky bg-base-100 border-b border-base-300 navbar" id="navbar">
+<div
+  class="top-0 z-50 sticky bg-base-100 border-b border-base-300 navbar"
+  id="navbar"
+>
   <div class="navbar-start">
     <!-- Mobile menu button -->
     <div class="lg:hidden dropdown">
-      <div tabindex="0" role="button" class="btn btn-ghost" id="mobile-menu-btn" aria-label="Toggle menu">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      <div
+        tabindex="0"
+        role="button"
+        class="btn btn-ghost"
+        id="mobile-menu-btn"
+        aria-label="Toggle menu"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </div>
-      <ul tabindex="0" class="z-[1] bg-base-100 shadow mt-3 p-2 border border-base-300 rounded-box w-52 menu menu-sm dropdown-content">
-        {_navItems.map(item => (
-          <li>
-            <a
-              href={item.href}
-              class={`font-primary ${currentPath === item.href ? 'active text-primary bg-primary/10' : 'text-base-content hover:text-primary'}`}
-            >
-              {item.name}
-            </a>
-          </li>
-        ))}
+      <ul
+        class="z-[1] bg-base-100 shadow mt-3 p-2 border border-base-300 rounded-box w-52 menu menu-sm dropdown-content"
+      >
+        {
+          _navItems.map(item => (
+            <li>
+              <a
+                href={item.href}
+                class={`font-primary ${currentPath === item.href ? 'active text-primary bg-primary/10' : 'text-base-content hover:text-primary'}`}
+              >
+                {item.name}
+              </a>
+            </li>
+          ))
+        }
         <li class="mt-2">
           <a href={`/${hotelSubdomain}/book`} class="btn btn-primary btn-sm">
             Book Now
@@ -83,32 +100,39 @@ const _navItems = [
     </div>
 
     <!-- Logo/Brand -->
-    <a href={`/${hotelSubdomain}`} class="hover:bg-primary/10 font-primary font-bold text-primary text-xl btn btn-ghost">
-      {priorityLogo && priorityLogo.id ? (
-        <img
-          src={getMediaUrl(priorityLogo.id, { height: 40, quality: 90 })}
-          alt={priorityLogo.title || hotelName}
-          class="w-auto h-8"
-        />
-      ) : (
-        <span>{hotelName}</span>
-      )}
+    <a
+      href={`/${hotelSubdomain}`}
+      class="hover:bg-primary/10 font-primary font-bold text-primary text-xl btn btn-ghost"
+    >
+      {
+        priorityLogo && priorityLogo.id ? (
+          <img
+            src={getMediaUrl(priorityLogo.id, { height: 40, quality: 90 })}
+            alt={priorityLogo.title || hotelName}
+            class="w-auto h-8"
+          />
+        ) : (
+          <span>{hotelName}</span>
+        )
+      }
     </a>
   </div>
 
   <!-- Desktop Navigation -->
   <div class="hidden lg:flex navbar-center">
     <ul class="gap-1 px-1 menu menu-horizontal">
-      {_navItems.map(item => (
-        <li>
-          <a
-            href={item.href}
-            class={`font-primary font-medium ${currentPath === item.href ? 'active text-primary bg-primary/10' : 'text-base-content hover:text-primary hover:bg-primary/5'}`}
-          >
-            {item.name}
-          </a>
-        </li>
-      ))}
+      {
+        _navItems.map(item => (
+          <li>
+            <a
+              href={item.href}
+              class={`font-primary font-medium ${currentPath === item.href ? 'active text-primary bg-primary/10' : 'text-base-content hover:text-primary hover:bg-primary/5'}`}
+            >
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </div>
 

@@ -1,9 +1,12 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: ActivityCard is used in JSX below
 import { ActivityCard } from '../../components/ActivityCard.tsx';
-// biome-ignore lint/correctness/noUnusedImports: CollectionPageLayout is used in JSX below
 import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
-import { getAllHotels, getHotelByDomain, getMediaUrl, getTranslatedContent } from '../../lib/directus.js';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../../lib/directus.js';
 
 export const prerender = true;
 
@@ -44,9 +47,7 @@ export async function getStaticPaths() {
 const {
   hotel: hotelData,
   hotelSubdomain,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultLanguage is part of the data structure for future use
   defaultLanguage,
-  // biome-ignore lint/correctness/noUnusedVariables: defaultCurrency is part of the data structure for future use
   defaultCurrency,
 } = Astro.props;
 
@@ -64,7 +65,9 @@ if (!fullHotel) {
 const hotel = {
   id: fullHotel.id,
   name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
-  description: getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
+  description:
+    getTranslatedContent(fullHotel, currentLanguage).description ||
+    fullHotel.description,
   domain: fullHotel.domain,
   default_currency: fullHotel.default_currency || defaultCurrency,
 
@@ -85,14 +88,17 @@ const hotel = {
   location: fullHotel.location || null,
 
   // Related data with translations - focus on activities (experiences) for this page
-  activities: fullHotel.activities?.map((activity) => getTranslatedContent(activity, currentLanguage)) || [],
+  activities:
+    fullHotel.activities?.map(activity =>
+      getTranslatedContent(activity, currentLanguage)
+    ) || [],
 
   // Other related data
   chatwoot_accounts: fullHotel.chatwoot_accounts || [],
 };
 
 // Breadcrumb items
-const breadcrumbItems = [
+const _breadcrumbItems = [
   { label: 'Home', href: `/${hotelSubdomain}` },
   { label: 'Experiences' },
 ];
@@ -112,7 +118,7 @@ console.log(
   hotelDomain={hotel.domain}
   items={hotel.activities || []}
   itemType="experiences"
-  breadcrumbItems={breadcrumbItems}
+  breadcrumbItems={_breadcrumbItems}
   ctaTitle="Ready for Your Next Adventure?"
   ctaDescription={`Book your stay at ${hotel.name} and unlock access to all our exclusive experiences and activities.`}
   ctaPrimaryText="Book Now"
@@ -122,36 +128,49 @@ console.log(
   gridId="experiencesGrid"
 >
   <Fragment slot="items">
-    {hotel.activities?.map((activity, index) => {
-      const imageUrl = activity.main_photo ? getMediaUrl(activity.main_photo.id, { width: 800, height: 450, quality: 95 }) : '';
-      const videoUrl = activity.main_video ? getMediaUrl(activity.main_video.id) : undefined;
+    {
+      hotel.activities?.map((activity, index) => {
+        const imageUrl = activity.main_photo
+          ? getMediaUrl(activity.main_photo.id, {
+              width: 800,
+              height: 450,
+              quality: 95,
+            })
+          : '';
+        const videoUrl = activity.main_video
+          ? getMediaUrl(activity.main_video.id)
+          : undefined;
 
-      // Create slug from activity name
-      const activitySlug = activity.name.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+        // Create slug from activity name
+        const activitySlug = activity.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
 
-      console.log(`🎥 Activity ${activity.name}: has video = ${!!activity.main_video}, videoUrl = ${videoUrl}`);
+        console.log(
+          `🎥 Activity ${activity.name}: has video = ${!!activity.main_video}, videoUrl = ${videoUrl}`
+        );
 
-      return (
-        <ActivityCard
-          key={activity.id || index}
-          name={activity.name}
-          description={activity.description}
-          maxParticipants={activity.max_participants}
-          ageRestriction={activity.age_restriction}
-          equipmentProvided={activity.equipment_provided}
-          operatingHours={activity.operating_hours}
-          defaultCurrency={defaultCurrency}
-          imageUrl={imageUrl}
-          videoUrl={videoUrl}
-          isLast={index === hotel.activities.length - 1}
-          isOdd={hotel.activities.length % 2 !== 0}
-          hotelSlug={hotelSubdomain}
-          activitySlug={activitySlug}
-          client:load
-        />
-      );
-    })}
+        return (
+          <ActivityCard
+            key={activity.id || index}
+            name={activity.name}
+            description={activity.description}
+            maxParticipants={activity.max_participants}
+            ageRestriction={activity.age_restriction}
+            equipmentProvided={activity.equipment_provided}
+            operatingHours={activity.operating_hours}
+            defaultCurrency={defaultCurrency}
+            imageUrl={imageUrl}
+            videoUrl={videoUrl}
+            isLast={index === hotel.activities.length - 1}
+            isOdd={hotel.activities.length % 2 !== 0}
+            hotelSlug={hotelSubdomain}
+            activitySlug={activitySlug}
+            client:load
+          />
+        );
+      })
+    }
   </Fragment>
 </CollectionPageLayout>

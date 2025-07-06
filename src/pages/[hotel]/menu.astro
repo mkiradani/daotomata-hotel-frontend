@@ -1,8 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Breadcrumb } from '../../components/Breadcrumb';
-import { DishCard } from '../../components/DishCard';
-import { getAllHotels, getHotelByDomain, getMediaUrl, getTranslatedContent, getDishesByHotelId } from '../../lib/directus.js';
+import { Breadcrumb } from '../../components/Breadcrumb.tsx';
+import { DishCard } from '../../components/DishCard.tsx';
+import {
+  getAllHotels,
+  getDishesByHotelId,
+  getHotelByDomain,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../../lib/directus.js';
 
 export async function getStaticPaths() {
   console.log('🍽️ Generating static paths for menu pages...');
@@ -38,12 +44,7 @@ export async function getStaticPaths() {
   }
 }
 
-const {
-  hotel: hotelData,
-  hotelSubdomain,
-  defaultLanguage,
-  defaultCurrency,
-} = Astro.props;
+const { hotel: hotelData, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
 
 // Get current language (default to English for now)
 const currentLanguage = defaultLanguage || 'en-US';
@@ -59,7 +60,8 @@ if (!fullHotel) {
 const hotel = {
   id: fullHotel.id,
   name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
-  description: getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
+  description:
+    getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
   domain: fullHotel.domain,
   default_currency: fullHotel.default_currency || defaultCurrency,
 
@@ -96,7 +98,8 @@ if (!restaurant) {
 const restaurantData = {
   id: restaurant.id,
   name: getTranslatedContent(restaurant, currentLanguage).name || restaurant.name,
-  description: getTranslatedContent(restaurant, currentLanguage).description || restaurant.description,
+  description:
+    getTranslatedContent(restaurant, currentLanguage).description || restaurant.description,
   main_photo: restaurant.main_photo,
   main_video: restaurant.main_video,
 };
@@ -110,15 +113,19 @@ console.log(
 );
 
 // Breadcrumb data
-const breadcrumbs = [
+const _breadcrumbs = [
   { label: hotel.name, href: `/${hotelSubdomain}` },
   { label: 'Restaurant', href: `/${hotelSubdomain}/restaurant` },
   { label: 'Menu', href: `/${hotelSubdomain}/menu` },
 ];
 
 // Hero media URLs
-const heroImageUrl = restaurantData.main_photo ? getMediaUrl(restaurantData.main_photo.id, { width: 1920, height: 1080, quality: 95 }) : '';
-const heroVideoUrl = restaurantData.main_video ? getMediaUrl(restaurantData.main_video.id) : undefined;
+const _heroImageUrl = restaurantData.main_photo
+  ? getMediaUrl(restaurantData.main_photo.id, { width: 1920, height: 1080, quality: 95 })
+  : '';
+const _heroVideoUrl = restaurantData.main_video
+  ? getMediaUrl(restaurantData.main_video.id)
+  : undefined;
 
 // Group dishes by category if they have one
 const groupedDishes = dishes.reduce((acc, dish) => {
@@ -130,7 +137,9 @@ const groupedDishes = dishes.reduce((acc, dish) => {
   return acc;
 }, {});
 
-console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).length} categories, ${dishes.length} total dishes`);
+console.log(
+  `🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).length} categories, ${dishes.length} total dishes`
+);
 ---
 
 <Layout
@@ -141,14 +150,14 @@ console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).l
   hotelDomain={hotel.domain}
 >
   <!-- Breadcrumb Navigation -->
-  <Breadcrumb items={breadcrumbs} client:load />
+  <Breadcrumb items={_breadcrumbs} client:load />
 
   <!-- Hero Section -->
   <section class="relative h-[50vh] min-h-[300px] overflow-hidden">
-    {heroVideoUrl ? (
+    {_heroVideoUrl ? (
       <video
-        src={heroVideoUrl}
-        poster={heroImageUrl}
+        src={_heroVideoUrl}
+        poster={_heroImageUrl}
         autoplay
         muted
         loop
@@ -159,7 +168,7 @@ console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).l
       </video>
     ) : (
       <img
-        src={heroImageUrl}
+        src={_heroImageUrl}
         alt={restaurantData.name}
         class="absolute inset-0 w-full h-full object-cover"
       />
@@ -192,7 +201,7 @@ console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).l
                 {category}
               </h2>
               {category !== 'Main Menu' && (
-                <div class="mx-auto w-24 h-1 bg-primary/20 rounded"></div>
+                <div class="bg-primary/20 mx-auto rounded w-24 h-1"></div>
               )}
             </div>
 
@@ -228,7 +237,7 @@ console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).l
         <div class="text-center">
           <a
             href={`/${hotelSubdomain}/restaurant`}
-            class="font-secondary btn btn-outline btn-lg"
+            class="btn-outline font-secondary btn btn-lg"
           >
             Back to Restaurant
           </a>
@@ -236,14 +245,13 @@ console.log(`🍽️ Menu ${restaurantData.name}: ${Object.keys(groupedDishes).l
       </div>
     </section>
   ) : (
-    <!-- No Dishes Message -->
     <section class="bg-base-100 py-16">
       <div class="mx-auto px-4 text-center container">
         <h2 class="mb-4 font-primary font-bold text-primary text-3xl md:text-4xl">
           Menu Coming Soon
         </h2>
         <p class="mx-auto mb-8 max-w-2xl font-secondary text-base-content/80 text-lg">
-          We're working on updating our menu. Please contact us directly for current offerings.
+          We&apos;re working on updating our menu. Please contact us directly for current offerings.
         </p>
         
         <!-- CTAs -->
