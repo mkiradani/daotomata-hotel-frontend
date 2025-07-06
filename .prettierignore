@@ -5,7 +5,9 @@ src/components/HotelHeader.astro
 src/components/Navbar.astro
 src/components/RoomGrid.astro
 src/layouts/Layout.astro
+src/layouts/CollectionPageLayout.astro
 src/pages/multitenant-showcase.astro
+src/pages/[hotel]/contact.astro
 
 # Non-code files
 src/lib/booking-engines/README.md

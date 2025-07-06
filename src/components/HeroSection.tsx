@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$ } from '@builder.io/qwik';
+import { component$ } from "@builder.io/qwik";
 
 interface HeroSectionProps {
   hotelName: string;
@@ -53,20 +53,25 @@ export const HeroSection = component$<HeroSectionProps>(
         {/* Content */}
         <div class="z-10 relative mx-auto px-4 max-w-4xl text-neutral-content text-center">
           <h1 class="mb-6 font-primary font-bold text-6xl">{hotelName}</h1>
-          <p class="opacity-90 mb-8 font-secondary text-xl">Welcome to an extraordinary experience</p>
+          <p class="opacity-90 mb-8 font-secondary text-xl">
+            Welcome to an extraordinary experience
+          </p>
 
           {/* Language & Currency Selector */}
           <div class="flex justify-center gap-4 mb-8">
             <select class="bg-base-100/20 backdrop-blur-sm px-4 py-2 border border-base-content/20 rounded-lg text-neutral-content">
               {availableLanguages.map((lang) => (
                 <option value={lang} selected={lang === currentLanguage}>
-                  {lang.split('-')[0].toUpperCase()}
+                  {lang.split("-")[0].toUpperCase()}
                 </option>
               ))}
             </select>
             <select class="bg-base-100/20 backdrop-blur-sm px-4 py-2 border border-base-content/20 rounded-lg text-neutral-content">
               {availableCurrencies.map((currency) => (
-                <option value={currency} selected={currency === defaultCurrency}>
+                <option
+                  value={currency}
+                  selected={currency === defaultCurrency}
+                >
                   {currency}
                 </option>
               ))}
@@ -85,7 +90,12 @@ export const HeroSection = component$<HeroSectionProps>(
 
         {/* Scroll indicator */}
         <div class="bottom-8 left-1/2 absolute text-neutral-content -translate-x-1/2 animate-bounce transform">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <title>Scroll down arrow</title>
             <path
               stroke-linecap="round"
@@ -97,5 +107,5 @@ export const HeroSection = component$<HeroSectionProps>(
         </div>
       </section>
     );
-  }
+  },
 );
