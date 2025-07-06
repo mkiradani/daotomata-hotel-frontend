@@ -3,7 +3,11 @@
  */
 
 import { CloudbedsEngine } from './cloudbeds-engine';
-import type { BookingEngineConfig, IBookingEngine, IBookingEngineFactory } from './types';
+import type {
+  BookingEngineConfig,
+  IBookingEngine,
+  IBookingEngineFactory,
+} from './types';
 import { ConfigurationError } from './types';
 
 /**
@@ -28,19 +32,27 @@ export class BookingEngineFactory implements IBookingEngineFactory {
 
       case 'booking.com':
         // TODO: Implement Booking.com engine
-        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+        throw new ConfigurationError(
+          `Booking engine '${type}' is not implemented yet`
+        );
 
       case 'expedia':
         // TODO: Implement Expedia engine
-        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+        throw new ConfigurationError(
+          `Booking engine '${type}' is not implemented yet`
+        );
 
       case 'airbnb':
         // TODO: Implement Airbnb engine
-        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+        throw new ConfigurationError(
+          `Booking engine '${type}' is not implemented yet`
+        );
 
       case 'custom':
         // TODO: Implement custom engine interface
-        throw new ConfigurationError(`Booking engine '${type}' is not implemented yet`);
+        throw new ConfigurationError(
+          `Booking engine '${type}' is not implemented yet`
+        );
 
       default:
         throw new ConfigurationError(`Unknown booking engine type: ${type}`);
@@ -54,7 +66,9 @@ export class BookingEngineFactory implements IBookingEngineFactory {
   /**
    * Create and initialize a booking engine from hotel configuration
    */
-  async createFromHotelConfig(hotelData: Record<string, unknown>): Promise<IBookingEngine> {
+  async createFromHotelConfig(
+    hotelData: Record<string, unknown>
+  ): Promise<IBookingEngine> {
     const config = this.extractBookingConfig(hotelData);
     const engine = this.createEngine(config.type);
     await engine.initialize(config);
@@ -64,7 +78,9 @@ export class BookingEngineFactory implements IBookingEngineFactory {
   /**
    * Extract booking engine configuration from hotel data
    */
-  private extractBookingConfig(hotelData: Record<string, unknown>): BookingEngineConfig {
+  private extractBookingConfig(
+    hotelData: Record<string, unknown>
+  ): BookingEngineConfig {
     const pmsType = hotelData.pms_type;
 
     if (!pmsType) {
@@ -108,7 +124,9 @@ export class BookingEngineFactory implements IBookingEngineFactory {
   /**
    * Get available booking engines for a hotel based on its configuration
    */
-  getAvailableEnginesForHotel(hotelData: Record<string, unknown>): BookingEngineConfig['type'][] {
+  getAvailableEnginesForHotel(
+    hotelData: Record<string, unknown>
+  ): BookingEngineConfig['type'][] {
     const availableEngines: BookingEngineConfig['type'][] = [];
 
     // Check Cloudbeds
@@ -145,7 +163,9 @@ export const createBookingEngineForHotel = async (
 /**
  * Convenience function to check if a hotel has booking capabilities
  */
-export const hasBookingCapabilities = (hotelData: Record<string, unknown>): boolean => {
+export const hasBookingCapabilities = (
+  hotelData: Record<string, unknown>
+): boolean => {
   const factory = getBookingEngineFactory();
   return factory.validateHotelConfig(hotelData);
 };

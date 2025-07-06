@@ -2,7 +2,11 @@
  * Cloudbeds booking engine implementation
  */
 
-import { type CloudbedsRoom, type DirectusRoom, RoomMappingService } from './room-mapping-service';
+import {
+  type CloudbedsRoom,
+  type DirectusRoom,
+  RoomMappingService,
+} from './room-mapping-service';
 import type {
   BookingEngineConfig,
   BookingRequest,
@@ -12,7 +16,23 @@ import type {
   RoomAvailability,
   RoomRate,
 } from './types';
-import { AvailabilityError, BookingEngineError, BookingError, ConfigurationError } from './types';
+import {
+  AvailabilityError,
+  BookingEngineError,
+  BookingError,
+  ConfigurationError,
+} from './types';
+import type {
+  CloudbedsApiResponse,
+  CloudbedsAvailabilityResponse,
+  CloudbedsBookingRequest,
+  CloudbedsBookingResponse,
+  CloudbedsDiagnosticResponse,
+  CloudbedsPropertyResponse,
+  CloudbedsRatesResponse,
+  CloudbedsRequestOptions,
+  CloudbedsRoomsListResponse,
+} from '../../types/cloudbeds-api.js';
 
 export class CloudbedsEngine implements IBookingEngine {
   private config: BookingEngineConfig | null = null;
@@ -44,7 +64,7 @@ export class CloudbedsEngine implements IBookingEngine {
     const hasOAuth = clientId && clientSecret;
     const hasApiKey = apiKey;
 
-    return (hasOAuth || hasApiKey) && !!propertyId;
+    return Boolean((hasOAuth || hasApiKey) && propertyId);
   }
 
   private async ensureAccessToken(): Promise<void> {
@@ -61,7 +81,9 @@ export class CloudbedsEngine implements IBookingEngine {
     if (clientId && clientSecret) {
       // TODO: Implement OAuth flow for production
       // For now, we'll assume the access token is provided
-      throw new ConfigurationError('OAuth flow not implemented yet. Please use API key.');
+      throw new ConfigurationError(
+        'OAuth flow not implemented yet. Please use API key.'
+      );
     }
 
     throw new ConfigurationError('No valid authentication method found');
@@ -72,7 +94,7 @@ export class CloudbedsEngine implements IBookingEngine {
    */
   private async loadCloudbedsRooms(): Promise<void> {
     try {
-      const response = await this.makeRequest('/v1/rooms');
+      const response = await this.makeRequest<CloudbedsRoomsListResponse>('/v1/rooms');
       this.cloudbedsRooms = this.transformCloudbedsRoomsResponse(response);
     } catch (error) {
       console.warn('Failed to load Cloudbeds rooms for mapping:', error);
@@ -91,20 +113,26 @@ export class CloudbedsEngine implements IBookingEngine {
    * Get room mapping statistics
    */
   getRoomMappingStats(): ReturnType<typeof RoomMappingService.getMappingStats> {
-    return RoomMappingService.getMappingStats(this.directusRooms, this.cloudbedsRooms);
+    return RoomMappingService.getMappingStats(
+      this.directusRooms,
+      this.cloudbedsRooms
+    );
   }
 
   /**
    * Get mapped rooms
    */
   getMappedRooms(): ReturnType<typeof RoomMappingService.mapRoomsByName> {
-    return RoomMappingService.mapRoomsByName(this.directusRooms, this.cloudbedsRooms);
+    return RoomMappingService.mapRoomsByName(
+      this.directusRooms,
+      this.cloudbedsRooms
+    );
   }
 
-  private async makeRequest(
+  private async makeRequest<T = CloudbedsApiResponse>(
     endpoint: string,
-    options: Record<string, unknown> = {}
-  ): Promise<unknown> {
+    options: CloudbedsRequestOptions = {}
+  ): Promise<T> {
     if (!this.accessToken || !this.config) {
       throw new ConfigurationError('Engine not properly initialized');
     }
@@ -155,11 +183,14 @@ export class CloudbedsEngine implements IBookingEngine {
         ...(query.rooms && { rooms: query.rooms.toString() }),
       });
 
-      const response = await this.makeRequest(`/v1/availability?${params}`);
+      const response = await this.makeRequest<CloudbedsAvailabilityResponse>(`/v1/availability?${params}`);
       const availability = this.transformAvailabilityResponse(response, query);
 
       // Map with Directus room information
-      return RoomMappingService.mapAvailabilityWithDirectusRooms(availability, this.directusRooms);
+      return RoomMappingService.mapAvailabilityWithDirectusRooms(
+        availability,
+        this.directusRooms
+      );
     } catch (error) {
       throw new AvailabilityError(
         `Failed to check availability: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -179,11 +210,14 @@ export class CloudbedsEngine implements IBookingEngine {
         ...(query.rooms && { rooms: query.rooms.toString() }),
       });
 
-      const response = await this.makeRequest(`/v1/rates?${params}`);
-      const rates = this.transformRatesResponse(response, query);
+      const response = await this.makeRequest<CloudbedsRatesResponse>(`/v1/rates?${params}`);
+      const rates = this.transformRatesResponse(response);
 
       // Map with Directus room information
-      return RoomMappingService.mapRatesWithDirectusRooms(rates, this.directusRooms);
+      return RoomMappingService.mapRatesWithDirectusRooms(
+        rates,
+        this.directusRooms
+      );
     } catch (error) {
       throw new AvailabilityError(
         `Failed to get rates: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -196,7 +230,7 @@ export class CloudbedsEngine implements IBookingEngine {
     try {
       const bookingData = this.transformBookingRequest(request);
 
-      const response = await this.makeRequest('/v1/reservations', {
+      const response = await this.makeRequest<CloudbedsBookingResponse>('/v1/reservations', {
         method: 'POST',
         body: JSON.stringify(bookingData),
       });
@@ -212,7 +246,7 @@ export class CloudbedsEngine implements IBookingEngine {
 
   async getBooking(bookingId: string): Promise<Record<string, unknown>> {
     try {
-      return await this.makeRequest(`/v1/reservations/${bookingId}`);
+      return await this.makeRequest<CloudbedsBookingResponse>(`/v1/reservations/${bookingId}`);
     } catch (error) {
       throw new BookingError(
         `Failed to get booking: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -221,12 +255,18 @@ export class CloudbedsEngine implements IBookingEngine {
     }
   }
 
-  async cancelBooking(bookingId: string, reason?: string): Promise<BookingResponse> {
+  async cancelBooking(
+    bookingId: string,
+    reason?: string
+  ): Promise<BookingResponse> {
     try {
-      const response = await this.makeRequest(`/v1/reservations/${bookingId}/cancel`, {
-        method: 'POST',
-        body: JSON.stringify({ reason }),
-      });
+      const response = await this.makeRequest(
+        `/v1/reservations/${bookingId}/cancel`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ reason }),
+        }
+      );
 
       return {
         success: true,
@@ -248,7 +288,7 @@ export class CloudbedsEngine implements IBookingEngine {
     try {
       const updateData = this.transformBookingRequest(changes);
 
-      const response = await this.makeRequest(`/v1/reservations/${bookingId}`, {
+      const response = await this.makeRequest<CloudbedsBookingResponse>(`/v1/reservations/${bookingId}`, {
         method: 'PATCH',
         body: JSON.stringify(updateData),
       });
@@ -264,7 +304,7 @@ export class CloudbedsEngine implements IBookingEngine {
 
   async getPropertyInfo(): Promise<Record<string, unknown>> {
     try {
-      return await this.makeRequest('/v1/properties');
+      return await this.makeRequest<CloudbedsPropertyResponse>('/v1/properties');
     } catch (error) {
       throw new BookingEngineError(
         `Failed to get property info: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -289,94 +329,96 @@ export class CloudbedsEngine implements IBookingEngine {
   }
 
   // Transform methods to convert between our common format and Cloudbeds format
-  private transformCloudbedsRoomsResponse(response: Record<string, unknown>): CloudbedsRoom[] {
+  private transformCloudbedsRoomsResponse(
+    response: CloudbedsRoomsListResponse
+  ): CloudbedsRoom[] {
     // Transform Cloudbeds rooms response to our CloudbedsRoom format
-    const rooms = response.rooms as Array<Record<string, unknown>> | undefined;
     return (
-      rooms?.map((room) => ({
+      response.data?.map((room: any) => ({
         id: String(room.id || ''),
         name: String(room.name || ''),
         type: String(room.type || ''),
         max_occupancy: Number(room.max_occupancy || 0),
         available: Boolean(room.available),
-        price: Number(room.price || 0),
+        price: Number(0), // Will be set from rates
         currency: String(room.currency || 'USD'),
-        ...room, // Include all other properties
       })) || []
     );
   }
 
   private transformAvailabilityResponse(
-    response: Record<string, unknown>,
+    response: CloudbedsAvailabilityResponse,
     query: RateQuery
   ): RoomAvailability[] {
     // Transform Cloudbeds availability response to our common format
-    // This is a simplified implementation - adjust based on actual Cloudbeds API response
-    const rooms = response.rooms as Array<Record<string, unknown>> | undefined;
     return (
-      rooms?.map((room) => ({
+      response.rooms?.map((room: any) => ({
         roomId: String(room.id || ''),
         roomType: String(room.type || ''),
         available: Boolean(room.available),
-        price: Number(room.price || 0),
-        currency: String(room.currency || this.config?.settings?.currency || 'USD'),
+        price: Number(0), // Will be set from rates
+        currency: String(
+          room.currency || this.config?.settings?.currency || 'USD'
+        ),
         maxOccupancy: Number(room.max_occupancy || 0),
         checkIn: query.checkIn,
         checkOut: query.checkOut,
-        restrictions: room.restrictions as Record<string, unknown> | undefined,
+        restrictions: room.restrictions,
       })) || []
     );
   }
 
-  private transformRatesResponse(response: Record<string, unknown>): RoomRate[] {
+  private transformRatesResponse(
+    response: CloudbedsRatesResponse
+  ): RoomRate[] {
     // Transform Cloudbeds rates response to our common format
-    const rates = response.rates as Array<Record<string, unknown>> | undefined;
     return (
-      rates?.map((rate) => ({
-        roomId: rate.room_id,
-        roomType: rate.room_type,
-        ratePlanId: rate.rate_plan_id,
-        ratePlanName: rate.rate_plan_name,
-        basePrice: rate.base_price,
-        totalPrice: rate.total_price,
-        currency: rate.currency || this.config?.settings?.currency || 'USD',
-        taxes: rate.taxes,
-        fees: rate.fees,
-        discounts: rate.discounts,
-        breakdown: rate.breakdown,
+      response.rates?.map((rate: any) => ({
+        roomId: String(rate.room_id),
+        roomType: String(rate.room_type),
+        ratePlanId: String(rate.rate_plan_id),
+        ratePlanName: String(rate.rate_plan_name),
+        basePrice: Number(rate.base_rate),
+        totalPrice: Number(rate.total_rate),
+        currency: String(rate.currency || this.config?.settings?.currency || 'USD'),
+        taxes: Number(rate.taxes || 0),
+        fees: Number(rate.fees || 0),
+        discounts: Number(rate.discounts || 0),
+        breakdown: undefined, // Not available in Cloudbeds API response
       })) || []
     );
   }
 
-  private transformBookingRequest(request: Partial<BookingRequest>): Record<string, unknown> {
+  private transformBookingRequest(
+    request: Partial<BookingRequest>
+  ): CloudbedsBookingRequest {
     // Transform our common booking request to Cloudbeds format
     return {
-      start_date: request.checkIn,
-      end_date: request.checkOut,
-      adults: request.adults,
+      start_date: request.checkIn || '',
+      end_date: request.checkOut || '',
+      adults: request.adults || 1,
       children: request.children,
       rooms: request.rooms,
-      room_type: request.roomType,
-      guest: request.guestInfo && {
-        first_name: request.guestInfo.firstName,
-        last_name: request.guestInfo.lastName,
-        email: request.guestInfo.email,
-        phone: request.guestInfo.phone,
-        address: request.guestInfo.address,
-      },
+      room_type_id: request.roomType,
+      guest_first_name: request.guestInfo?.firstName,
+      guest_last_name: request.guestInfo?.lastName,
+      guest_email: request.guestInfo?.email,
+      guest_phone: request.guestInfo?.phone,
       special_requests: request.specialRequests,
       promo_code: request.promoCode,
     };
   }
 
-  private transformBookingResponse(response: Record<string, unknown>): BookingResponse {
+  private transformBookingResponse(
+    response: CloudbedsBookingResponse
+  ): BookingResponse {
     // Transform Cloudbeds booking response to our common format
     return {
       success: !!response.id,
-      bookingId: response.id,
-      confirmationNumber: response.confirmation_number,
-      totalAmount: response.total_amount,
-      currency: response.currency,
+      bookingId: String(response.id),
+      confirmationNumber: String(response.reservation_id || response.id),
+      totalAmount: Number(response.total_amount),
+      currency: String(response.currency),
       details: response,
     };
   }

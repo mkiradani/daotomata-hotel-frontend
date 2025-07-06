@@ -34,6 +34,9 @@ const directus = createDirectus(directusUrl, {
   )
   .with(staticToken(directusToken));
 
+// Export the directus client for direct use
+export { directus };
+
 /**
  * Get all hotels for static path generation
  */

@@ -32,7 +32,12 @@ export type {
   RoomRate,
 } from './types';
 // Error classes
-export { AvailabilityError, BookingEngineError, BookingError, ConfigurationError } from './types';
+export {
+  AvailabilityError,
+  BookingEngineError,
+  BookingError,
+  ConfigurationError,
+} from './types';
 
 // Import types for convenience functions
 import type { BookingRequest, RateQuery } from './types';
@@ -69,8 +74,10 @@ export const BookingEngines = {
   },
 
   // Check if hotel has booking capabilities
-  hasBookingCapabilities(hotelData: Record<string, unknown>) {
-    const { hasBookingCapabilities: hasCapabilities } = require('./factory');
+  async hasBookingCapabilities(hotelData: Record<string, unknown>) {
+    const { hasBookingCapabilities: hasCapabilities } = await import(
+      './factory'
+    );
     return hasCapabilities(hotelData);
   },
 

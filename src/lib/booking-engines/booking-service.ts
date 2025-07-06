@@ -45,7 +45,9 @@ export class BookingService {
   private getEngine(hotelId: string): IBookingEngine {
     const engine = this.engines.get(hotelId);
     if (!engine) {
-      throw new ConfigurationError(`No booking engine initialized for hotel ${hotelId}`);
+      throw new ConfigurationError(
+        `No booking engine initialized for hotel ${hotelId}`
+      );
     }
     return engine;
   }
@@ -53,7 +55,10 @@ export class BookingService {
   /**
    * Check room availability for a hotel
    */
-  async checkAvailability(hotelId: string, query: RateQuery): Promise<RoomAvailability[]> {
+  async checkAvailability(
+    hotelId: string,
+    query: RateQuery
+  ): Promise<RoomAvailability[]> {
     const engine = this.getEngine(hotelId);
     return await engine.checkAvailability(query);
   }
@@ -69,7 +74,10 @@ export class BookingService {
   /**
    * Create a booking for a hotel
    */
-  async createBooking(hotelId: string, request: BookingRequest): Promise<BookingResponse> {
+  async createBooking(
+    hotelId: string,
+    request: BookingRequest
+  ): Promise<BookingResponse> {
     const engine = this.getEngine(hotelId);
     return await engine.createBooking(request);
   }
@@ -77,7 +85,10 @@ export class BookingService {
   /**
    * Get booking details
    */
-  async getBooking(hotelId: string, bookingId: string): Promise<Record<string, unknown>> {
+  async getBooking(
+    hotelId: string,
+    bookingId: string
+  ): Promise<Record<string, unknown>> {
     const engine = this.getEngine(hotelId);
     return await engine.getBooking(bookingId);
   }
@@ -184,13 +195,17 @@ export class BookingService {
   /**
    * Validate booking request before submission
    */
-  validateBookingRequest(request: BookingRequest): { valid: boolean; errors: string[] } {
+  validateBookingRequest(request: BookingRequest): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Basic validation
     if (!request.checkIn) errors.push('Check-in date is required');
     if (!request.checkOut) errors.push('Check-out date is required');
-    if (!request.adults || request.adults < 1) errors.push('At least one adult is required');
+    if (!request.adults || request.adults < 1)
+      errors.push('At least one adult is required');
 
     // Date validation
     if (request.checkIn && request.checkOut) {
@@ -200,17 +215,23 @@ export class BookingService {
       today.setHours(0, 0, 0, 0);
 
       if (checkIn < today) errors.push('Check-in date cannot be in the past');
-      if (checkOut <= checkIn) errors.push('Check-out date must be after check-in date');
+      if (checkOut <= checkIn)
+        errors.push('Check-out date must be after check-in date');
     }
 
     // Guest info validation
     if (request.guestInfo) {
-      if (!request.guestInfo.firstName) errors.push('Guest first name is required');
-      if (!request.guestInfo.lastName) errors.push('Guest last name is required');
+      if (!request.guestInfo.firstName)
+        errors.push('Guest first name is required');
+      if (!request.guestInfo.lastName)
+        errors.push('Guest last name is required');
       if (!request.guestInfo.email) errors.push('Guest email is required');
 
       // Email format validation
-      if (request.guestInfo.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.guestInfo.email)) {
+      if (
+        request.guestInfo.email &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.guestInfo.email)
+      ) {
         errors.push('Invalid email format');
       }
     }
@@ -261,7 +282,10 @@ export class BookingService {
     const totalGuests = request.adults + (request.children || 0);
 
     // Calculate estimated total from rates
-    const estimatedTotal = rates.reduce((sum, rate) => sum + rate.totalPrice, 0);
+    const estimatedTotal = rates.reduce(
+      (sum, rate) => sum + rate.totalPrice,
+      0
+    );
     const currency = rates[0]?.currency || 'USD';
 
     return {

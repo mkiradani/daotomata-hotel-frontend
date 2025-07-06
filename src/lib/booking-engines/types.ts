@@ -66,7 +66,7 @@ export interface BookingResponse {
   totalAmount?: number;
   currency?: string;
   error?: string;
-  details?: Record<string, unknown>;
+  details?: unknown;
 }
 
 export interface RateQuery {
@@ -135,7 +135,10 @@ export interface IBookingEngine {
   /**
    * Modify an existing booking
    */
-  modifyBooking(bookingId: string, changes: Partial<BookingRequest>): Promise<BookingResponse>;
+  modifyBooking(
+    bookingId: string,
+    changes: Partial<BookingRequest>
+  ): Promise<BookingResponse>;
 
   /**
    * Get property information
@@ -168,7 +171,7 @@ export class BookingEngineError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: Record<string, unknown>
+    public details?: unknown
   ) {
     super(message);
     this.name = 'BookingEngineError';
@@ -176,21 +179,21 @@ export class BookingEngineError extends Error {
 }
 
 export class ConfigurationError extends BookingEngineError {
-  constructor(message: string, details?: Record<string, unknown>) {
+  constructor(message: string, details?: unknown) {
     super(message, 'CONFIGURATION_ERROR', details);
     this.name = 'ConfigurationError';
   }
 }
 
 export class AvailabilityError extends BookingEngineError {
-  constructor(message: string, details?: Record<string, unknown>) {
+  constructor(message: string, details?: unknown) {
     super(message, 'AVAILABILITY_ERROR', details);
     this.name = 'AvailabilityError';
   }
 }
 
 export class BookingError extends BookingEngineError {
-  constructor(message: string, details?: Record<string, unknown>) {
+  constructor(message: string, details?: unknown) {
     super(message, 'BOOKING_ERROR', details);
     this.name = 'BookingError';
   }
