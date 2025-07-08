@@ -48,6 +48,7 @@ export async function getStaticPaths() {
             hotelSubdomain: subdomain,
             defaultLanguage: hotel.default_language || 'en-US',
             defaultCurrency: hotel.default_currency || 'USD',
+            isSubdomain: true, // Always true for [hotel] pages in SSG
           },
         });
       }

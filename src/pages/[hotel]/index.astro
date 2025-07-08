@@ -46,6 +46,7 @@ export async function getStaticPaths() {
           hotel,
           hotelDomain: hotelData.domain,
           hotelSubdomain: subdomain,
+          isSubdomain: true, // Always true for [hotel] pages in SSG
         },
       });
     }
@@ -67,8 +68,8 @@ console.log(
   `🏨 Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
 );
 
-// Detect if we're using subdomain-based routing
-const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+// Get isSubdomain from props (passed from getStaticPaths)
+const { isSubdomain } = Astro.props;
 
 // Extract hotel properties for SSG mode
 const hotelId = hotel.id;

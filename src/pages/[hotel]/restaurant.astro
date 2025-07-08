@@ -33,6 +33,7 @@ export async function getStaticPaths() {
           hotelSubdomain: subdomain,
           defaultLanguage: hotel.default_language || 'en-US',
           defaultCurrency: hotel.default_currency || 'USD',
+          isSubdomain: true, // Always true for [hotel] pages in SSG
         },
       });
     }
@@ -45,7 +46,12 @@ export async function getStaticPaths() {
   }
 }
 
-const { hotel: hotelData, hotelSubdomain, defaultLanguage, defaultCurrency } = Astro.props;
+const {
+  hotel: hotelData,
+  hotelSubdomain,
+  defaultLanguage,
+  defaultCurrency,
+} = Astro.props;
 
 // Get current language (default to English for now)
 const currentLanguage = defaultLanguage || 'en-US';
@@ -62,7 +68,8 @@ const hotel = {
   id: fullHotel.id,
   name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
   description:
-    getTranslatedContent(fullHotel, currentLanguage).description || fullHotel.description,
+    getTranslatedContent(fullHotel, currentLanguage).description ||
+    fullHotel.description,
   domain: fullHotel.domain,
   default_currency: fullHotel.default_currency || defaultCurrency,
 
@@ -104,9 +111,11 @@ if (!restaurant) {
 // Process restaurant with translations
 const restaurantData = {
   id: restaurant.id,
-  name: getTranslatedContent(restaurant, currentLanguage).name || restaurant.name,
+  name:
+    getTranslatedContent(restaurant, currentLanguage).name || restaurant.name,
   description:
-    getTranslatedContent(restaurant, currentLanguage).description || restaurant.description,
+    getTranslatedContent(restaurant, currentLanguage).description ||
+    restaurant.description,
   main_photo: restaurant.main_photo,
   main_video: restaurant.main_video,
 };
@@ -123,7 +132,11 @@ const _breadcrumbs = [
 
 // Hero media URLs
 const _heroImageUrl = restaurantData.main_photo
-  ? getMediaUrl(restaurantData.main_photo.id, { width: 1920, height: 1080, quality: 95 })
+  ? getMediaUrl(restaurantData.main_photo.id, {
+      width: 1920,
+      height: 1080,
+      quality: 95,
+    })
   : '';
 const heroVideoUrl = restaurantData.main_video
   ? getMediaUrl(restaurantData.main_video.id)
@@ -146,25 +159,27 @@ console.log(
 
   <!-- Hero Section -->
   <section class="relative h-[60vh] min-h-[400px] overflow-hidden">
-    {heroVideoUrl ? (
-      <video
-        src={heroVideoUrl}
-        poster={_heroImageUrl}
-        autoplay
-        muted
-        loop
-        playsInline
-        class="absolute inset-0 w-full h-full object-cover"
-      >
-        <track kind="captions" src="" label="No captions available" default />
-      </video>
-    ) : (
-      <img
-        src={_heroImageUrl}
-        alt={restaurantData.name}
-        class="absolute inset-0 w-full h-full object-cover"
-      />
-    )}
+    {
+      heroVideoUrl ? (
+        <video
+          src={heroVideoUrl}
+          poster={_heroImageUrl}
+          autoplay
+          muted
+          loop
+          playsInline
+          class="absolute inset-0 w-full h-full object-cover"
+        >
+          <track kind="captions" src="" label="No captions available" default />
+        </video>
+      ) : (
+        <img
+          src={_heroImageUrl}
+          alt={restaurantData.name}
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+      )
+    }
 
     <!-- Hero Overlay -->
     <div class="absolute inset-0 bg-neutral/50"></div>
@@ -183,7 +198,9 @@ console.log(
   <section class="bg-base-100 px-4 py-16 border-b border-base-300">
     <div class="mx-auto max-w-4xl container">
       <div class="text-center">
-        <p class="mx-auto max-w-3xl font-secondary text-base-content/80 text-lg leading-relaxed">
+        <p
+          class="mx-auto max-w-3xl font-secondary text-base-content/80 text-lg leading-relaxed"
+        >
           {restaurantData.description}
         </p>
       </div>
@@ -191,78 +208,90 @@ console.log(
   </section>
 
   <!-- Featured Dishes Section -->
-  {hotel.dishes && hotel.dishes.length > 0 && (
-    <section class="bg-base-100 py-16">
-      <div class="mx-auto px-4 container">
-        <div class="mb-12 text-center">
-          <h2 class="mb-4 font-primary font-bold text-primary text-3xl md:text-4xl">
-            Featured Dishes
-          </h2>
-          <p class="mx-auto max-w-2xl font-secondary text-base-content/80 text-lg">
-            Discover our chef&apos;s signature creations and most beloved specialties
-          </p>
-        </div>
+  {
+    hotel.dishes && hotel.dishes.length > 0 && (
+      <section class="bg-base-100 py-16">
+        <div class="mx-auto px-4 container">
+          <div class="mb-12 text-center">
+            <h2 class="mb-4 font-primary font-bold text-primary text-3xl md:text-4xl">
+              Featured Dishes
+            </h2>
+            <p class="mx-auto max-w-2xl font-secondary text-base-content/80 text-lg">
+              Discover our chef&apos;s signature creations and most beloved
+              specialties
+            </p>
+          </div>
 
-        <!-- Dishes Grid -->
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2 mb-12">
-          {hotel.dishes.map((dish, index) => {
-            const imageUrl = dish.main_photo ? getMediaUrl(dish.main_photo.id, { width: 600, height: 400, quality: 95 }) : '';
-            
-            return (
-              <DishCard
-                key={dish.id || index}
-                name={dish.name}
-                description={dish.description}
-                price={dish.price}
-                ingredients={dish.ingredients || []}
-                dietary_options={dish.dietary_options || []}
-                allergens={dish.allergens || []}
-                calories={dish.calories}
-                imageUrl={imageUrl}
-                isAvailable={dish.is_available}
-                defaultCurrency={hotel.default_currency}
-                isLast={index === hotel.dishes.length - 1}
-                isOdd={hotel.dishes.length % 2 !== 0}
-                client:load
-              />
-            );
-          })}
-        </div>
+          {/* Dishes Grid */}
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2 mb-12">
+            {hotel.dishes.map((dish, index) => {
+              const imageUrl = dish.main_photo
+                ? getMediaUrl(dish.main_photo.id, {
+                    width: 600,
+                    height: 400,
+                    quality: 95,
+                  })
+                : '';
 
-        <!-- CTAs -->
-        <div class="text-center">
-          <a
-            href={`/${hotelSubdomain}/menu`}
-            class="font-secondary btn btn-primary btn-lg"
-          >
-            View Full Menu
-          </a>
+              return (
+                <DishCard
+                  key={dish.id || index}
+                  name={dish.name}
+                  description={dish.description}
+                  price={dish.price}
+                  ingredients={dish.ingredients || []}
+                  dietary_options={dish.dietary_options || []}
+                  allergens={dish.allergens || []}
+                  calories={dish.calories}
+                  imageUrl={imageUrl}
+                  isAvailable={dish.is_available}
+                  defaultCurrency={hotel.default_currency}
+                  isLast={index === hotel.dishes.length - 1}
+                  isOdd={hotel.dishes.length % 2 !== 0}
+                  client:load
+                />
+              );
+            })}
+          </div>
+
+          {/* CTAs */}
+          <div class="text-center">
+            <a
+              href={`/${hotelSubdomain}/menu`}
+              class="font-secondary btn btn-primary btn-lg"
+            >
+              View Full Menu
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- No Featured Dishes Message -->
-  {(!hotel.dishes || hotel.dishes.length === 0) && (
-    <section class="bg-base-100 py-16">
-      <div class="mx-auto px-4 text-center container">
-        <h2 class="mb-4 font-primary font-bold text-primary text-3xl md:text-4xl">
-          Our Restaurant
-        </h2>
-        <p class="mx-auto mb-8 max-w-2xl font-secondary text-base-content/80 text-lg">
-          Experience exceptional dining with carefully crafted dishes using the finest local ingredients.
-        </p>
-        
-        <!-- CTAs -->
-        <div class="text-center">
-          <a
-            href={`/${hotelSubdomain}/menu`}
-            class="font-secondary btn btn-primary btn-lg"
-          >
-            View Full Menu
-          </a>
+  {
+    (!hotel.dishes || hotel.dishes.length === 0) && (
+      <section class="bg-base-100 py-16">
+        <div class="mx-auto px-4 text-center container">
+          <h2 class="mb-4 font-primary font-bold text-primary text-3xl md:text-4xl">
+            Our Restaurant
+          </h2>
+          <p class="mx-auto mb-8 max-w-2xl font-secondary text-base-content/80 text-lg">
+            Experience exceptional dining with carefully crafted dishes using
+            the finest local ingredients.
+          </p>
+
+          {/* CTAs */}
+          <div class="text-center">
+            <a
+              href={`/${hotelSubdomain}/menu`}
+              class="font-secondary btn btn-primary btn-lg"
+            >
+              View Full Menu
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 </Layout>

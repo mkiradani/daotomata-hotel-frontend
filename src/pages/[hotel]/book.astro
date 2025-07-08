@@ -11,7 +11,7 @@ export async function getStaticPaths() {
     const hotels = await getAllHotels();
     console.log(
       `✅ Found ${hotels.length} hotels:`,
-      hotels.map(h => h.domain)
+      hotels.map((h) => h.domain)
     );
 
     const paths = [];
@@ -40,6 +40,7 @@ export async function getStaticPaths() {
           hotelSubdomain: subdomain,
           defaultLanguage: hotelData.default_language || 'en-US',
           defaultCurrency: hotelData.default_currency || 'USD',
+          isSubdomain: true, // Always true for [hotel] pages in SSG
         },
       });
     }

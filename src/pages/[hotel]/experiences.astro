@@ -32,6 +32,7 @@ export async function getStaticPaths() {
           hotelSubdomain: subdomain,
           defaultLanguage: hotel.default_language || 'en-US',
           defaultCurrency: hotel.default_currency || 'USD',
+          isSubdomain: true, // Always true for [hotel] pages in SSG
         },
       });
     }
@@ -89,7 +90,7 @@ const hotel = {
 
   // Related data with translations - focus on activities (experiences) for this page
   activities:
-    fullHotel.activities?.map(activity =>
+    fullHotel.activities?.map((activity) =>
       getTranslatedContent(activity, currentLanguage)
     ) || [],
 

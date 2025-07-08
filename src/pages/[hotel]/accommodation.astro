@@ -35,6 +35,7 @@ export async function getStaticPaths() {
           defaultCurrency: hotel.default_currency || 'USD',
           availableLanguages: hotel.available_languages || ['en-US'],
           availableCurrencies: hotel.available_currencies || ['USD'],
+          isSubdomain: true, // Always true for [hotel] pages in SSG
         },
       };
     });
@@ -59,8 +60,8 @@ console.log(
   `🏨 Loading accommodation page for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
 );
 
-// Detect if we're using subdomain-based routing
-const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+// Get isSubdomain from props (passed from getStaticPaths)
+const { isSubdomain } = Astro.props;
 
 // Load complete hotel data from Directus using full domain
 const hotelData = await getHotelByDomain(hotelDomain);
