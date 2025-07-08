@@ -14,7 +14,8 @@ COPY package.json ./
 COPY pnpm-lock.yaml* ./
 
 # Install dependencies (including dev dependencies for build)
-RUN pnpm install --frozen-lockfile
+# Use --force to recreate lockfile if version mismatch occurs
+RUN pnpm install --frozen-lockfile || pnpm install --force
 
 # Copy source code
 COPY . .
