@@ -52,6 +52,11 @@ RUN chown -R astro:nodejs /app
 
 USER astro
 
+# Set environment variables for production
+ENV NODE_ENV=production
+ENV PORT=4321
+ENV HOST=0.0.0.0
+
 # Expose port
 EXPOSE 4321
 

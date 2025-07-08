@@ -6,11 +6,11 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [qwik()],
   adapter: node({
-    mode: "standalone"
+    mode: "standalone",
   }),
   server: {
     host: true,
-    port: 4321,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 4321,
   },
   // Output configuration for multitenant SSR (Server-Side Rendering)
   output: "server",
