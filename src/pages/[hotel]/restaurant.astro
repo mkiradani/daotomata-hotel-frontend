@@ -51,6 +51,7 @@ const {
   hotelSubdomain,
   defaultLanguage,
   defaultCurrency,
+  isSubdomain,
 } = Astro.props;
 
 // Get current language (default to English for now)
@@ -124,10 +125,16 @@ console.log(
   `✅ Restaurant page loaded: ${hotel.name} - ${restaurantData.name} (${hotel.dishes?.length || 0} featured dishes)`
 );
 
-// Breadcrumb data
+// Breadcrumb data - conditional URLs based on routing type
 const _breadcrumbs = [
-  { label: hotel.name, href: `/${hotelSubdomain}` },
-  { label: 'Restaurant', href: `/${hotelSubdomain}/restaurant` },
+  {
+    label: hotel.name,
+    href: isSubdomain ? '/' : `/${hotelSubdomain}`,
+  },
+  {
+    label: 'Restaurant',
+    href: isSubdomain ? '/restaurant' : `/${hotelSubdomain}/restaurant`,
+  },
 ];
 
 // Hero media URLs
@@ -257,7 +264,7 @@ console.log(
           {/* CTAs */}
           <div class="text-center">
             <a
-              href={`/${hotelSubdomain}/menu`}
+              href={isSubdomain ? '/menu' : `/${hotelSubdomain}/menu`}
               class="font-secondary btn btn-primary btn-lg"
             >
               View Full Menu
@@ -284,7 +291,7 @@ console.log(
           {/* CTAs */}
           <div class="text-center">
             <a
-              href={`/${hotelSubdomain}/menu`}
+              href={isSubdomain ? '/menu' : `/${hotelSubdomain}/menu`}
               class="font-secondary btn btn-primary btn-lg"
             >
               View Full Menu

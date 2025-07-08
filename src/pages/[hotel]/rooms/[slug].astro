@@ -62,8 +62,14 @@ export async function getStaticPaths() {
   }
 }
 
-const { room, hotel, hotelSubdomain, defaultLanguage, defaultCurrency } =
-  Astro.props;
+const {
+  room,
+  hotel,
+  hotelSubdomain,
+  defaultLanguage,
+  defaultCurrency,
+  isSubdomain,
+} = Astro.props;
 
 // Hotel theme data will be handled globally by Layout.astro
 
@@ -120,8 +126,14 @@ const _roomMetadata = {
 };
 
 const _breadcrumbItems = [
-  { label: hotel.name, href: `/${hotelSubdomain}` },
-  { label: 'Rooms', href: `/${hotelSubdomain}#rooms` },
+  {
+    label: hotel.name,
+    href: isSubdomain ? '/' : `/${hotelSubdomain}`,
+  },
+  {
+    label: 'Rooms',
+    href: isSubdomain ? '/#rooms' : `/${hotelSubdomain}#rooms`,
+  },
   { label: room.name },
 ];
 
