@@ -54,6 +54,21 @@ export async function onRequest(context, next) {
   const { url } = context;
   const pathname = url.pathname;
 
+  // 🛡️ PROTECCIÓN ANTI-LOOP: Evitar procesar rewrites internos
+  const isAlreadyProcessed = context.request.headers.get(
+    "x-middleware-processed",
+  );
+  if (isAlreadyProcessed) {
+    console.log(`🔄 Skipping already processed request: ${pathname}`);
+    return next();
+  }
+
+  // 🛡️ PROTECCIÓN ANTI-LOOP: Evitar procesar URLs que ya están en formato correcto
+  if (pathname.startsWith("/maisondemo") || pathname.startsWith("/baberrih")) {
+    console.log(`✅ URL already in correct format: ${pathname}`);
+    return next();
+  }
+
   // Debug logging detallado para producción
   console.log(`🚀 Middleware intercepted: ${url.hostname}${pathname}`);
   console.log(`🔍 Request details:`, {
