@@ -16,6 +16,7 @@ export interface Props {
   hotel?: Record<string, unknown>; // Hotel data for automatic theme generation
   hotelSubdomain?: string; // For theme naming
   hotelDomain?: string; // Hotel domain for navbar links
+  isSubdomain?: boolean; // For navbar URL generation
   // Legacy props for backward compatibility
   themeCSS?: string;
   themeName?: string;
@@ -34,6 +35,7 @@ const {
   hotel,
   hotelSubdomain,
   hotelDomain,
+  isSubdomain = false,
   // Legacy props for backward compatibility
   themeCSS: legacyThemeCSS,
   themeName: legacyThemeName,
@@ -212,6 +214,7 @@ if (hotel?.id) {
         themeConfig={_themeConfig}
         hotelLogo={hotelLogo}
         hotelInfo={hotelInfo}
+        isSubdomain={isSubdomain}
       />
     )}
 

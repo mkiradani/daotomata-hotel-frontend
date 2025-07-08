@@ -1,6 +1,5 @@
 ---
 import { getMediaUrl } from '../lib/directus.js';
-import { isSubdomainBasedRouting } from '../lib/domain-mapping.js';
 
 interface HotelInfo {
   id: number;
@@ -19,6 +18,7 @@ export interface Props {
   themeConfig?: Record<string, unknown>;
   hotelLogo?: Record<string, unknown> | null;
   hotelInfo?: HotelInfo | null;
+  isSubdomain?: boolean; // Add isSubdomain prop
 }
 
 const {
@@ -28,6 +28,7 @@ const {
   themeConfig: _themeConfig = {},
   hotelLogo = null,
   hotelInfo = null,
+  isSubdomain = false, // Default to false for backward compatibility
 } = Astro.props;
 
 // Extract subdomain from full domain (e.g., "baberrih" from "baberrih.daotomata.io")
@@ -35,9 +36,6 @@ const hotelSubdomain = hotelDomain.split('.')[0];
 
 // Prioritize hotel_info logo over original hotel logo
 const priorityLogo = hotelInfo?.logo || hotelLogo;
-
-// Detect if we're using subdomain-based routing
-const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
 
 // Generate navigation URLs based on routing mode
 const _navItems = [

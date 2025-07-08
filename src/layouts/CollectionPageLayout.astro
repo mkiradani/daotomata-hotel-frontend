@@ -35,6 +35,7 @@ interface Props {
   hotel: Hotel;
   hotelSubdomain: string;
   hotelDomain: string;
+  isSubdomain?: boolean; // For navbar URL generation
 
   // Collection data
   items: CollectionItem[];
@@ -63,6 +64,7 @@ const {
   hotel,
   hotelSubdomain,
   hotelDomain,
+  isSubdomain = false,
   items,
   itemType,
   breadcrumbItems,
@@ -106,6 +108,7 @@ const _getMediaUrl = (id: string, options?: MediaOptions) => {
   hotel={hotel}
   hotelSubdomain={hotelSubdomain}
   hotelDomain={hotelDomain}
+  isSubdomain={isSubdomain}
   showNavbar={true}
 >
   <!-- Breadcrumb -->
