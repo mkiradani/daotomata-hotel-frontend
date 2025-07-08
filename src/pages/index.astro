@@ -1,5 +1,21 @@
 ---
-// Redirect to multitenant showcase for easy hotel selection
-console.log('🏨 Redirecting to multitenant showcase');
-return Astro.redirect('/multitenant-showcase');
+import { isSubdomainBasedRouting } from '../lib/domain-mapping.js';
+
+// Check if this is a subdomain request
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+
+console.log(`🏨 Index page accessed from: ${Astro.url.hostname}`);
+console.log(`🌐 Is subdomain: ${isSubdomain}`);
+
+if (isSubdomain) {
+  // For subdomain requests, this should never be reached due to middleware rewrite
+  // But if it is, redirect to the subdomain homepage
+  const subdomain = Astro.url.hostname.split('.')[0];
+  console.log(`🔄 Subdomain fallback redirect: / → /${subdomain}`);
+  return Astro.redirect(`/${subdomain}`);
+} else {
+  // For main domain requests, redirect to multitenant showcase for hotel selection
+  console.log('🏨 Main domain - redirecting to multitenant showcase');
+  return Astro.redirect('/multitenant-showcase');
+}
 ---
