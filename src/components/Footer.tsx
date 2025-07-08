@@ -48,10 +48,19 @@ export const Footer = component$<FooterProps>(
 
     // Helper function to generate URLs based on routing type
     const generateUrl = (path: string) => {
+      // Debug: Log the isSubdomain value
+      console.log(
+        `🔍 Footer generateUrl: isSubdomain=${isSubdomain}, path=${path}, hotelSlug=${hotelSlug}`
+      );
+
       if (isSubdomain) {
-        return path; // For subdomain routing: /accommodation
+        const result = path || '/'; // For subdomain routing: /accommodation or / for home
+        console.log(`✅ Subdomain routing: ${result}`);
+        return result;
       } else {
-        return `/${hotelSlug}${path}`; // For path-based routing: /maisondemo/accommodation
+        const result = `/${hotelSlug}${path}`; // For path-based routing: /maisondemo/accommodation
+        console.log(`✅ Path-based routing: ${result}`);
+        return result;
       }
     };
 
@@ -192,7 +201,7 @@ export const Footer = component$<FooterProps>(
               <ul class="space-y-2">
                 <li>
                   <a
-                    href={generateUrl('')}
+                    href={generateUrl('/')}
                     class="hover:text-primary text-base-content/70 transition-colors"
                   >
                     Home
@@ -333,19 +342,19 @@ export const Footer = component$<FooterProps>(
             </p>
             <div class="flex space-x-6 mt-4 md:mt-0">
               <a
-                href="/privacy"
+                href={generateUrl('/privacy')}
                 class="hover:text-primary text-sm text-base-content/60 transition-colors"
               >
                 Privacy Policy
               </a>
               <a
-                href="/terms"
+                href={generateUrl('/terms')}
                 class="hover:text-primary text-sm text-base-content/60 transition-colors"
               >
                 Terms of Service
               </a>
               <a
-                href="/cookies"
+                href={generateUrl('/cookies')}
                 class="hover:text-primary text-sm text-base-content/60 transition-colors"
               >
                 Cookie Policy
