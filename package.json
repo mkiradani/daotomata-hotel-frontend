@@ -19,6 +19,7 @@
     "generate:themes": "node scripts/generate-themes.js"
   },
   "dependencies": {
+    "@astrojs/node": "^9.3.0",
     "@astrojs/vercel": "^5.0.0",
     "@builder.io/qwik": "^1.14.1",
     "@directus/sdk": "^17.0.0",

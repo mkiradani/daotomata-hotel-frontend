@@ -1,90 +1,63 @@
-# Multi-stage Dockerfile optimizado para Astro SSG
-# Basado en mejores prácticas 2024
+# Astro SSG + Middleware Frontend Production Dockerfile
+# Multi-stage build for optimized production image
 
-# Stage 1: Dependencies
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+# Build stage
+FROM node:22.16.0-alpine AS builder
+
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable pnpm
+# Install pnpm
+RUN npm install -g pnpm@9.1.2
 
-# Copy package files for better caching
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files
+COPY package.json ./
+COPY pnpm-lock.yaml* ./
 
-# Install dependencies with cache mount
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-  pnpm install --frozen-lockfile --prefer-offline
-
-# Stage 2: Development (for docker-compose dev)
-FROM node:20-alpine AS development
-WORKDIR /app
-
-# Enable pnpm
-RUN corepack enable pnpm
-
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
-COPY --from=deps /app/pnpm-lock.yaml* ./
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
-# Expose port
-EXPOSE 4321
+# Build for production using Docker config (Node.js adapter)
+RUN pnpm build --config astro.config.docker.mjs
 
-# Development command with hot reload
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+# Production stage
+FROM node:22.16.0-alpine AS production
 
-# Stage 3: Builder
-FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable pnpm
+# Install pnpm
+RUN npm install -g pnpm@9.1.2
 
-# Copy dependencies and source
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Copy package files
+COPY package.json ./
+COPY pnpm-lock.yaml* ./
 
-# Build for production
-ENV NODE_ENV=production
-RUN pnpm build
+# Install only production dependencies
+RUN pnpm install --frozen-lockfile --prod
 
-# Stage 4: Production runtime
-FROM nginx:alpine AS production
-WORKDIR /usr/share/nginx/html
+# Copy built application from builder stage (Node.js standalone)
+COPY --from=builder /app/dist ./dist
 
-# Remove default nginx static assets
-RUN rm -rf ./*
+# Install curl for healthchecks
+RUN apk add --no-cache curl
 
-# Copy built application
-COPY --from=builder /app/dist .
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S astro -u 1001
 
-# Copy nginx config for SPA
-COPY <<EOF /etc/nginx/conf.d/default.conf
-server {
-    listen 4321;
-    server_name localhost;
-    root /usr/share/nginx/html;
-    index index.html;
+# Change ownership of app directory
+RUN chown -R astro:nodejs /app
 
-    # Handle client-side routing
-    location / {
-        try_files \$uri \$uri/ /index.html;
-    }
-
-    # Cache static assets
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
-EOF
+USER astro
 
 # Expose port
 EXPOSE 4321
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:4321/ || exit 1
+
+# Production command - run Node.js standalone server
+CMD ["node", "./dist/server/entry.mjs"]
