@@ -44,7 +44,12 @@ export async function getStaticPaths() {
   }
 }
 
-const { hotel: hotelData, hotelSubdomain, defaultLanguage } = Astro.props;
+const {
+  hotel: hotelData,
+  hotelSubdomain,
+  defaultLanguage,
+  isSubdomain,
+} = Astro.props;
 
 // Get current language from URL or use default
 const currentLanguage = defaultLanguage;
@@ -161,6 +166,7 @@ console.log(
             isOdd={hotel.facilities.length % 2 !== 0}
             hotelSlug={hotelSubdomain}
             facilitySlug={facilitySlug}
+            isSubdomain={isSubdomain}
             client:load
           />
         );

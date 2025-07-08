@@ -50,6 +50,7 @@ const {
   hotelSubdomain,
   defaultLanguage,
   defaultCurrency,
+  isSubdomain,
 } = Astro.props;
 
 // Get current language (default to English for now)
@@ -168,6 +169,7 @@ console.log(
             isOdd={hotel.activities.length % 2 !== 0}
             hotelSlug={hotelSubdomain}
             activitySlug={activitySlug}
+            isSubdomain={isSubdomain}
             client:load
           />
         );

@@ -240,7 +240,11 @@ export const RoomCard = component$<RoomCardProps>(
                     Contact Reception
                   </button>
                   <a
-                    href={`/${hotelSlug}/rooms/${roomSlug}`}
+                    href={
+                      isSubdomain
+                        ? `/rooms/${roomSlug}`
+                        : `/${hotelSlug}/rooms/${roomSlug}`
+                    }
                     class="btn-outline btn"
                   >
                     View Room Details
