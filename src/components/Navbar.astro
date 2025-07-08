@@ -1,5 +1,6 @@
 ---
 import { getMediaUrl } from '../lib/directus.js';
+import { isSubdomainBasedRouting } from '../lib/domain-mapping.js';
 
 interface HotelInfo {
   id: number;
@@ -35,15 +36,24 @@ const hotelSubdomain = hotelDomain.split('.')[0];
 // Prioritize hotel_info logo over original hotel logo
 const priorityLogo = hotelInfo?.logo || hotelLogo;
 
-// Navigation items based on Baberrih's real structure
+// Detect if we're using subdomain-based routing
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+
+// Generate navigation URLs based on routing mode
 const _navItems = [
-  { name: 'Home', href: `/${hotelSubdomain}` },
-  { name: 'Accommodation', href: `/${hotelSubdomain}/accommodation` },
-  { name: 'Facilities', href: `/${hotelSubdomain}/facilities` },
-  { name: 'Experiences', href: `/${hotelSubdomain}/experiences` },
-  { name: 'Restaurant', href: `/${hotelSubdomain}/restaurant` },
-  { name: 'Contact', href: `/${hotelSubdomain}/contact` },
+  { name: 'Home', href: isSubdomain ? '/' : `/${hotelSubdomain}` },
+  { name: 'Accommodation', href: isSubdomain ? '/accommodation' : `/${hotelSubdomain}/accommodation` },
+  { name: 'Facilities', href: isSubdomain ? '/facilities' : `/${hotelSubdomain}/facilities` },
+  { name: 'Experiences', href: isSubdomain ? '/experiences' : `/${hotelSubdomain}/experiences` },
+  { name: 'Restaurant', href: isSubdomain ? '/restaurant' : `/${hotelSubdomain}/restaurant` },
+  { name: 'Contact', href: isSubdomain ? '/contact' : `/${hotelSubdomain}/contact` },
 ];
+
+// Book Now button URL
+const bookNowHref = isSubdomain ? '/book' : `/${hotelSubdomain}/book`;
+
+// Logo/Brand URL
+const logoHref = isSubdomain ? '/' : `/${hotelSubdomain}`;
 
 // Theme configuration is handled automatically by DaisyUI via data-theme
 ---
@@ -92,7 +102,7 @@ const _navItems = [
           ))
         }
         <li class="mt-2">
-          <a href={`/${hotelSubdomain}/book`} class="btn btn-primary btn-sm">
+          <a href={bookNowHref} class="btn btn-primary btn-sm">
             Book Now
           </a>
         </li>
@@ -101,7 +111,7 @@ const _navItems = [
 
     <!-- Logo/Brand -->
     <a
-      href={`/${hotelSubdomain}`}
+      href={logoHref}
       class="hover:bg-primary/10 font-primary font-bold text-primary text-xl btn btn-ghost"
     >
       {
@@ -138,7 +148,7 @@ const _navItems = [
 
   <!-- CTA Button -->
   <div class="navbar-end">
-    <a href={`/${hotelSubdomain}/book`} class="font-primary btn btn-primary">
+    <a href={bookNowHref} class="font-primary btn btn-primary">
       Book Now
     </a>
   </div>

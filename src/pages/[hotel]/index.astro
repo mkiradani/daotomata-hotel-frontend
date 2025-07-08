@@ -1,0 +1,319 @@
+---
+import { ActivityCard } from '../../components/ActivityCard.tsx';
+import { FacilityCard } from '../../components/FacilityCard.tsx';
+import { HeroSection } from '../../components/HeroSection.tsx';
+import { RoomCard } from '../../components/RoomCard.tsx';
+import Layout from '../../layouts/Layout.astro';
+import {
+  getAllHotels,
+  getHotelByDomain,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../../lib/directus.js';
+
+// SSG mode - prerender all hotel pages at build time
+export const prerender = true;
+
+export async function getStaticPaths() {
+  console.log('🏨 Generating static paths for hotel homepage...');
+  
+  try {
+    const hotels = await getAllHotels();
+    console.log(`✅ Found ${hotels.length} hotels:`, hotels.map(h => h.domain));
+    
+    const paths = [];
+    
+    for (const hotelData of hotels) {
+      // Extract subdomain from full domain (e.g., "maisondemo" from "maisondemo.com")
+      const subdomain = hotelData.domain.split('.')[0];
+      
+      console.log(`🏨 Processing hotel homepage: ${hotelData.name} (${hotelData.domain}) -> /${subdomain}/`);
+      
+      // Get full hotel data
+      const hotel = await getHotelByDomain(hotelData.domain);
+      
+      paths.push({
+        params: {
+          hotel: subdomain,
+        },
+        props: {
+          hotel,
+          hotelDomain: hotelData.domain,
+          hotelSubdomain: subdomain,
+        },
+      });
+    }
+    
+    console.log(`✅ Generated ${paths.length} static paths for hotel homepage`);
+    return paths;
+  } catch (error) {
+    console.error('❌ Error generating static paths for hotel homepage:', error);
+    return [];
+  }
+}
+
+const { hotel, hotelDomain, hotelSubdomain } = Astro.props;
+
+console.log(`🏨 Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`);
+
+// Extract hotel properties for SSG mode
+const hotelId = hotel.id;
+const hotelName = hotel.name;
+
+// Get available languages and currencies
+const availableLanguages = hotel.languages || ['en'];
+const availableCurrencies = hotel.currencies || ['USD'];
+const currentLanguage = 'en';
+const defaultCurrency = 'USD';
+
+// Prepare hotel data for components
+const hotelData = {
+  id: hotelId,
+  name: hotelName,
+  domain: hotelDomain,
+  rooms: hotel.rooms || [],
+  activities: hotel.activities || [],
+  facilities: hotel.facilities || [],
+  hero_media: hotel.hero_media || [],
+};
+
+// Simple theme name extraction - no dynamic CSS generation needed
+const hotelSlug = hotel.domain.split('.')[0];
+const _themeName = hotel.theme?.name || `${hotelSlug}-theme`;
+
+// Get hero media and hotel logo
+const _heroPhoto = hotel.hero_media?.[0]?.main_photo;
+const _heroVideo = hotel.hero_media?.[0]?.main_video;
+const _hotelLogo = hotel.logo;
+
+console.log(
+  `✅ Hotel loaded: ${hotel.name} (${hotel.rooms?.length || 0} rooms, ${hotel.activities?.length || 0} activities, ${hotel.facilities?.length || 0} facilities)`
+);
+---
+
+<Layout
+  title={hotel.name}
+  description={`Welcome to ${hotel.name} - Experience luxury and comfort`}
+  domain={hotelDomain}
+  ga4Id={hotel.analytics?.ga4_id}
+  pixelId={hotel.analytics?.pixel_id}
+  hotel={hotel}
+  hotelSubdomain={hotelSubdomain}
+  showNavbar={true}
+>
+  <!-- Hero Section -->
+  {
+    console.log('🖼️ Hero media debug:', {
+      heroPhoto: _heroPhoto,
+      heroPhotoId: _heroPhoto?.id,
+      heroVideo: _heroVideo,
+      heroVideoId: _heroVideo?.id,
+      hotelLogo: _hotelLogo,
+      hotelLogoId: _hotelLogo?.id,
+    })
+  }
+  <HeroSection
+    hotelName={hotel.name}
+    heroImageUrl={_heroPhoto
+      ? getMediaUrl(_heroPhoto.id, { width: 1920, height: 1080, quality: 90 })
+      : undefined}
+    heroVideoUrl={_heroVideo
+      ? getMediaUrl(_heroVideo.id, { quality: 90 })
+      : undefined}
+    availableLanguages={availableLanguages}
+    availableCurrencies={availableCurrencies}
+    currentLanguage={currentLanguage}
+    defaultCurrency={defaultCurrency}
+    client:load
+  />
+
+  <!-- Rooms Section -->
+  <section class="bg-base-100 py-16">
+    <div class="mx-auto px-4 container">
+      <div class="mb-12 text-center">
+        <h2 class="mb-4 font-primary font-bold text-primary text-4xl">
+          {getTranslatedContent('Our Rooms', currentLanguage)}
+        </h2>
+        <p class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg">
+          {getTranslatedContent('Discover our carefully designed accommodations', currentLanguage)}
+        </p>
+      </div>
+
+      <div class="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {
+          hotelData.rooms.slice(0, 6).map((room, index) => {
+            const isOdd = hotelData.rooms.length % 2 !== 0;
+            const isLastInOddGrid = isOdd && index === hotelData.rooms.length - 1;
+            
+            return (
+              <div class={isLastInOddGrid ? 'md:col-span-2 lg:col-span-1' : ''}>
+                <RoomCard
+                  room={room}
+                  hotelDomain={hotelDomain}
+                  client:load
+                />
+              </div>
+            );
+          })
+        }
+      </div>
+
+      {hotelData.rooms.length > 6 && (
+        <div class="mt-12 text-center">
+          <a
+            href={`/${hotelSubdomain}/accommodation`}
+            class="font-primary btn btn-primary btn-lg"
+          >
+            {getTranslatedContent('View All Rooms', currentLanguage)}
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Activities Section -->
+  <section class="bg-base-200 py-16">
+    <div class="mx-auto px-4 container">
+      <div class="mb-12 text-center">
+        <h2 class="mb-4 font-primary font-bold text-primary text-4xl">
+          {getTranslatedContent('Experiences & Activities', currentLanguage)}
+        </h2>
+        <p class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg">
+          {getTranslatedContent('Immerse yourself in unforgettable experiences', currentLanguage)}
+        </p>
+      </div>
+
+      <div class="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {
+          hotelData.activities.slice(0, 6).map((activity, index) => {
+            const isOdd = hotelData.activities.length % 2 !== 0;
+            const isLastInOddGrid = isOdd && index === hotelData.activities.length - 1;
+            
+            return (
+              <div class={isLastInOddGrid ? 'md:col-span-2 lg:col-span-1' : ''}>
+                <ActivityCard
+                  activity={activity}
+                  hotelDomain={hotelDomain}
+                  client:load
+                />
+              </div>
+            );
+          })
+        }
+      </div>
+
+      {hotelData.activities.length > 6 && (
+        <div class="mt-12 text-center">
+          <a
+            href={`/${hotelSubdomain}/experiences`}
+            class="font-primary btn btn-primary btn-lg"
+          >
+            {getTranslatedContent('Discover All Experiences', currentLanguage)}
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Facilities Section -->
+  <section class="bg-base-100 py-16">
+    <div class="mx-auto px-4 container">
+      <div class="mb-12 text-center">
+        <h2 class="mb-4 font-primary font-bold text-primary text-4xl">
+          {getTranslatedContent('Hotel Facilities', currentLanguage)}
+        </h2>
+        <p class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg">
+          {getTranslatedContent('Enjoy our world-class amenities and services', currentLanguage)}
+        </p>
+      </div>
+
+      <div class="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {
+          hotelData.facilities.slice(0, 6).map((facility, index) => {
+            const isOdd = hotelData.facilities.length % 2 !== 0;
+            const isLastInOddGrid = isOdd && index === hotelData.facilities.length - 1;
+            
+            return (
+              <div class={isLastInOddGrid ? 'md:col-span-2 lg:col-span-1' : ''}>
+                <FacilityCard
+                  facility={facility}
+                  hotelDomain={hotelDomain}
+                  client:load
+                />
+              </div>
+            );
+          })
+        }
+      </div>
+
+      {hotelData.facilities.length > 6 && (
+        <div class="mt-12 text-center">
+          <a
+            href={`/${hotelSubdomain}/facilities`}
+            class="font-primary btn btn-primary btn-lg"
+          >
+            {getTranslatedContent('Explore All Facilities', currentLanguage)}
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-primary py-16 text-primary-content">
+    <div class="mx-auto px-4 text-center container">
+      <h2 class="mb-4 font-primary font-bold text-4xl">
+        {getTranslatedContent('Ready to Book Your Stay?', currentLanguage)}
+      </h2>
+      <p class="mx-auto mb-8 max-w-2xl font-secondary text-lg">
+        {getTranslatedContent('Experience luxury and comfort at its finest', currentLanguage)}
+      </p>
+      <a
+        href={`/${hotelSubdomain}/book`}
+        class="font-primary btn btn-secondary btn-lg"
+      >
+        {getTranslatedContent('Book Now', currentLanguage)}
+      </a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  // Parallax effect for hero section
+  function initParallax() {
+    const parallaxElements = document.querySelectorAll('[data-parallax]');
+
+    if (parallaxElements.length === 0) return;
+
+    function updateParallax() {
+      const scrolled = window.pageYOffset;
+      const rate = scrolled * -0.5; // Negative for upward movement
+
+      parallaxElements.forEach((element) => {
+        element.style.transform = `translateY(${rate}px) translateZ(0)`;
+      });
+    }
+
+    // Throttle scroll events for performance
+    let ticking = false;
+    function requestTick() {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+        setTimeout(() => {
+          ticking = false;
+        }, 16); // ~60fps
+      }
+    }
+
+    window.addEventListener('scroll', requestTick);
+    updateParallax(); // Initial call
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParallax);
+  } else {
+    initParallax();
+  }
+</script>

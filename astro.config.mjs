@@ -1,19 +1,15 @@
 import qwik from "@qwikdev/astro";
 import tailwindcss from "@tailwindcss/vite";
-import node from "@astrojs/node";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [qwik()],
-  adapter: node({
-    mode: "standalone",
-  }),
   server: {
     host: true,
     port: 4321,
   },
-  // Output configuration for multitenant SSR (Server-Side Rendering)
-  output: "server",
+  // Output configuration for static site generation (SSG)
+  output: "static",
 
   // Production site configuration for wildcard subdomain support
   site:

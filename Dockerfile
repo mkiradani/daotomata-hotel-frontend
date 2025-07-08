@@ -1,68 +1,55 @@
-# Astro SSG + Middleware Frontend Production Dockerfile
-# Multi-stage build for optimized production image
+# Hotel Frontend - Static Site with NGINX
+# Multi-stage build for optimized static file serving with 0 JavaScript
 
 # Build stage
-FROM node:22.16.0-alpine AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm@9.1.2
+RUN npm install -g pnpm
 
 # Copy package files
 COPY package.json ./
 COPY pnpm-lock.yaml* ./
 
-# Install dependencies
+# Install dependencies (including dev dependencies for build)
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
-# Build for production using Docker config (Node.js adapter)
-RUN pnpm build --config astro.config.docker.mjs
+# Set environment for production build
+ENV NODE_ENV=production
 
-# Production stage
-FROM node:22.16.0-alpine AS production
+# Generate themes and build static site
+RUN pnpm run build
 
-WORKDIR /app
+# Production stage - NGINX for static file serving
+FROM nginx:alpine
 
-# Install pnpm
-RUN npm install -g pnpm@9.1.2
+# Copy custom NGINX configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy package files
-COPY package.json ./
-COPY pnpm-lock.yaml* ./
+# Copy built static files from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Install only production dependencies (ignore scripts to prevent husky setup)
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
-
-# Copy built application from builder stage (Node.js standalone)
-COPY --from=builder /app/dist ./dist
-
-# Install curl for healthchecks
+# Install curl for health checks
 RUN apk add --no-cache curl
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S astro -u 1001
+# Create nginx user and set permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+  chmod -R 755 /usr/share/nginx/html
 
-# Change ownership of app directory
-RUN chown -R astro:nodejs /app
+# Remove default nginx config if it exists
+RUN rm -f /etc/nginx/conf.d/default.conf.bak
 
-USER astro
+# Health check for static site
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/health || exit 1
 
-# Set environment variables for production
-ENV NODE_ENV=production
-ENV PORT=4321
-ENV HOST=0.0.0.0
+# Expose port 80
+EXPOSE 80
 
-# Expose port
-EXPOSE 4321
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:4321/ || exit 1
-
-# Production command - run Node.js standalone server
-CMD ["node", "./dist/server/entry.mjs"]
+# Start nginx in foreground
+CMD ["nginx", "-g", "daemon off;"]
