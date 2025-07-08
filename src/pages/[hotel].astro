@@ -11,51 +11,36 @@ import {
   getTranslatedContent,
 } from '../lib/directus.js';
 
-export const prerender = true;
-
-export async function getStaticPaths() {
-  console.log('🏨 Generating static paths for hotels...');
-
-  try {
-    const hotels = await getAllHotels();
-    console.log(
-      `✅ Found ${hotels.length} hotels:`,
-      hotels.map(h => h.domain)
-    );
-
-    return hotels.map(hotel => {
-      // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
-      const subdomain = hotel.domain.split('.')[0];
-      return {
-        params: { hotel: subdomain },
-        props: {
-          hotelId: hotel.id,
-          hotelName: hotel.name,
-          hotelDomain: hotel.domain,
-          hotelSubdomain: subdomain,
-          defaultLanguage: hotel.default_language || 'en-US',
-          defaultCurrency: hotel.default_currency || 'USD',
-          availableLanguages: hotel.available_languages || ['en-US'],
-          availableCurrencies: hotel.available_currencies || ['USD'],
-        },
-      };
-    });
-  } catch (error) {
-    console.error('❌ Error generating static paths:', error);
-    return [];
-  }
-}
+// SSR mode - no prerendering needed for dynamic subdomain routing
+export const prerender = false;
 
 const { hotel: hotelSubdomain } = Astro.params;
-const {
-  hotelId,
-  hotelName,
-  hotelDomain,
-  defaultLanguage,
-  defaultCurrency,
-  availableLanguages,
-  availableCurrencies,
-} = Astro.props;
+
+console.log(`🏨 SSR Mode: Loading hotel data for subdomain: ${hotelSubdomain}`);
+
+// In SSR mode, we need to find the hotel by subdomain
+// First get all hotels to find the matching domain
+const allHotels = await getAllHotels();
+const matchingHotel = allHotels.find((h) => {
+  const subdomain = h.domain.split('.')[0];
+  return subdomain === hotelSubdomain;
+});
+
+if (!matchingHotel) {
+  console.error(`❌ Hotel not found for subdomain: ${hotelSubdomain}`);
+  return Astro.redirect('/404');
+}
+
+console.log(`✅ Found hotel: ${matchingHotel.name} (${matchingHotel.domain})`);
+
+// Extract hotel properties for SSR mode
+const hotelId = matchingHotel.id;
+const hotelName = matchingHotel.name;
+const hotelDomain = matchingHotel.domain;
+const defaultLanguage = matchingHotel.default_language || 'en-US';
+const defaultCurrency = matchingHotel.default_currency || 'USD';
+const availableLanguages = matchingHotel.available_languages || ['en-US'];
+const availableCurrencies = matchingHotel.available_currencies || ['USD'];
 
 console.log(
   `🏨 Loading hotel data for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
@@ -89,22 +74,23 @@ const hotel = {
 
   // Related data with translations
   rooms:
-    hotelData.rooms?.map(room => getTranslatedContent(room, currentLanguage)) ||
-    [],
+    hotelData.rooms?.map((room) =>
+      getTranslatedContent(room, currentLanguage)
+    ) || [],
   activities:
-    hotelData.activities?.map(activity =>
+    hotelData.activities?.map((activity) =>
       getTranslatedContent(activity, currentLanguage)
     ) || [],
   facilities:
-    hotelData.facilities?.map(facility =>
+    hotelData.facilities?.map((facility) =>
       getTranslatedContent(facility, currentLanguage)
     ) || [],
   galleries:
-    hotelData.galleries?.map(gallery =>
+    hotelData.galleries?.map((gallery) =>
       getTranslatedContent(gallery, currentLanguage)
     ) || [],
   menu_items:
-    hotelData.menu_items?.map(item =>
+    hotelData.menu_items?.map((item) =>
       getTranslatedContent(item, currentLanguage)
     ) || [],
 
@@ -363,7 +349,7 @@ console.log(
       const scrolled = window.pageYOffset;
       const rate = scrolled * -0.5; // Negative for upward movement
 
-      parallaxElements.forEach(element => {
+      parallaxElements.forEach((element) => {
         element.style.transform = `translateY(${rate}px) translateZ(0)`;
       });
     }
