@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
 
 interface FacilityCardProps {
   name: string;
@@ -13,6 +13,7 @@ interface FacilityCardProps {
   isOdd: boolean;
   hotelSlug: string;
   facilitySlug: string;
+  isSubdomain?: boolean;
 }
 
 export const FacilityCard = component$<FacilityCardProps>(
@@ -28,6 +29,7 @@ export const FacilityCard = component$<FacilityCardProps>(
     isOdd,
     hotelSlug,
     facilitySlug,
+    isSubdomain = false,
   }) => {
     const cardRef = useSignal<HTMLDivElement>();
 
@@ -36,15 +38,15 @@ export const FacilityCard = component$<FacilityCardProps>(
       if (!card) return;
 
       const handleMouseEnter = () => {
-        const img = card.querySelector("img") as HTMLImageElement;
-        const video = card.querySelector("video") as HTMLVideoElement;
+        const img = card.querySelector('img') as HTMLImageElement;
+        const video = card.querySelector('video') as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = "0";
+          img.style.opacity = '0';
         }
 
         if (video && videoUrl) {
-          video.style.opacity = "1";
+          video.style.opacity = '1';
           if (!video.src) {
             video.src = videoUrl;
             video.load();
@@ -54,26 +56,26 @@ export const FacilityCard = component$<FacilityCardProps>(
       };
 
       const handleMouseLeave = () => {
-        const img = card.querySelector("img") as HTMLImageElement;
-        const video = card.querySelector("video") as HTMLVideoElement;
+        const img = card.querySelector('img') as HTMLImageElement;
+        const video = card.querySelector('video') as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = "1";
+          img.style.opacity = '1';
         }
 
         if (video) {
-          video.style.opacity = "0";
+          video.style.opacity = '0';
           video.pause();
           video.currentTime = 0;
         }
       };
 
-      card.addEventListener("mouseenter", handleMouseEnter);
-      card.addEventListener("mouseleave", handleMouseLeave);
+      card.addEventListener('mouseenter', handleMouseEnter);
+      card.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-        card.removeEventListener("mouseenter", handleMouseEnter);
-        card.removeEventListener("mouseleave", handleMouseLeave);
+        card.removeEventListener('mouseenter', handleMouseEnter);
+        card.removeEventListener('mouseleave', handleMouseLeave);
       };
     });
 
@@ -81,7 +83,7 @@ export const FacilityCard = component$<FacilityCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-accent transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? "md:col-span-2" : ""
+          isOdd && isLast ? 'md:col-span-2' : ''
         }`}
       >
         {imageUrl && (
@@ -133,11 +135,15 @@ export const FacilityCard = component$<FacilityCardProps>(
                 Access
               </div>
               <div class="font-semibold text-primary text-lg">
-                {accessType || "Available"}
+                {accessType || 'Available'}
               </div>
             </div>
             <a
-              href={`/${hotelSlug}/facilities/${facilitySlug}`}
+              href={
+                isSubdomain
+                  ? `/facilities/${facilitySlug}`
+                  : `/${hotelSlug}/facilities/${facilitySlug}`
+              }
               class="btn btn-accent btn-sm"
             >
               Learn More
@@ -160,5 +166,5 @@ export const FacilityCard = component$<FacilityCardProps>(
         </div>
       </div>
     );
-  },
+  }
 );

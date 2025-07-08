@@ -10,28 +10,34 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../../lib/directus.js';
+import { isSubdomainBasedRouting } from '../../lib/domain-mapping.js';
 
 // SSG mode - prerender all hotel pages at build time
 export const prerender = true;
 
 export async function getStaticPaths() {
   console.log('🏨 Generating static paths for hotel homepage...');
-  
+
   try {
     const hotels = await getAllHotels();
-    console.log(`✅ Found ${hotels.length} hotels:`, hotels.map(h => h.domain));
-    
+    console.log(
+      `✅ Found ${hotels.length} hotels:`,
+      hotels.map((h) => h.domain)
+    );
+
     const paths = [];
-    
+
     for (const hotelData of hotels) {
       // Extract subdomain from full domain (e.g., "maisondemo" from "maisondemo.com")
       const subdomain = hotelData.domain.split('.')[0];
-      
-      console.log(`🏨 Processing hotel homepage: ${hotelData.name} (${hotelData.domain}) -> /${subdomain}/`);
-      
+
+      console.log(
+        `🏨 Processing hotel homepage: ${hotelData.name} (${hotelData.domain}) -> /${subdomain}/`
+      );
+
       // Get full hotel data
       const hotel = await getHotelByDomain(hotelData.domain);
-      
+
       paths.push({
         params: {
           hotel: subdomain,
@@ -43,18 +49,26 @@ export async function getStaticPaths() {
         },
       });
     }
-    
+
     console.log(`✅ Generated ${paths.length} static paths for hotel homepage`);
     return paths;
   } catch (error) {
-    console.error('❌ Error generating static paths for hotel homepage:', error);
+    console.error(
+      '❌ Error generating static paths for hotel homepage:',
+      error
+    );
     return [];
   }
 }
 
 const { hotel, hotelDomain, hotelSubdomain } = Astro.props;
 
-console.log(`🏨 Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`);
+console.log(
+  `🏨 Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
+);
+
+// Detect if we're using subdomain-based routing
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
 
 // Extract hotel properties for SSG mode
 const hotelId = hotel.id;
@@ -134,8 +148,15 @@ console.log(
         <h2 class="mb-4 font-primary font-bold text-primary text-4xl">
           {getTranslatedContent('Our Rooms', currentLanguage)}
         </h2>
-        <p class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg">
-          {getTranslatedContent('Discover our carefully designed accommodations', currentLanguage)}
+        <p
+          class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg"
+        >
+          {
+            getTranslatedContent(
+              'Discover our carefully designed accommodations',
+              currentLanguage
+            )
+          }
         </p>
       </div>
 
@@ -143,13 +164,43 @@ console.log(
         {
           hotelData.rooms.slice(0, 6).map((room, index) => {
             const isOdd = hotelData.rooms.length % 2 !== 0;
-            const isLastInOddGrid = isOdd && index === hotelData.rooms.length - 1;
-            
+            const isLastInOddGrid =
+              isOdd && index === hotelData.rooms.length - 1;
+
+            // Generate image and video URLs
+            const imageUrl = room.main_photo
+              ? getMediaUrl(room.main_photo.id, {
+                  width: 800,
+                  height: 450,
+                  quality: 95,
+                })
+              : '';
+            const videoUrl = room.main_video
+              ? getMediaUrl(room.main_video.id)
+              : undefined;
+
+            // Create slug from room name
+            const roomSlug = room.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
             return (
               <div class={isLastInOddGrid ? 'md:col-span-2 lg:col-span-1' : ''}>
                 <RoomCard
-                  room={room}
-                  hotelDomain={hotelDomain}
+                  name={room.name}
+                  description={room.description}
+                  bedConfiguration={room.bed_configuration}
+                  sizeSqm={room.size_sqm}
+                  basePrice={room.base_price}
+                  defaultCurrency={defaultCurrency}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotelData.rooms.slice(0, 6).length - 1}
+                  isOdd={hotelData.rooms.slice(0, 6).length % 2 !== 0}
+                  hotelSlug={hotelSubdomain}
+                  roomSlug={roomSlug}
+                  isSubdomain={isSubdomain}
                   client:load
                 />
               </div>
@@ -158,16 +209,22 @@ console.log(
         }
       </div>
 
-      {hotelData.rooms.length > 6 && (
-        <div class="mt-12 text-center">
-          <a
-            href={`/${hotelSubdomain}/accommodation`}
-            class="font-primary btn btn-primary btn-lg"
-          >
-            {getTranslatedContent('View All Rooms', currentLanguage)}
-          </a>
-        </div>
-      )}
+      {
+        hotelData.rooms.length > 6 && (
+          <div class="mt-12 text-center">
+            <a
+              href={
+                isSubdomain
+                  ? '/accommodation'
+                  : `/${hotelSubdomain}/accommodation`
+              }
+              class="font-primary btn btn-primary btn-lg"
+            >
+              {getTranslatedContent('View All Rooms', currentLanguage)}
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -178,8 +235,15 @@ console.log(
         <h2 class="mb-4 font-primary font-bold text-primary text-4xl">
           {getTranslatedContent('Experiences & Activities', currentLanguage)}
         </h2>
-        <p class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg">
-          {getTranslatedContent('Immerse yourself in unforgettable experiences', currentLanguage)}
+        <p
+          class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg"
+        >
+          {
+            getTranslatedContent(
+              'Immerse yourself in unforgettable experiences',
+              currentLanguage
+            )
+          }
         </p>
       </div>
 
@@ -187,13 +251,44 @@ console.log(
         {
           hotelData.activities.slice(0, 6).map((activity, index) => {
             const isOdd = hotelData.activities.length % 2 !== 0;
-            const isLastInOddGrid = isOdd && index === hotelData.activities.length - 1;
-            
+            const isLastInOddGrid =
+              isOdd && index === hotelData.activities.length - 1;
+
+            // Generate image and video URLs
+            const imageUrl = activity.main_photo
+              ? getMediaUrl(activity.main_photo.id, {
+                  width: 800,
+                  height: 450,
+                  quality: 95,
+                })
+              : '';
+            const videoUrl = activity.main_video
+              ? getMediaUrl(activity.main_video.id)
+              : undefined;
+
+            // Create slug from activity name
+            const activitySlug = activity.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
             return (
               <div class={isLastInOddGrid ? 'md:col-span-2 lg:col-span-1' : ''}>
                 <ActivityCard
-                  activity={activity}
-                  hotelDomain={hotelDomain}
+                  name={activity.name}
+                  description={activity.description}
+                  maxParticipants={activity.max_participants}
+                  ageRestriction={activity.age_restriction}
+                  equipmentProvided={activity.equipment_provided}
+                  operatingHours={activity.operating_hours}
+                  defaultCurrency={defaultCurrency}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotelData.activities.slice(0, 6).length - 1}
+                  isOdd={hotelData.activities.slice(0, 6).length % 2 !== 0}
+                  hotelSlug={hotelSubdomain}
+                  activitySlug={activitySlug}
+                  isSubdomain={isSubdomain}
                   client:load
                 />
               </div>
@@ -202,16 +297,23 @@ console.log(
         }
       </div>
 
-      {hotelData.activities.length > 6 && (
-        <div class="mt-12 text-center">
-          <a
-            href={`/${hotelSubdomain}/experiences`}
-            class="font-primary btn btn-primary btn-lg"
-          >
-            {getTranslatedContent('Discover All Experiences', currentLanguage)}
-          </a>
-        </div>
-      )}
+      {
+        hotelData.activities.length > 6 && (
+          <div class="mt-12 text-center">
+            <a
+              href={
+                isSubdomain ? '/experiences' : `/${hotelSubdomain}/experiences`
+              }
+              class="font-primary btn btn-primary btn-lg"
+            >
+              {getTranslatedContent(
+                'Discover All Experiences',
+                currentLanguage
+              )}
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -222,8 +324,15 @@ console.log(
         <h2 class="mb-4 font-primary font-bold text-primary text-4xl">
           {getTranslatedContent('Hotel Facilities', currentLanguage)}
         </h2>
-        <p class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg">
-          {getTranslatedContent('Enjoy our world-class amenities and services', currentLanguage)}
+        <p
+          class="mx-auto max-w-2xl font-secondary text-base-content/70 text-lg"
+        >
+          {
+            getTranslatedContent(
+              'Enjoy our world-class amenities and services',
+              currentLanguage
+            )
+          }
         </p>
       </div>
 
@@ -231,13 +340,42 @@ console.log(
         {
           hotelData.facilities.slice(0, 6).map((facility, index) => {
             const isOdd = hotelData.facilities.length % 2 !== 0;
-            const isLastInOddGrid = isOdd && index === hotelData.facilities.length - 1;
-            
+            const isLastInOddGrid =
+              isOdd && index === hotelData.facilities.length - 1;
+
+            // Generate image and video URLs
+            const imageUrl = facility.main_photo
+              ? getMediaUrl(facility.main_photo.id, {
+                  width: 800,
+                  height: 450,
+                  quality: 95,
+                })
+              : '';
+            const videoUrl = facility.main_video
+              ? getMediaUrl(facility.main_video.id)
+              : undefined;
+
+            // Create slug from facility name
+            const facilitySlug = facility.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
             return (
               <div class={isLastInOddGrid ? 'md:col-span-2 lg:col-span-1' : ''}>
                 <FacilityCard
-                  facility={facility}
-                  hotelDomain={hotelDomain}
+                  name={facility.name}
+                  description={facility.description}
+                  facilityType={facility.facility_type}
+                  capacity={facility.capacity}
+                  accessType={facility.access_type}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotelData.facilities.slice(0, 6).length - 1}
+                  isOdd={hotelData.facilities.slice(0, 6).length % 2 !== 0}
+                  hotelSlug={hotelSubdomain}
+                  facilitySlug={facilitySlug}
+                  isSubdomain={isSubdomain}
                   client:load
                 />
               </div>
@@ -246,16 +384,20 @@ console.log(
         }
       </div>
 
-      {hotelData.facilities.length > 6 && (
-        <div class="mt-12 text-center">
-          <a
-            href={`/${hotelSubdomain}/facilities`}
-            class="font-primary btn btn-primary btn-lg"
-          >
-            {getTranslatedContent('Explore All Facilities', currentLanguage)}
-          </a>
-        </div>
-      )}
+      {
+        hotelData.facilities.length > 6 && (
+          <div class="mt-12 text-center">
+            <a
+              href={
+                isSubdomain ? '/facilities' : `/${hotelSubdomain}/facilities`
+              }
+              class="font-primary btn btn-primary btn-lg"
+            >
+              {getTranslatedContent('Explore All Facilities', currentLanguage)}
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -266,7 +408,12 @@ console.log(
         {getTranslatedContent('Ready to Book Your Stay?', currentLanguage)}
       </h2>
       <p class="mx-auto mb-8 max-w-2xl font-secondary text-lg">
-        {getTranslatedContent('Experience luxury and comfort at its finest', currentLanguage)}
+        {
+          getTranslatedContent(
+            'Experience luxury and comfort at its finest',
+            currentLanguage
+          )
+        }
       </p>
       <a
         href={`/${hotelSubdomain}/book`}

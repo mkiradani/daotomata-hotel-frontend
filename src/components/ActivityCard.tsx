@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
 
 interface ActivityCardProps {
   name: string;
@@ -15,6 +15,7 @@ interface ActivityCardProps {
   isOdd: boolean;
   hotelSlug: string;
   activitySlug: string;
+  isSubdomain?: boolean;
 }
 
 export const ActivityCard = component$<ActivityCardProps>(
@@ -32,6 +33,7 @@ export const ActivityCard = component$<ActivityCardProps>(
     isOdd,
     hotelSlug,
     activitySlug,
+    isSubdomain = false,
   }) => {
     const cardRef = useSignal<HTMLDivElement>();
     const isHovered = useSignal(false);
@@ -42,15 +44,15 @@ export const ActivityCard = component$<ActivityCardProps>(
 
       const handleMouseEnter = () => {
         isHovered.value = true;
-        const img = card.querySelector("img") as HTMLImageElement;
-        const video = card.querySelector("video") as HTMLVideoElement;
+        const img = card.querySelector('img') as HTMLImageElement;
+        const video = card.querySelector('video') as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = "0";
+          img.style.opacity = '0';
         }
 
         if (video && videoUrl) {
-          video.style.opacity = "1";
+          video.style.opacity = '1';
           if (!video.src) {
             video.src = videoUrl;
             video.load();
@@ -61,26 +63,26 @@ export const ActivityCard = component$<ActivityCardProps>(
 
       const handleMouseLeave = () => {
         isHovered.value = false;
-        const img = card.querySelector("img") as HTMLImageElement;
-        const video = card.querySelector("video") as HTMLVideoElement;
+        const img = card.querySelector('img') as HTMLImageElement;
+        const video = card.querySelector('video') as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = "1";
+          img.style.opacity = '1';
         }
 
         if (video) {
-          video.style.opacity = "0";
+          video.style.opacity = '0';
           video.pause();
           video.currentTime = 0;
         }
       };
 
-      card.addEventListener("mouseenter", handleMouseEnter);
-      card.addEventListener("mouseleave", handleMouseLeave);
+      card.addEventListener('mouseenter', handleMouseEnter);
+      card.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-        card.removeEventListener("mouseenter", handleMouseEnter);
-        card.removeEventListener("mouseleave", handleMouseLeave);
+        card.removeEventListener('mouseenter', handleMouseEnter);
+        card.removeEventListener('mouseleave', handleMouseLeave);
       };
     });
 
@@ -88,7 +90,7 @@ export const ActivityCard = component$<ActivityCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-secondary transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? "md:col-span-2" : ""
+          isOdd && isLast ? 'md:col-span-2' : ''
         }`}
       >
         {imageUrl && (
@@ -159,7 +161,11 @@ export const ActivityCard = component$<ActivityCardProps>(
               <div class="font-bold text-primary text-2xl">Available</div>
             </div>
             <a
-              href={`/${hotelSlug}/activities/${activitySlug}`}
+              href={
+                isSubdomain
+                  ? `/activities/${activitySlug}`
+                  : `/${hotelSlug}/activities/${activitySlug}`
+              }
               class="btn btn-secondary btn-sm"
             >
               Learn More
@@ -182,5 +188,5 @@ export const ActivityCard = component$<ActivityCardProps>(
         </div>
       </div>
     );
-  },
+  }
 );

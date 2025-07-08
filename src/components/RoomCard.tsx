@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { $, component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
 
 interface RoomCardProps {
   name: string;
@@ -14,6 +14,7 @@ interface RoomCardProps {
   isOdd: boolean;
   hotelSlug: string;
   roomSlug: string;
+  isSubdomain?: boolean; // Add subdomain detection
 }
 
 export const RoomCard = component$<RoomCardProps>(
@@ -30,6 +31,7 @@ export const RoomCard = component$<RoomCardProps>(
     isOdd,
     hotelSlug,
     roomSlug,
+    isSubdomain = false,
   }) => {
     const cardRef = useSignal<HTMLDivElement>();
     const isHovered = useSignal(false);
@@ -49,15 +51,15 @@ export const RoomCard = component$<RoomCardProps>(
 
       const handleMouseEnter = () => {
         isHovered.value = true;
-        const img = card.querySelector("img") as HTMLImageElement;
-        const video = card.querySelector("video") as HTMLVideoElement;
+        const img = card.querySelector('img') as HTMLImageElement;
+        const video = card.querySelector('video') as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = "0";
+          img.style.opacity = '0';
         }
 
         if (video && videoUrl) {
-          video.style.opacity = "1";
+          video.style.opacity = '1';
           if (!video.src) {
             video.src = videoUrl;
             video.load();
@@ -68,26 +70,26 @@ export const RoomCard = component$<RoomCardProps>(
 
       const handleMouseLeave = () => {
         isHovered.value = false;
-        const img = card.querySelector("img") as HTMLImageElement;
-        const video = card.querySelector("video") as HTMLVideoElement;
+        const img = card.querySelector('img') as HTMLImageElement;
+        const video = card.querySelector('video') as HTMLVideoElement;
 
         if (img) {
-          img.style.opacity = "1";
+          img.style.opacity = '1';
         }
 
         if (video) {
-          video.style.opacity = "0";
+          video.style.opacity = '0';
           video.pause();
           video.currentTime = 0;
         }
       };
 
-      card.addEventListener("mouseenter", handleMouseEnter);
-      card.addEventListener("mouseleave", handleMouseLeave);
+      card.addEventListener('mouseenter', handleMouseEnter);
+      card.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-        card.removeEventListener("mouseenter", handleMouseEnter);
-        card.removeEventListener("mouseleave", handleMouseLeave);
+        card.removeEventListener('mouseenter', handleMouseEnter);
+        card.removeEventListener('mouseleave', handleMouseLeave);
       };
     });
 
@@ -95,7 +97,7 @@ export const RoomCard = component$<RoomCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? "md:col-span-2" : ""
+          isOdd && isLast ? 'md:col-span-2' : ''
         }`}
       >
         {imageUrl && (
@@ -151,7 +153,7 @@ export const RoomCard = component$<RoomCardProps>(
                 From
               </div>
               <div class="font-bold text-primary text-2xl">
-                {defaultCurrency} {basePrice || "Contact"}
+                {defaultCurrency} {basePrice || 'Contact'}
               </div>
             </div>
             <div class="flex gap-2">
@@ -163,7 +165,11 @@ export const RoomCard = component$<RoomCardProps>(
                 Book Now
               </button>
               <a
-                href={`/${hotelSlug}/rooms/${roomSlug}`}
+                href={
+                  isSubdomain
+                    ? `/rooms/${roomSlug}`
+                    : `/${hotelSlug}/rooms/${roomSlug}`
+                }
                 class="btn-outline btn btn-sm"
               >
                 Details
@@ -206,7 +212,7 @@ export const RoomCard = component$<RoomCardProps>(
                   <div>
                     <h4 class="font-semibold">{name}</h4>
                     <p class="opacity-70 text-sm">
-                      {bedConfiguration || "Room"}
+                      {bedConfiguration || 'Room'}
                     </p>
                   </div>
                   <div class="text-right">
@@ -253,5 +259,5 @@ export const RoomCard = component$<RoomCardProps>(
         )}
       </div>
     );
-  },
+  }
 );

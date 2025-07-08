@@ -7,6 +7,7 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../../lib/directus.js';
+import { isSubdomainBasedRouting } from '../../lib/domain-mapping.js';
 
 export const prerender = true;
 
@@ -17,10 +18,10 @@ export async function getStaticPaths() {
     const hotels = await getAllHotels();
     console.log(
       `✅ Found ${hotels.length} hotels:`,
-      hotels.map(h => h.domain)
+      hotels.map((h) => h.domain)
     );
 
-    return hotels.map(hotel => {
+    return hotels.map((hotel) => {
       // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
       const subdomain = hotel.domain.split('.')[0];
       return {
@@ -58,6 +59,9 @@ console.log(
   `🏨 Loading accommodation page for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
 );
 
+// Detect if we're using subdomain-based routing
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+
 // Load complete hotel data from Directus using full domain
 const hotelData = await getHotelByDomain(hotelDomain);
 
@@ -92,8 +96,9 @@ const hotel = {
 
   // Related data with translations - focus on rooms for accommodation page
   rooms:
-    hotelData.rooms?.map(room => getTranslatedContent(room, currentLanguage)) ||
-    [],
+    hotelData.rooms?.map((room) =>
+      getTranslatedContent(room, currentLanguage)
+    ) || [],
 
   // Other related data
   analytics: hotelData.analytics || null,
@@ -173,6 +178,7 @@ console.log(
             isOdd={hotel.rooms.length % 2 !== 0}
             hotelSlug={hotelSubdomain}
             roomSlug={roomSlug}
+            isSubdomain={isSubdomain}
             client:load
           />
         );
