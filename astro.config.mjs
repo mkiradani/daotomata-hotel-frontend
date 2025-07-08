@@ -1,11 +1,13 @@
 import qwik from "@qwikdev/astro";
 import tailwindcss from "@tailwindcss/vite";
-import vercel from "@astrojs/vercel/serverless";
+import node from "@astrojs/node";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [qwik()],
-  adapter: vercel(),
+  adapter: node({
+    mode: "standalone",
+  }),
   server: {
     host: true,
     port: 4321,
