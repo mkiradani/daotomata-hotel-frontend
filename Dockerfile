@@ -34,8 +34,8 @@ RUN npm install -g pnpm@9.1.2
 COPY package.json ./
 COPY pnpm-lock.yaml* ./
 
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --prod
+# Install only production dependencies (ignore scripts to prevent husky setup)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Copy built application from builder stage (Node.js standalone)
 COPY --from=builder /app/dist ./dist
