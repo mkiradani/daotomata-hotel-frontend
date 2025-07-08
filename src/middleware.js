@@ -35,6 +35,7 @@ const HOTEL_ROUTES = [
 
 /**
  * Rutas que NO deben ser interceptadas (admin, api, assets, etc.)
+ * NOTA: multitenant-showcase removido para permitir interceptación desde subdomains
  */
 const EXCLUDED_ROUTES = [
   "admin",
@@ -43,7 +44,6 @@ const EXCLUDED_ROUTES = [
   "favicon.ico",
   "robots.txt",
   "sitemap.xml",
-  "multitenant-showcase",
   "test-chatwoot",
 ];
 
@@ -111,6 +111,19 @@ export async function onRequest(context, next) {
       // Rewrite interno a página SSG (sin cambiar URL)
       return context.rewrite(newPath);
     }
+
+    // 🚨 SEGURIDAD: Cualquier otra ruta desde subdomain → homepage del hotel
+    // Esto bloquea acceso a /multitenant-showcase, /admin, etc. desde subdomains
+    const newPath = `/${subdomain}`;
+    console.log(
+      `🛡️ Subdomain security rewrite: ${pathname} → ${newPath} (unauthorized route blocked)`,
+    );
+
+    // Debug detección de hotel
+    debugHotelDetection(url, { hotel: subdomain });
+
+    // Rewrite a homepage del hotel para bloquear rutas no autorizadas
+    return context.rewrite(newPath);
   } else {
     // LEGACY ROUTING: Verificar si es una ruta de hotel sin prefijo
     const targetRoute = extractRouteFromPath(pathname);
