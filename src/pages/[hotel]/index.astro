@@ -17,23 +17,44 @@ import {
 } from '../../lib/domain-mapping.js';
 
 // SSR mode - detect hotel from runtime request
+console.log(`🔍 [HOTEL INDEX] === DEBUGGING SSR ROUTING ===`);
+console.log(`🔍 [HOTEL INDEX] URL: ${Astro.url.href}`);
+console.log(`🔍 [HOTEL INDEX] Hostname: ${Astro.url.hostname}`);
+console.log(`🔍 [HOTEL INDEX] Pathname: ${Astro.url.pathname}`);
+console.log(`🔍 [HOTEL INDEX] Params:`, Astro.params);
+
 const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+console.log(`🔍 [HOTEL INDEX] isSubdomain: ${isSubdomain}`);
+
 const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+console.log(`🔍 [HOTEL INDEX] hotelDomain: ${hotelDomain}`);
+
 const hotelSubdomain = isSubdomain
   ? getSubdomainFromHostname(Astro.url.hostname)
   : Astro.params.hotel;
+console.log(`🔍 [HOTEL INDEX] hotelSubdomain: ${hotelSubdomain}`);
 
 console.log(
   `🏨 SSR Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}, isSubdomain: ${isSubdomain}`
 );
 
 // Get hotel data from Directus
+console.log(`🔍 [HOTEL INDEX] Fetching hotel data from Directus...`);
 const hotel = await getHotelByDomain(hotelDomain);
 
 if (!hotel) {
-  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  console.error(`❌ [HOTEL INDEX] Hotel not found for domain: ${hotelDomain}`);
   return Astro.redirect('/404');
 }
+
+console.log(`✅ [HOTEL INDEX] Hotel found: ${hotel.name} (ID: ${hotel.id})`);
+console.log(
+  `🔍 [HOTEL INDEX] Hotel facilities count: ${hotel.facilities?.length || 0}`
+);
+console.log(
+  `🔍 [HOTEL INDEX] Hotel activities count: ${hotel.activities?.length || 0}`
+);
+console.log(`🔍 [HOTEL INDEX] Hotel rooms count: ${hotel.rooms?.length || 0}`);
 
 // Extract hotel properties for SSR mode
 const hotelId = hotel.id;

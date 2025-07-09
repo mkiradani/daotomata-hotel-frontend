@@ -15,32 +15,72 @@ const hotelSubdomain = isSubdomain
   ? getSubdomainFromHostname(Astro.url.hostname)
   : Astro.params.hotel;
 
+console.log(`🔍 [FACILITY DETAIL] === DEBUGGING SSR ROUTING ===`);
+console.log(`🔍 [FACILITY DETAIL] URL: ${Astro.url.href}`);
+console.log(`🔍 [FACILITY DETAIL] Hostname: ${Astro.url.hostname}`);
+console.log(`🔍 [FACILITY DETAIL] Pathname: ${Astro.url.pathname}`);
+console.log(`🔍 [FACILITY DETAIL] Params:`, Astro.params);
+
 console.log(
   `🏨 SSR Loading facility page for subdomain: ${hotelSubdomain}, slug: ${Astro.params.slug}`
 );
 
 // Get hotel data from Directus
+console.log(`🔍 [FACILITY DETAIL] Fetching hotel data from Directus...`);
 const hotel = await getHotelByDomain(hotelDomain);
 
 if (!hotel) {
-  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  console.error(
+    `❌ [FACILITY DETAIL] Hotel not found for domain: ${hotelDomain}`
+  );
   return Astro.redirect('/404');
 }
 
+console.log(
+  `✅ [FACILITY DETAIL] Hotel found: ${hotel.name} (ID: ${hotel.id})`
+);
+console.log(
+  `🔍 [FACILITY DETAIL] Hotel facilities count: ${hotel.facilities?.length || 0}`
+);
+console.log(
+  `🔍 [FACILITY DETAIL] Available facilities:`,
+  hotel.facilities?.map((f) => f.name) || []
+);
+
 // Find the facility by slug
 const facilitySlug = Astro.params.slug;
+console.log(
+  `🔍 [FACILITY DETAIL] Looking for facility with slug: ${facilitySlug}`
+);
+
 const facility = hotel.facilities?.find((item) => {
   const slug = item.name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+  console.log(
+    `🔍 [FACILITY DETAIL] Comparing "${slug}" with "${facilitySlug}"`
+  );
   return slug === facilitySlug;
 });
 
 if (!facility) {
-  console.error(`❌ Facility not found for slug: ${facilitySlug}`);
+  console.error(
+    `❌ [FACILITY DETAIL] Facility not found for slug: ${facilitySlug}`
+  );
+  console.error(
+    `❌ [FACILITY DETAIL] Available facility slugs:`,
+    hotel.facilities?.map((f) => {
+      return f.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }) || []
+  );
   return Astro.redirect('/404');
 }
+
+console.log(`✅ [FACILITY DETAIL] Facility found: ${facility.name}`);
 
 // Default values
 const defaultLanguage = hotel.default_language || 'en-US';

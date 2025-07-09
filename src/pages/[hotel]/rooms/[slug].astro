@@ -9,38 +9,71 @@ import {
 } from '../../../lib/domain-mapping.js';
 
 // SSR mode - detect hotel from runtime request
+console.log(`🔍 [ROOM DETAIL] === DEBUGGING SSR ROUTING ===`);
+console.log(`🔍 [ROOM DETAIL] URL: ${Astro.url.href}`);
+console.log(`🔍 [ROOM DETAIL] Hostname: ${Astro.url.hostname}`);
+console.log(`🔍 [ROOM DETAIL] Pathname: ${Astro.url.pathname}`);
+console.log(`🔍 [ROOM DETAIL] Params:`, Astro.params);
+
 const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+console.log(`🔍 [ROOM DETAIL] isSubdomain: ${isSubdomain}`);
+
 const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+console.log(`🔍 [ROOM DETAIL] hotelDomain: ${hotelDomain}`);
+
 const hotelSubdomain = isSubdomain
   ? getSubdomainFromHostname(Astro.url.hostname)
   : Astro.params.hotel;
+console.log(`🔍 [ROOM DETAIL] hotelSubdomain: ${hotelSubdomain}`);
 
 console.log(
   `🏨 SSR Loading room page for subdomain: ${hotelSubdomain}, slug: ${Astro.params.slug}`
 );
 
 // Get hotel data from Directus
+console.log(`🔍 [ROOM DETAIL] Fetching hotel data from Directus...`);
 const hotel = await getHotelByDomain(hotelDomain);
 
 if (!hotel) {
-  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  console.error(`❌ [ROOM DETAIL] Hotel not found for domain: ${hotelDomain}`);
   return Astro.redirect('/404');
 }
 
+console.log(`✅ [ROOM DETAIL] Hotel found: ${hotel.name} (ID: ${hotel.id})`);
+console.log(`🔍 [ROOM DETAIL] Hotel rooms count: ${hotel.rooms?.length || 0}`);
+console.log(
+  `🔍 [ROOM DETAIL] Available rooms:`,
+  hotel.rooms?.map((r) => r.name) || []
+);
+
 // Find the room by slug
 const roomSlug = Astro.params.slug;
+console.log(`🔍 [ROOM DETAIL] Looking for room with slug: ${roomSlug}`);
+
 const room = hotel.rooms?.find((r) => {
   const slug = r.name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+  console.log(`🔍 [ROOM DETAIL] Comparing "${slug}" with "${roomSlug}"`);
   return slug === roomSlug;
 });
 
 if (!room) {
-  console.error(`❌ Room not found for slug: ${roomSlug}`);
+  console.error(`❌ [ROOM DETAIL] Room not found for slug: ${roomSlug}`);
+  console.error(
+    `❌ [ROOM DETAIL] Available room slugs:`,
+    hotel.rooms?.map((r) => {
+      return r.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }) || []
+  );
   return Astro.redirect('/404');
 }
+
+console.log(`✅ [ROOM DETAIL] Room found: ${room.name}`);
 
 // Default values
 const defaultLanguage = hotel.default_language || 'en-US';

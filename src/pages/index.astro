@@ -1,6 +1,11 @@
 ---
 import { isSubdomainBasedRouting } from '../lib/domain-mapping.js';
 
+console.log(`🔍 [INDEX] === DEBUGGING ROOT ROUTING ===`);
+console.log(`🔍 [INDEX] URL: ${Astro.url.href}`);
+console.log(`🔍 [INDEX] Hostname: ${Astro.url.hostname}`);
+console.log(`🔍 [INDEX] Pathname: ${Astro.url.pathname}`);
+
 // Check if this is a subdomain request
 const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
 
