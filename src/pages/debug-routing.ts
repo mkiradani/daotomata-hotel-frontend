@@ -36,7 +36,9 @@ export async function GET(context: { url?: URL; request?: Request }) {
 
     const hostname = context.url?.hostname || 'unknown';
     const isSubdomain = isSubdomainBasedRouting(hostname);
-    const hotelDomain = getHotelDomainFromRequest(context.url, {});
+    const hotelDomain = context.url
+      ? getHotelDomainFromRequest(context.url, {})
+      : 'unknown';
 
     console.log(`🔍 [DEBUG-ROUTING] isSubdomain: ${isSubdomain}`);
     console.log(`🔍 [DEBUG-ROUTING] hotelDomain: ${hotelDomain}`);
