@@ -7,97 +7,42 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../../lib/directus.js';
+import {
+  isSubdomainBasedRouting,
+  getHotelDomainFromRequest,
+  getSubdomainFromHostname,
+} from '../../lib/domain-mapping.js';
 
-export const prerender = true;
+// SSR mode - detect hotel from runtime request
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+const hotelSubdomain = isSubdomain
+  ? getSubdomainFromHostname(Astro.url.hostname)
+  : Astro.params.hotel;
 
-export async function getStaticPaths() {
-  console.log('🏢 Generating static paths for experiences pages...');
+console.log(
+  `🏨 SSR Loading experiences page for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
+);
 
-  try {
-    const hotels = await getAllHotels();
-    const paths = [];
+// Get hotel data from Directus
+const hotel = await getHotelByDomain(hotelDomain);
 
-    for (const hotel of hotels) {
-      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
-
-      // Extract subdomain from full domain (e.g., "baberrih" from "baberrih.ma")
-      const subdomain = hotel.domain.split('.')[0];
-
-      paths.push({
-        params: {
-          hotel: subdomain,
-        },
-        props: {
-          hotel,
-          hotelSubdomain: subdomain,
-          defaultLanguage: hotel.default_language || 'en-US',
-          defaultCurrency: hotel.default_currency || 'USD',
-          isSubdomain: true, // Always true for [hotel] pages in SSG
-        },
-      });
-    }
-
-    console.log(`✅ Generated ${paths.length} experiences page paths`);
-    return paths;
-  } catch (error) {
-    console.error('❌ Error generating experiences static paths:', error);
-    return [];
-  }
+if (!hotel) {
+  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  return Astro.redirect('/404');
 }
 
-const {
-  hotel: hotelData,
-  hotelSubdomain,
-  defaultLanguage,
-  defaultCurrency,
-  isSubdomain,
-} = Astro.props;
+// Extract hotel properties for SSR mode
+const hotelId = hotel.id;
+const hotelName = hotel.name;
+const defaultLanguage = hotel.default_language || 'en-US';
+const defaultCurrency = hotel.default_currency || 'USD';
 
 // Get current language (default to English for now)
 const currentLanguage = defaultLanguage || 'en-US';
 
-// Get hotel data with experiences
-const fullHotel = await getHotelByDomain(hotelData.domain);
-
-if (!fullHotel) {
-  throw new Error(`Hotel not found for domain: ${hotelData.domain}`);
-}
-
-// Process hotel data with translations
-const hotel = {
-  id: fullHotel.id,
-  name: getTranslatedContent(fullHotel, currentLanguage).name || fullHotel.name,
-  description:
-    getTranslatedContent(fullHotel, currentLanguage).description ||
-    fullHotel.description,
-  domain: fullHotel.domain,
-  default_currency: fullHotel.default_currency || defaultCurrency,
-
-  // Analytics
-  analytics: fullHotel.analytics || {},
-
-  // Chatwoot
-  chatwoot_website_token: fullHotel.chatwoot_website_token,
-
-  // Theme data from Directus
-  theme: fullHotel.theme || {},
-  logo: fullHotel.logo || null,
-
-  // Contact information
-  contact_email: fullHotel.contact_email || null,
-  contact_phone_calls: fullHotel.contact_phone_calls || null,
-  contact_phone_messages: fullHotel.contact_phone_messages || null,
-  location: fullHotel.location || null,
-
-  // Related data with translations - focus on activities (experiences) for this page
-  activities:
-    fullHotel.activities?.map((activity) =>
-      getTranslatedContent(activity, currentLanguage)
-    ) || [],
-
-  // Other related data
-  chatwoot_accounts: fullHotel.chatwoot_accounts || [],
-};
+// Hotel data is already loaded in the 'hotel' variable from SSR
+// No need to process further, just use it directly
 
 // Breadcrumb items
 const _breadcrumbItems = [

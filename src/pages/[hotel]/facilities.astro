@@ -7,92 +7,42 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../../lib/directus.js';
+import {
+  isSubdomainBasedRouting,
+  getHotelDomainFromRequest,
+  getSubdomainFromHostname,
+} from '../../lib/domain-mapping.js';
 
-export const prerender = true;
+// SSR mode - detect hotel from runtime request
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+const hotelSubdomain = isSubdomain
+  ? getSubdomainFromHostname(Astro.url.hostname)
+  : Astro.params.hotel;
 
-export async function getStaticPaths() {
-  console.log('🏨 Generating static paths for facilities pages...');
+console.log(
+  `🏨 SSR Loading facilities page for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
+);
 
-  try {
-    const hotels = await getAllHotels();
-    const paths = [];
+// Get hotel data from Directus
+const hotel = await getHotelByDomain(hotelDomain);
 
-    for (const hotel of hotels) {
-      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
-
-      // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
-      const subdomain = hotel.domain.split('.')[0];
-
-      paths.push({
-        params: {
-          hotel: subdomain,
-        },
-        props: {
-          hotel,
-          hotelSubdomain: subdomain,
-          defaultLanguage: hotel.default_language || 'en-US',
-          isSubdomain: true, // Always true for [hotel] pages in SSG
-        },
-      });
-    }
-
-    console.log(`✅ Generated ${paths.length} facilities page paths`);
-    return paths;
-  } catch (error) {
-    console.error('❌ Error generating facilities static paths:', error);
-    return [];
-  }
+if (!hotel) {
+  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  return Astro.redirect('/404');
 }
 
-const {
-  hotel: hotelData,
-  hotelSubdomain,
-  defaultLanguage,
-  isSubdomain,
-} = Astro.props;
+// Extract hotel properties for SSR mode
+const hotelId = hotel.id;
+const hotelName = hotel.name;
+const defaultLanguage = hotel.default_language || 'en-US';
+const defaultCurrency = hotel.default_currency || 'USD';
 
 // Get current language from URL or use default
 const currentLanguage = defaultLanguage;
 
-// Get full hotel data with facilities
-const fullHotel = await getHotelByDomain(hotelData.domain);
-if (!fullHotel) {
-  throw new Error(`Hotel not found for domain: ${hotelData.domain}`);
-}
-
-// Build hotel object with translated content
-const hotel = {
-  // Basic hotel info
-  id: fullHotel.id,
-  name: fullHotel.name,
-  domain: fullHotel.domain,
-
-  // Analytics and integrations
-  analytics: {
-    ga4_id: fullHotel.ga4_token,
-    pixel_id: fullHotel.meta_pixel_token,
-  },
-  chatwoot_website_token: fullHotel.chatwoot_website_token,
-
-  // Theme data from Directus
-  theme: fullHotel.theme || {},
-  logo: fullHotel.logo || null,
-
-  // Contact information
-  contact_email: fullHotel.contact_email || null,
-  contact_phone_calls: fullHotel.contact_phone_calls || null,
-  contact_phone_messages: fullHotel.contact_phone_messages || null,
-  location: fullHotel.location || null,
-
-  // Related data with translations - focus on facilities for this page
-  facilities:
-    fullHotel.facilities?.map((facility) =>
-      getTranslatedContent(facility, currentLanguage)
-    ) || [],
-
-  // Other related data
-  chatwoot_accounts: fullHotel.chatwoot_accounts || [],
-};
+// Hotel data is already loaded in the 'hotel' variable from SSR
+// No need to rebuild the object, just use it directly
 
 // Get hotel domain and slug
 const _hotelDomain = hotel.domain;

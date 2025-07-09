@@ -1,75 +1,50 @@
 ---
 import { DetailPageLayout } from '../../../components/DetailPageLayout.tsx';
 import Layout from '../../../layouts/Layout.astro';
+import { getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
 import {
-  getAllHotels,
-  getHotelByDomain,
-  getMediaUrl,
-} from '../../../lib/directus.js';
+  isSubdomainBasedRouting,
+  getHotelDomainFromRequest,
+  getSubdomainFromHostname,
+} from '../../../lib/domain-mapping.js';
 
-export const prerender = true;
+// SSR mode - detect hotel from runtime request
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+const hotelSubdomain = isSubdomain
+  ? getSubdomainFromHostname(Astro.url.hostname)
+  : Astro.params.hotel;
 
-export async function getStaticPaths() {
-  console.log('🎯 Generating static paths for activity pages...');
+console.log(
+  `🏨 SSR Loading activity page for subdomain: ${hotelSubdomain}, slug: ${Astro.params.slug}`
+);
 
-  try {
-    const hotels = await getAllHotels();
-    const paths = [];
+// Get hotel data from Directus
+const hotel = await getHotelByDomain(hotelDomain);
 
-    for (const hotel of hotels) {
-      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
-
-      // Get full hotel data including activities
-      const fullHotel = await getHotelByDomain(hotel.domain);
-      if (!fullHotel || !fullHotel.activities) {
-        console.log(`⚠️ No activities found for hotel: ${hotel.name}`);
-        continue;
-      }
-
-      // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
-      const subdomain = hotel.domain.split('.')[0];
-
-      // Generate paths for each activity
-      for (const activity of fullHotel.activities) {
-        // Create slug from activity name
-        const slug = activity.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-
-        paths.push({
-          params: {
-            hotel: subdomain,
-            slug: slug,
-          },
-          props: {
-            activity,
-            hotel: fullHotel,
-            hotelSubdomain: subdomain,
-            defaultLanguage: hotel.default_language || 'en-US',
-            defaultCurrency: hotel.default_currency || 'USD',
-            isSubdomain: true, // Always true for [hotel] pages in SSG
-          },
-        });
-      }
-    }
-
-    console.log(`✅ Generated ${paths.length} activity page paths`);
-    return paths;
-  } catch (error) {
-    console.error('❌ Error generating activity static paths:', error);
-    return [];
-  }
+if (!hotel) {
+  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  return Astro.redirect('/404');
 }
 
-const {
-  activity,
-  hotel,
-  hotelSubdomain,
-  defaultLanguage,
-  defaultCurrency,
-  isSubdomain,
-} = Astro.props;
+// Find the activity by slug
+const activitySlug = Astro.params.slug;
+const activity = hotel.activities?.find((item) => {
+  const slug = item.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  return slug === activitySlug;
+});
+
+if (!activity) {
+  console.error(`❌ Activity not found for slug: ${activitySlug}`);
+  return Astro.redirect('/404');
+}
+
+// Default values
+const defaultLanguage = hotel.default_language || 'en-US';
+const defaultCurrency = hotel.default_currency || 'USD';
 
 // Hotel theme data will be handled globally by Layout.astro
 
@@ -132,7 +107,7 @@ const breadcrumbItems = [
   },
   {
     label: 'Activities',
-    href: isSubdomain ? '/#activities' : `/${hotelSubdomain}#activities`,
+    href: isSubdomain ? '/experiences' : `/${hotelSubdomain}/experiences`,
   },
   { label: activity.name },
 ];

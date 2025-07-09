@@ -1,75 +1,50 @@
 ---
 import { DetailPageLayout } from '../../../components/DetailPageLayout.tsx';
 import Layout from '../../../layouts/Layout.astro';
+import { getHotelByDomain, getMediaUrl } from '../../../lib/directus.js';
 import {
-  getAllHotels,
-  getHotelByDomain,
-  getMediaUrl,
-} from '../../../lib/directus.js';
+  isSubdomainBasedRouting,
+  getHotelDomainFromRequest,
+  getSubdomainFromHostname,
+} from '../../../lib/domain-mapping.js';
 
-export const prerender = true;
+// SSR mode - detect hotel from runtime request
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+const hotelSubdomain = isSubdomain
+  ? getSubdomainFromHostname(Astro.url.hostname)
+  : Astro.params.hotel;
 
-export async function getStaticPaths() {
-  console.log('🏨 Generating static paths for room pages...');
+console.log(
+  `🏨 SSR Loading room page for subdomain: ${hotelSubdomain}, slug: ${Astro.params.slug}`
+);
 
-  try {
-    const hotels = await getAllHotels();
-    const paths = [];
+// Get hotel data from Directus
+const hotel = await getHotelByDomain(hotelDomain);
 
-    for (const hotel of hotels) {
-      console.log(`🏨 Processing hotel: ${hotel.name} (${hotel.domain})`);
-
-      // Get full hotel data including rooms
-      const fullHotel = await getHotelByDomain(hotel.domain);
-      if (!fullHotel || !fullHotel.rooms) {
-        console.log(`⚠️ No rooms found for hotel: ${hotel.name}`);
-        continue;
-      }
-
-      // Extract subdomain from full domain (e.g., "demo" from "demo.daotomata.io")
-      const subdomain = hotel.domain.split('.')[0];
-
-      // Generate paths for each room
-      for (const room of fullHotel.rooms) {
-        // Create slug from room name
-        const slug = room.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-
-        paths.push({
-          params: {
-            hotel: subdomain,
-            slug: slug,
-          },
-          props: {
-            room,
-            hotel: fullHotel,
-            hotelSubdomain: subdomain,
-            defaultLanguage: hotel.default_language || 'en-US',
-            defaultCurrency: hotel.default_currency || 'USD',
-            isSubdomain: true, // Always true for [hotel] pages in SSG
-          },
-        });
-      }
-    }
-
-    console.log(`✅ Generated ${paths.length} room page paths`);
-    return paths;
-  } catch (error) {
-    console.error('❌ Error generating room static paths:', error);
-    return [];
-  }
+if (!hotel) {
+  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  return Astro.redirect('/404');
 }
 
-const {
-  room,
-  hotel,
-  hotelSubdomain,
-  defaultLanguage,
-  defaultCurrency,
-  isSubdomain,
-} = Astro.props;
+// Find the room by slug
+const roomSlug = Astro.params.slug;
+const room = hotel.rooms?.find((r) => {
+  const slug = r.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  return slug === roomSlug;
+});
+
+if (!room) {
+  console.error(`❌ Room not found for slug: ${roomSlug}`);
+  return Astro.redirect('/404');
+}
+
+// Default values
+const defaultLanguage = hotel.default_language || 'en-US';
+const defaultCurrency = hotel.default_currency || 'USD';
 
 // Hotel theme data will be handled globally by Layout.astro
 
@@ -132,7 +107,7 @@ const _breadcrumbItems = [
   },
   {
     label: 'Rooms',
-    href: isSubdomain ? '/#rooms' : `/${hotelSubdomain}#rooms`,
+    href: isSubdomain ? '/accommodation' : `/${hotelSubdomain}/accommodation`,
   },
   { label: room.name },
 ];

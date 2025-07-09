@@ -10,68 +10,32 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../../lib/directus.js';
-import { isSubdomainBasedRouting } from '../../lib/domain-mapping.js';
+import {
+  isSubdomainBasedRouting,
+  getHotelDomainFromRequest,
+  getSubdomainFromHostname,
+} from '../../lib/domain-mapping.js';
 
-// SSG mode - prerender all hotel pages at build time
-export const prerender = true;
-
-export async function getStaticPaths() {
-  console.log('🏨 Generating static paths for hotel homepage...');
-
-  try {
-    const hotels = await getAllHotels();
-    console.log(
-      `✅ Found ${hotels.length} hotels:`,
-      hotels.map((h) => h.domain)
-    );
-
-    const paths = [];
-
-    for (const hotelData of hotels) {
-      // Extract subdomain from full domain (e.g., "maisondemo" from "maisondemo.com")
-      const subdomain = hotelData.domain.split('.')[0];
-
-      console.log(
-        `🏨 Processing hotel homepage: ${hotelData.name} (${hotelData.domain}) -> /${subdomain}/`
-      );
-
-      // Get full hotel data
-      const hotel = await getHotelByDomain(hotelData.domain);
-
-      paths.push({
-        params: {
-          hotel: subdomain,
-        },
-        props: {
-          hotel,
-          hotelDomain: hotelData.domain,
-          hotelSubdomain: subdomain,
-          isSubdomain: true, // Always true for [hotel] pages in SSG
-        },
-      });
-    }
-
-    console.log(`✅ Generated ${paths.length} static paths for hotel homepage`);
-    return paths;
-  } catch (error) {
-    console.error(
-      '❌ Error generating static paths for hotel homepage:',
-      error
-    );
-    return [];
-  }
-}
-
-const { hotel, hotelDomain, hotelSubdomain } = Astro.props;
+// SSR mode - detect hotel from runtime request
+const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
+const hotelSubdomain = isSubdomain
+  ? getSubdomainFromHostname(Astro.url.hostname)
+  : Astro.params.hotel;
 
 console.log(
-  `🏨 Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}`
+  `🏨 SSR Loading hotel homepage for subdomain: ${hotelSubdomain}, full domain: ${hotelDomain}, isSubdomain: ${isSubdomain}`
 );
 
-// Get isSubdomain from props (passed from getStaticPaths)
-const { isSubdomain } = Astro.props;
+// Get hotel data from Directus
+const hotel = await getHotelByDomain(hotelDomain);
 
-// Extract hotel properties for SSG mode
+if (!hotel) {
+  console.error(`❌ Hotel not found for domain: ${hotelDomain}`);
+  return Astro.redirect('/404');
+}
+
+// Extract hotel properties for SSR mode
 const hotelId = hotel.id;
 const hotelName = hotel.name;
 
@@ -93,7 +57,7 @@ const hotelData = {
 };
 
 // Simple theme name extraction - no dynamic CSS generation needed
-const hotelSlug = hotel.domain.split('.')[0];
+const hotelSlug = hotelDomain.split('.')[0];
 const _themeName = hotel.theme?.name || `${hotelSlug}-theme`;
 
 // Get hero media and hotel logo
