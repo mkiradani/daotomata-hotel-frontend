@@ -73,6 +73,25 @@ export function getSubdomainFromHostname(hostname) {
 }
 
 /**
+ * Gets hotel slug from hostname for URL rewriting
+ * @param {string} hostname - Full hostname (e.g., "maisondemo.daotomata.io")
+ * @returns {string} - Hotel slug for URL paths (e.g., "maisondemo")
+ */
+export function getHotelSlugFromHostname(hostname) {
+  const subdomain = hostname.split('.')[0];
+
+  // Static mapping of subdomains to URL slugs
+  const slugMapping = {
+    maisondemo: 'maisondemo',
+    baberrih: 'baberrih',
+    demo: 'maisondemo', // Alias for demo
+  };
+
+  // Return mapped slug or use subdomain directly
+  return slugMapping[subdomain] || subdomain;
+}
+
+/**
  * Checks if current request is using subdomain-based routing
  * @param {string} hostname - Full hostname
  * @returns {boolean} - True if using subdomain-based routing
