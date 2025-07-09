@@ -6,8 +6,17 @@
 // Ensure this endpoint is not prerendered in SSR mode
 export const prerender = false;
 
-export async function GET() {
+export async function GET(context) {
   try {
+    console.log(`🔍 [HEALTH] === HEALTH CHECK ACCESSED ===`);
+    console.log(`🔍 [HEALTH] URL: ${context.url?.href || 'unknown'}`);
+    console.log(
+      `🔍 [HEALTH] Request method: ${context.request?.method || 'unknown'}`
+    );
+    console.log(
+      `🔍 [HEALTH] User-Agent: ${context.request?.headers?.get('user-agent') || 'unknown'}`
+    );
+
     // Basic health check - server is responding
     const healthData = {
       status: 'healthy',
@@ -15,7 +24,15 @@ export async function GET() {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',
       version: '1.8.0-dev',
+      serverInfo: {
+        platform: process.platform,
+        nodeVersion: process.version,
+        memoryUsage: process.memoryUsage(),
+        cwd: process.cwd(),
+      },
     };
+
+    console.log(`🔍 [HEALTH] Returning health data successfully`);
 
     return new Response(JSON.stringify(healthData), {
       status: 200,
