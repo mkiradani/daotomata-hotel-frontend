@@ -6,7 +6,7 @@
 // Ensure this endpoint is not prerendered in SSR mode
 export const prerender = false;
 
-export async function GET(context) {
+export async function GET(context: { url?: URL; request?: Request }) {
   try {
     console.log(`🔍 [HEALTH] === HEALTH CHECK ACCESSED ===`);
     console.log(`🔍 [HEALTH] URL: ${context.url?.href || 'unknown'}`);
