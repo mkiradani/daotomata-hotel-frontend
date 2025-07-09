@@ -39,7 +39,7 @@ const defaultLanguage = hotel.default_language || 'en-US';
 const defaultCurrency = hotel.default_currency || 'USD';`;
 
 // SSR template for detail pages (activities/[slug], facilities/[slug])
-const SSR_TEMPLATE_DETAIL = `// SSR mode - detect hotel from runtime request
+const _SSR_TEMPLATE_DETAIL = `// SSR mode - detect hotel from runtime request
 const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
 const hotelDomain = getHotelDomainFromRequest(Astro.url, Astro.params);
 const hotelSubdomain = isSubdomain 
