@@ -1,11 +1,12 @@
 ---
 // Single-tenant Chatwoot Widget - Official SDK Integration using Directus
 import { getCurrentHotel } from '../lib/directus.js';
+import type { Hotel } from '../types/hotel.ts';
 
 console.log('🔍 ChatwootWidget - Loading for current hotel...');
 
 // Get current hotel data
-const hotel: any = await getCurrentHotel();
+const hotel = await getCurrentHotel() as Hotel | null;
 
 console.log('🔍 ChatwootWidget - Directus query result:', {
   found: !!hotel,
@@ -221,5 +222,3 @@ if (!hotel) {
     })(document,"script");
   </script>
 )}
-
-
