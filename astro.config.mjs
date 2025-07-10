@@ -4,8 +4,8 @@ import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (only if not already set in system env)
+dotenv.config({ override: false }); // Don't override existing environment variables
 const env = process.env;
 
 export default defineConfig({
