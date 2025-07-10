@@ -2,15 +2,16 @@ import qwik from '@qwikdev/astro';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
-import { loadEnv } from 'vite';
+import dotenv from 'dotenv';
 
 // Load environment variables
-const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+dotenv.config();
+const env = process.env;
 
 export default defineConfig({
   integrations: [qwik()],
   adapter: node({
-    mode: 'standalone'
+    mode: 'standalone',
   }),
   server: {
     host: true,
@@ -35,9 +36,7 @@ export default defineConfig({
         env.DIRECTUS_ADMIN_TOKEN || 'rYncRSsu41KQQLvZYczPJyC8-8yzyED3'
       ),
       // Single-tenant hotel configuration
-      'import.meta.env.HOTEL_ID': JSON.stringify(
-        env.HOTEL_ID || '1'
-      ),
+      'import.meta.env.HOTEL_ID': JSON.stringify(env.HOTEL_ID || '1'),
     },
   },
 });
