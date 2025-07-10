@@ -300,6 +300,11 @@ function writeGeneratedFiles(themesCSS, fontsConfig) {
 async function generateThemes() {
   console.log('🚀 Starting single-tenant theme generation from Directus...');
   console.log(`📡 Directus URL: ${DIRECTUS_URL}`);
+  console.log(`🔍 [DEBUG] All environment variables:`);
+  console.log(`🔍 [DEBUG] NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`🔍 [DEBUG] HOTEL_ID from env: ${process.env.HOTEL_ID}`);
+  console.log(`🔍 [DEBUG] DIRECTUS_URL from env: ${process.env.DIRECTUS_URL}`);
+  console.log(`🔍 [DEBUG] SITE_URL from env: ${process.env.SITE_URL}`);
   console.log(`🏨 Hotel ID: ${process.env.HOTEL_ID || '1'}`);
 
   try {

@@ -8,6 +8,13 @@ import dotenv from 'dotenv';
 dotenv.config({ override: false }); // Don't override existing environment variables
 const env = process.env;
 
+// Debug environment variables
+console.log('🔍 [ASTRO CONFIG DEBUG] Environment variables:');
+console.log(`🔍 [ASTRO CONFIG DEBUG] NODE_ENV: ${env.NODE_ENV}`);
+console.log(`🔍 [ASTRO CONFIG DEBUG] HOTEL_ID: ${env.HOTEL_ID}`);
+console.log(`🔍 [ASTRO CONFIG DEBUG] DIRECTUS_URL: ${env.DIRECTUS_URL}`);
+console.log(`🔍 [ASTRO CONFIG DEBUG] SITE_URL: ${env.SITE_URL}`);
+
 export default defineConfig({
   integrations: [qwik()],
   adapter: node({
