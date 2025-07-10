@@ -52,7 +52,7 @@ export const HeroSection = component$<HeroSectionProps>(
 
         {/* Content */}
         <div class="z-10 relative mx-auto px-4 max-w-4xl text-neutral-content text-center">
-          <h1 class="mb-6 font-primary font-bold text-6xl">{hotelName}</h1>
+          <h1 class="mb-6 font-primary text-neutral-content/95 text-6xl">{hotelName}</h1>
           <p class="opacity-90 mb-8 font-secondary text-xl">
             Welcome to an extraordinary experience
           </p>

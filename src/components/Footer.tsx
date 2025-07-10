@@ -166,7 +166,7 @@ export const Footer = component$<FooterProps>(
           <div class="gap-8 grid grid-cols-1 md:grid-cols-4">
             {/* Hotel Info */}
             <div class="md:col-span-2">
-              <h3 class="mb-4 font-primary font-bold text-primary text-xl">
+              <h3 class="mb-4 font-primary text-primary/90 text-xl">
                 {hotelName}
               </h3>
               <p class="mb-4 text-base-content/80 leading-relaxed">
@@ -195,7 +195,7 @@ export const Footer = component$<FooterProps>(
 
             {/* Quick Links */}
             <div>
-              <h4 class="mb-4 font-primary font-semibold text-base-content text-lg">
+              <h4 class="mb-4 font-primary text-base-content/80 text-lg">
                 Quick Links
               </h4>
               <ul class="space-y-2">
@@ -260,7 +260,7 @@ export const Footer = component$<FooterProps>(
 
             {/* Contact Info */}
             <div>
-              <h4 class="mb-4 font-primary font-semibold text-base-content text-lg">
+              <h4 class="mb-4 font-primary text-base-content/80 text-lg">
                 Contact
               </h4>
               <div class="space-y-3">

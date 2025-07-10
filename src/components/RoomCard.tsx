@@ -148,7 +148,7 @@ export const RoomCard = component$<RoomCardProps>(
               <div class="text-xs text-base-content/50 uppercase tracking-wide">
                 From
               </div>
-              <div class="font-bold text-primary text-2xl">
+              <div class="text-primary/90 text-2xl">
                 {defaultCurrency} {basePrice || 'Contact'}
               </div>
             </div>
@@ -189,7 +189,7 @@ export const RoomCard = component$<RoomCardProps>(
           <div class="modal modal-open">
             <div class="max-w-4xl modal-box">
               <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg">Book {name}</h3>
+                <h3 class="text-base-content/80 text-lg">Book {name}</h3>
                 <button
                   type="button"
                   class="btn btn-sm btn-circle btn-ghost"
@@ -202,13 +202,13 @@ export const RoomCard = component$<RoomCardProps>(
               <div class="bg-base-200 mb-4 p-4 rounded-lg">
                 <div class="flex justify-between items-center">
                   <div>
-                    <h4 class="font-semibold">{name}</h4>
+                    <h4 class="text-base-content/80">{name}</h4>
                     <p class="opacity-70 text-sm">
                       {bedConfiguration || 'Room'}
                     </p>
                   </div>
                   <div class="text-right">
-                    <div class="font-bold text-primary text-2xl">
+                    <div class="text-primary/90 text-2xl">
                       {defaultCurrency} {basePrice}
                     </div>
                     <p class="opacity-70 text-sm">per night</p>

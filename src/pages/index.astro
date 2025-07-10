@@ -61,7 +61,7 @@ console.log(
   {hotel.rooms && hotel.rooms.length > 0 && (
     <section class="bg-base-100 py-16">
       <div class="mx-auto px-4 container">
-        <h2 class="mb-12 font-bold text-3xl text-center">Our Rooms</h2>
+        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Our Rooms</h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
           {hotel.rooms.slice(0, 6).map((room: any, index: number) => {
             const imageUrl = room.main_photo
@@ -112,7 +112,7 @@ console.log(
   {hotel.facilities && hotel.facilities.length > 0 && (
     <section class="bg-base-200 py-16">
       <div class="mx-auto px-4 container">
-        <h2 class="mb-12 font-bold text-3xl text-center">Our Facilities</h2>
+        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Our Facilities</h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
           {hotel.facilities.slice(0, 6).map((facility: any, index: number) => {
             const imageUrl = facility.main_photo
@@ -162,7 +162,7 @@ console.log(
   {hotel.activities && hotel.activities.length > 0 && (
     <section class="bg-base-100 py-16">
       <div class="mx-auto px-4 container">
-        <h2 class="mb-12 font-bold text-3xl text-center">Experiences</h2>
+        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Experiences</h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
           {hotel.activities.slice(0, 6).map((activity: any, index: number) => {
             const imageUrl = activity.main_photo
@@ -213,7 +213,7 @@ console.log(
   <!-- CTA Section -->
   <section class="bg-primary py-16 text-primary-content">
     <div class="mx-auto px-4 text-center container">
-      <h2 class="mb-4 font-bold text-3xl">Ready to Book Your Stay?</h2>
+      <h2 class="mb-4 text-primary-content/90 text-3xl">Ready to Book Your Stay?</h2>
       <p class="mb-8 text-xl">Experience luxury and comfort at {hotel.name}</p>
       <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
     </div>

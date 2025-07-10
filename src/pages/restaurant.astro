@@ -51,7 +51,7 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
       <div class="mx-auto px-4 container">
         <div class="items-center gap-12 grid grid-cols-1 lg:grid-cols-2">
           <div>
-            <h1 class="mb-6 font-bold text-4xl">{restaurant.name}</h1>
+            <h1 class="mb-6 text-base-content/80 text-4xl">{restaurant.name}</h1>
             <p class="mb-8 text-base-content/80 text-lg">
               {restaurant.description}
             </p>
@@ -74,7 +74,7 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
   {!restaurant && (
     <section class="bg-base-200 py-16">
       <div class="mx-auto px-4 text-center container">
-        <h1 class="mb-4 font-bold text-4xl">Our Restaurant</h1>
+        <h1 class="mb-4 text-base-content/80 text-4xl">Our Restaurant</h1>
         <p class="mx-auto max-w-2xl text-base-content/80 text-xl">
           Experience exceptional dining at {hotel.name}
         </p>
@@ -86,7 +86,7 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
   {dishes.length > 0 && (
     <section class="bg-base-100 py-16">
       <div class="mx-auto px-4 container">
-        <h2 class="mb-12 font-bold text-3xl text-center">Our Menu</h2>
+        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Our Menu</h2>
         <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
           {dishes.map((dish: any, index: number) => {
             const imageUrl = dish.main_photo
@@ -123,7 +123,7 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
   {dishes.length === 0 && (
     <section class="bg-base-100 py-16">
       <div class="mx-auto px-4 text-center container">
-        <h2 class="mb-4 font-bold text-2xl">Menu Coming Soon</h2>
+        <h2 class="mb-4 text-base-content/80 text-2xl">Menu Coming Soon</h2>
         <p class="text-base-content/80 text-lg">
           Our culinary team is preparing something special. Please contact us for current offerings.
         </p>
@@ -135,7 +135,7 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
   <!-- CTA Section -->
   <section class="bg-primary py-16 text-primary-content">
     <div class="mx-auto px-4 text-center container">
-      <h2 class="mb-4 font-bold text-3xl">Make a Reservation</h2>
+      <h2 class="mb-4 text-primary-content/90 text-3xl">Make a Reservation</h2>
       <p class="mb-8 text-xl">Book your table and enjoy exceptional dining at {hotel.name}</p>
       <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
     </div>

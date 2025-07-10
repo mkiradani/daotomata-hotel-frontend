@@ -159,7 +159,7 @@ export const ContactForm = component$<ContactFormProps>(
 
     if (isSubmitted.value) {
       return (
-        <div class="bg-success/10 p-8 border border-success/20 rounded-lg text-center">
+        <div class="bg-success/10 p-8 border border-success/20 text-center" style="border-radius: var(--radius-box);">
           <div class="mb-4">
             <svg
               class="mx-auto w-16 h-16 text-success"
@@ -174,7 +174,7 @@ export const ContactForm = component$<ContactFormProps>(
               />
             </svg>
           </div>
-          <h3 class="mb-2 font-primary font-bold text-success text-xl">
+          <h3 class="mb-2 font-primary text-success/90 text-xl">
             Message Sent Successfully!
           </h3>
           <p class="mb-6 font-secondary text-base-content/70">
@@ -195,8 +195,8 @@ export const ContactForm = component$<ContactFormProps>(
     }
 
     return (
-      <div class="bg-base-200 p-8 rounded-lg">
-        <h3 class="mb-6 font-primary font-bold text-primary text-xl">
+      <div class="bg-base-200 p-8" style="border-radius: var(--radius-box);">
+        <h3 class="mb-6 font-primary text-primary/90 text-xl">
           Send us a Message
         </h3>
 
@@ -220,7 +220,8 @@ export const ContactForm = component$<ContactFormProps>(
                   (event.target as HTMLInputElement).value,
                 )
               }
-              class="px-4 py-3 border input-bordered focus:border-primary border-base-300 rounded-lg focus:ring-primary w-full transition-colors input"
+              class="px-4 py-3 border input-bordered focus:border-primary border-base-300 focus:ring-primary w-full transition-colors input"
+              style="border-radius: var(--radius-field);"
               placeholder="your.email@example.com"
               disabled={isSubmitting.value}
             />
@@ -244,7 +245,8 @@ export const ContactForm = component$<ContactFormProps>(
                   (event.target as HTMLInputElement).value,
                 )
               }
-              class="px-4 py-3 border input-bordered focus:border-primary border-base-300 rounded-lg focus:ring-primary w-full transition-colors input"
+              class="px-4 py-3 border input-bordered focus:border-primary border-base-300 focus:ring-primary w-full transition-colors input"
+              style="border-radius: var(--radius-field);"
               placeholder="+1 (555) 123-4567"
               disabled={isSubmitting.value}
             />
@@ -269,7 +271,8 @@ export const ContactForm = component$<ContactFormProps>(
                   (event.target as HTMLTextAreaElement).value,
                 )
               }
-              class="px-4 py-3 border textarea-bordered focus:border-primary border-base-300 rounded-lg focus:ring-primary w-full transition-colors resize-none textarea"
+              class="px-4 py-3 border textarea-bordered focus:border-primary border-base-300 focus:ring-primary w-full transition-colors resize-none textarea"
+              style="border-radius: var(--radius-field);"
               placeholder="Tell us about your inquiry, special requests, or any questions you may have..."
               disabled={isSubmitting.value}
             />
@@ -277,7 +280,7 @@ export const ContactForm = component$<ContactFormProps>(
 
           {/* Error Message */}
           {errorMessage.value && (
-            <div class="bg-error/10 p-4 border border-error/20 rounded-lg">
+            <div class="bg-error/10 p-4 border border-error/20" style="border-radius: var(--radius-box);">
               <div class="flex items-center">
                 <svg
                   class="flex-shrink-0 mr-2 w-5 h-5 text-error"
@@ -331,7 +334,7 @@ export const ContactForm = component$<ContactFormProps>(
         {/* Alternative Contact Methods */}
         {contactMethods && contactMethods.length > 0 && (
           <div class="mt-8 pt-8 border-t border-base-300">
-            <h4 class="mb-4 font-primary font-semibold text-base-content text-lg">
+            <h4 class="mb-4 font-primary text-base-content/80 text-lg">
               Other Ways to Reach Us
             </h4>
             <div class="gap-4 grid grid-cols-1 sm:grid-cols-2">
@@ -350,7 +353,8 @@ export const ContactForm = component$<ContactFormProps>(
                         : undefined
                     }
                     title={display.title}
-                    class="group flex items-center space-x-3 bg-base-100 hover:bg-base-300 p-4 rounded-lg transition-colors"
+                    class="group flex items-center space-x-3 bg-base-100 hover:bg-base-300 p-4 transition-colors"
+                    style="border-radius: var(--radius-box);"
                   >
                     <div class="flex-shrink-0 text-primary group-hover:text-primary-focus">
                       {display.icon}

@@ -48,7 +48,7 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
   <!-- Contact Header -->
   <section class="bg-base-200 py-16">
     <div class="mx-auto px-4 text-center container">
-      <h1 class="mb-4 font-bold text-4xl">Contact Us</h1>
+      <h1 class="mb-4 text-base-content/80 text-4xl">Contact Us</h1>
       <p class="mx-auto max-w-2xl text-base-content/80 text-xl">
         We&apos;re here to help make your stay at {hotel.name} unforgettable
       </p>
@@ -61,12 +61,12 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
       <div class="gap-12 grid grid-cols-1 lg:grid-cols-2">
         <!-- Contact Details -->
         <div>
-          <h2 class="mb-8 font-bold text-2xl">Get in Touch</h2>
+          <h2 class="mb-8 text-base-content/80 text-2xl">Get in Touch</h2>
           
           {/* Hotel Location */}
           {hotel.location && (
             <div class="mb-6">
-              <h3 class="mb-2 font-semibold text-lg">📍 Location</h3>
+              <h3 class="mb-2 text-base-content/80 text-lg">📍 Location</h3>
               <p class="text-base-content/80">{hotel.location}</p>
             </div>
           )}
@@ -83,7 +83,7 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
                     {method.contact_type === 'website' && '🌐'}
                   </div>
                   <div>
-                    <p class="font-semibold">{method.name}</p>
+                    <p class="text-base-content/80">{method.name}</p>
                     {method.contact_type === 'phone' && (
                       <a href={`tel:${method.contact_identifier}`} class="text-primary hover:underline">
                         {method.contact_identifier}
@@ -133,8 +133,12 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
 
         <!-- Contact Form -->
         <div>
-          <h2 class="mb-8 font-bold text-2xl">Send us a Message</h2>
-          <ContactForm hotel={hotel} />
+          <h2 class="mb-8 text-base-content/80 text-2xl">Send us a Message</h2>
+          <ContactForm
+            hotelId={hotel.id}
+            hotelName={hotel.name}
+            contactMethods={contactMethods as any}
+          />
         </div>
       </div>
     </div>
@@ -143,7 +147,7 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
   <!-- CTA Section -->
   <section class="bg-primary py-16 text-primary-content">
     <div class="mx-auto px-4 text-center container">
-      <h2 class="mb-4 font-bold text-3xl">Ready to Book?</h2>
+      <h2 class="mb-4 text-primary-content/90 text-3xl">Ready to Book?</h2>
       <p class="mb-8 text-xl">Don&apos;t wait - secure your perfect stay at {hotel.name}</p>
       <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
     </div>

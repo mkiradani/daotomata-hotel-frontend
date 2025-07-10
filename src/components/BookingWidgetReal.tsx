@@ -372,7 +372,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
               availability.value.length > 0 &&
               !showBookingForm.value && (
                 <div class="mt-6">
-                  <h4 class="mb-4 font-semibold text-lg">
+                  <h4 class="mb-4 text-base-content/80 text-lg">
                     Available Rooms ({calculateNights()} nights)
                   </h4>
 
@@ -425,7 +425,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                               </div>
 
                               <div class="text-right">
-                                <div class="font-bold text-primary text-2xl">
+                                <div class="text-primary/90 text-2xl">
                                   {rate
                                     ? formatPrice(
                                         rate.totalPrice,
@@ -480,7 +480,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {showBookingForm.value && selectedRoom.value && (
               <div class="mt-6">
                 <div class="flex justify-between items-center mb-4">
-                  <h4 class="font-semibold text-lg">Complete Your Booking</h4>
+                  <h4 class="text-base-content/80 text-lg">Complete Your Booking</h4>
                   <button
                     type="button"
                     class="btn btn-sm btn-ghost"
@@ -523,7 +523,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                           <strong>Rooms:</strong> {rooms.value}
                         </p>
                         <div class="text-right">
-                          <div class="font-bold text-primary text-xl">
+                          <div class="text-primary/90 text-xl">
                             {(() => {
                               const rate = getRoomRate(
                                 selectedRoom.value?.roomId

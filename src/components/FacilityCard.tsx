@@ -134,7 +134,7 @@ export const FacilityCard = component$<FacilityCardProps>(
               <div class="text-xs text-base-content/50 uppercase tracking-wide">
                 Access
               </div>
-              <div class="font-semibold text-primary text-lg">
+              <div class="text-primary/90 text-lg">
                 {accessType || 'Available'}
               </div>
             </div>

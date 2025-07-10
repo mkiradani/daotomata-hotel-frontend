@@ -158,7 +158,7 @@ export const ActivityCard = component$<ActivityCardProps>(
               <div class="text-xs text-base-content/50 uppercase tracking-wide">
                 Activity
               </div>
-              <div class="font-bold text-primary text-2xl">Available</div>
+              <div class="text-primary/90 text-2xl">Available</div>
             </div>
             <a
               href={

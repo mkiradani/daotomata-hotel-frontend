@@ -133,52 +133,52 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
           return (
             <div class="space-y-6">
               <div class="gap-4 grid grid-cols-2">
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Room Type
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.roomType || "Standard"}
                   </div>
                 </div>
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Max Occupancy
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.maxOccupancy || 2} guests
                   </div>
                 </div>
               </div>
 
               {metadata.sizeSqm && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Room Size
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.sizeSqm} m²
                   </div>
                 </div>
               )}
 
               {metadata.bedConfiguration && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Bed Configuration
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.bedConfiguration}
                   </div>
                 </div>
               )}
 
               {metadata.viewType && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     View
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.viewType}
                   </div>
                 </div>
@@ -186,13 +186,13 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
               {/* Cloudbeds pricing integration placeholder */}
               {(metadata.basePrice || availabilityData?.priceRange) && (
-                <div class="bg-accent/10 p-6 border border-accent/20 rounded-lg">
+                <div class="bg-accent/10 p-6 border border-accent/20" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-accent text-xs uppercase tracking-wide">
                     {availabilityData?.priceRange
                       ? "Price Range"
                       : "Starting From"}
                   </div>
-                  <div class="font-bold text-accent text-3xl">
+                  <div class="text-accent/90 text-3xl">
                     {availabilityData?.priceRange
                       ? `${availabilityData.priceRange.min} - ${availabilityData.priceRange.max} ${defaultCurrency}`
                       : `${metadata.basePrice} ${defaultCurrency}`}
@@ -208,12 +208,13 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
               {metadata.amenities && metadata.amenities.length > 0 && (
                 <div>
-                  <h3 class="mb-3 font-semibold text-lg">Amenities</h3>
+                  <h3 class="mb-3 text-base-content/80 text-lg">Amenities</h3>
                   <div class="flex flex-wrap gap-2">
                     {metadata.amenities.map((amenity) => (
                       <span
                         key={amenity}
-                        class="bg-primary/10 px-3 py-1 rounded-full text-primary text-sm"
+                        class="bg-primary/10 px-3 py-1 text-primary text-sm"
+                        style="border-radius: var(--radius-selector);"
                       >
                         {amenity}
                       </span>
@@ -223,8 +224,8 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               )}
 
               {metadata.isAccessible && (
-                <div class="bg-info/10 p-4 border border-info/20 rounded-lg">
-                  <div class="font-semibold text-info">♿ Accessible Room</div>
+                <div class="bg-info/10 p-4 border border-info/20" style="border-radius: var(--radius-box);">
+                  <div class="text-info/90">♿ Accessible Room</div>
                   <div class="mt-1 text-info/80 text-sm">
                     This room is wheelchair accessible
                   </div>
@@ -237,54 +238,54 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
           return (
             <div class="space-y-6">
               <div class="gap-4 grid grid-cols-2">
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Duration
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.durationMinutes
                       ? `${metadata.durationMinutes} min`
                       : "Varies"}
                   </div>
                 </div>
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Difficulty
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.difficultyLevel || "All levels"}
                   </div>
                 </div>
               </div>
 
               {metadata.maxParticipants && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Max Participants
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.maxParticipants} people
                   </div>
                 </div>
               )}
 
               {metadata.location && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Location
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.location}
                   </div>
                 </div>
               )}
 
               {metadata.price && (
-                <div class="bg-accent/10 p-6 border border-accent/20 rounded-lg">
+                <div class="bg-accent/10 p-6 border border-accent/20" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-accent text-xs uppercase tracking-wide">
                     Price
                   </div>
-                  <div class="font-bold text-accent text-3xl">
+                  <div class="text-accent/90 text-3xl">
                     {metadata.price} {defaultCurrency}
                   </div>
                   <div class="mt-1 text-accent/70 text-xs">per person</div>
@@ -293,7 +294,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
               {metadata.equipmentProvided && (
                 <div>
-                  <h3 class="mb-3 font-semibold text-lg">Equipment Provided</h3>
+                  <h3 class="mb-3 text-base-content/80 text-lg">Equipment Provided</h3>
                   <div class="text-sm text-base-content/80">
                     {metadata.equipmentProvided}
                   </div>
@@ -301,8 +302,8 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               )}
 
               {metadata.ageRestriction && (
-                <div class="bg-warning/10 p-4 border border-warning/20 rounded-lg">
-                  <div class="font-semibold text-warning">Age Restriction</div>
+                <div class="bg-warning/10 p-4 border border-warning/20" style="border-radius: var(--radius-box);">
+                  <div class="text-warning/90">Age Restriction</div>
                   <div class="mt-1 text-warning/80 text-sm">
                     {metadata.ageRestriction}
                   </div>
@@ -310,8 +311,8 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               )}
 
               {metadata.bookingRequired && (
-                <div class="bg-info/10 p-4 border border-info/20 rounded-lg">
-                  <div class="font-semibold text-info">📅 Booking Required</div>
+                <div class="bg-info/10 p-4 border border-info/20" style="border-radius: var(--radius-box);">
+                  <div class="text-info/90">📅 Booking Required</div>
                   <div class="mt-1 text-info/80 text-sm">
                     Please reserve in advance
                   </div>
@@ -324,54 +325,54 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
           return (
             <div class="space-y-6">
               <div class="gap-4 grid grid-cols-2">
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Capacity
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.capacity
                       ? `${metadata.capacity} people`
                       : "Unlimited"}
                   </div>
                 </div>
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Category
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.facilityCategory || "General"}
                   </div>
                 </div>
               </div>
 
               {metadata.facilityLocation && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Location
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.facilityLocation}
                   </div>
                 </div>
               )}
 
               {metadata.operatingHours && (
-                <div class="bg-base-200 p-4 border border-base-300 rounded-lg">
+                <div class="bg-base-200 p-4 border border-base-300" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-xs text-base-content/50 uppercase tracking-wide">
                     Operating Hours
                   </div>
-                  <div class="font-semibold text-primary">
+                  <div class="text-primary/90">
                     {metadata.operatingHours}
                   </div>
                 </div>
               )}
 
               {metadata.pricePerHour && (
-                <div class="bg-accent/10 p-6 border border-accent/20 rounded-lg">
+                <div class="bg-accent/10 p-6 border border-accent/20" style="border-radius: var(--radius-box);">
                   <div class="mb-1 text-accent text-xs uppercase tracking-wide">
                     Price
                   </div>
-                  <div class="font-bold text-accent text-3xl">
+                  <div class="text-accent/90 text-3xl">
                     {metadata.pricePerHour} {defaultCurrency}
                   </div>
                   <div class="mt-1 text-accent/70 text-xs">per hour</div>
@@ -381,12 +382,13 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               {metadata.facilityAmenities &&
                 metadata.facilityAmenities.length > 0 && (
                   <div>
-                    <h3 class="mb-3 font-semibold text-lg">Amenities</h3>
+                    <h3 class="mb-3 text-base-content/80 text-lg">Amenities</h3>
                     <div class="flex flex-wrap gap-2">
                       {metadata.facilityAmenities.map((amenity) => (
                         <span
                           key={amenity}
-                          class="bg-primary/10 px-3 py-1 rounded-full text-primary text-sm"
+                          class="bg-primary/10 px-3 py-1 text-primary text-sm"
+                          style="border-radius: var(--radius-selector);"
                         >
                           {amenity}
                         </span>
@@ -396,8 +398,8 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 )}
 
               {metadata.dressCode && (
-                <div class="bg-warning/10 p-4 border border-warning/20 rounded-lg">
-                  <div class="font-semibold text-warning">👔 Dress Code</div>
+                <div class="bg-warning/10 p-4 border border-warning/20" style="border-radius: var(--radius-box);">
+                  <div class="text-warning/90">👔 Dress Code</div>
                   <div class="mt-1 text-warning/80 text-sm">
                     {metadata.dressCode}
                   </div>
@@ -405,8 +407,8 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               )}
 
               {metadata.facilityBookingRequired && (
-                <div class="bg-info/10 p-4 border border-info/20 rounded-lg">
-                  <div class="font-semibold text-info">📅 Booking Required</div>
+                <div class="bg-info/10 p-4 border border-info/20" style="border-radius: var(--radius-box);">
+                  <div class="text-info/90">📅 Booking Required</div>
                   <div class="mt-1 text-info/80 text-sm">
                     Please contact reception to reserve
                   </div>
@@ -414,8 +416,8 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               )}
 
               {metadata.facilityIsAccessible && (
-                <div class="bg-info/10 p-4 border border-info/20 rounded-lg">
-                  <div class="font-semibold text-info">
+                <div class="bg-info/10 p-4 border border-info/20" style="border-radius: var(--radius-box);">
+                  <div class="text-info/90">
                     ♿ Accessible Facility
                   </div>
                   <div class="mt-1 text-info/80 text-sm">
@@ -468,7 +470,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
           <div class="absolute inset-0 bg-neutral/40"></div>
           <div class="z-10 relative flex items-end h-full">
             <div class="mx-auto px-4 pb-12 w-full max-w-7xl">
-              <h1 class="mb-4 font-primary font-bold text-neutral-content text-5xl">
+              <h1 class="mb-4 font-primary text-neutral-content/95 text-5xl">
                 {title}
               </h1>
             </div>
@@ -482,7 +484,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
               {/* Main Content */}
               <div class="space-y-8 lg:col-span-2">
                 <div>
-                  <h2 class="mb-6 font-primary font-bold text-3xl">
+                  <h2 class="mb-6 font-primary text-base-content/80 text-3xl">
                     About This {type.charAt(0).toUpperCase() + type.slice(1)}
                   </h2>
                   <div class="font-secondary text-base-content/80 text-lg leading-relaxed">
@@ -493,12 +495,12 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 {/* Gallery */}
                 {sortedGalleryImages.length > 0 && (
                   <div>
-                    <h3 class="mb-6 font-primary font-bold text-2xl">
+                    <h3 class="mb-6 font-primary text-base-content/80 text-2xl">
                       Gallery
                     </h3>
 
                     {/* Custom Slideshow without scroll */}
-                    <div class="relative bg-base-200 mb-4 rounded-lg w-full aspect-[16/10] overflow-hidden">
+                    <div class="relative bg-base-200 mb-4 w-full aspect-[16/10] overflow-hidden" style="border-radius: var(--radius-box);">
                       {sortedGalleryImages.map((media, index) => (
                         <div
                           key={`slide-${media.id}-${index}`}
@@ -551,7 +553,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                       )}
 
                       {/* Counter */}
-                      <div class="top-4 right-4 absolute bg-neutral/70 px-3 py-1 rounded text-neutral-content text-sm">
+                      <div class="top-4 right-4 absolute bg-neutral/70 px-3 py-1 text-neutral-content text-sm" style="border-radius: var(--radius-selector);">
                         {currentSlide.value + 1} / {sortedGalleryImages.length}
                       </div>
                     </div>
@@ -633,7 +635,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
           <div class="modal modal-open">
             <div class="max-w-4xl modal-box">
               <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg">
+                <h3 class="text-base-content/80 text-lg">
                   {type === "room"
                     ? `Book ${title}`
                     : type === "activity"
@@ -649,11 +651,11 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 </button>
               </div>
 
-              <div class="bg-base-200 mb-4 p-4 rounded-lg">
+              <div class="bg-base-200 mb-4 p-4" style="border-radius: var(--radius-box);">
                 <div class="flex justify-between items-center">
                   <div>
-                    <h4 class="font-semibold">{title}</h4>
-                    <p class="opacity-70 text-sm">
+                    <h4 class="text-base-content/80">{title}</h4>
+                    <p class="opacity-70 text-sm text-base-content/70">
                       {type === "room" &&
                         metadata.roomType &&
                         `${metadata.roomType} • Max ${metadata.maxOccupancy} guests`}
@@ -669,7 +671,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                     {(metadata.basePrice ||
                       metadata.price ||
                       metadata.pricePerHour) && (
-                      <div class="font-bold text-primary text-2xl">
+                      <div class="text-primary/90 text-2xl">
                         {defaultCurrency}{" "}
                         {metadata.basePrice ||
                           metadata.price ||

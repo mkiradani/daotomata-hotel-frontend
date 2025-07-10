@@ -67,7 +67,7 @@ export const DishCard = component$<DishCardProps>(
             />
             {!isAvailable && (
               <div class="top-4 left-4 z-10 absolute">
-                <div class="bg-error/90 backdrop-blur-sm px-3 py-1 rounded-full font-semibold text-error-content text-sm">
+                <div class="bg-error/90 backdrop-blur-sm px-3 py-1 text-error-content/95 text-sm" style="border-radius: var(--radius-selector);">
                   Not Available
                 </div>
               </div>
@@ -145,7 +145,7 @@ export const DishCard = component$<DishCardProps>(
               <div class="text-xs text-base-content/50 uppercase tracking-wide">
                 Price
               </div>
-              <div class="font-bold text-primary text-2xl">
+              <div class="text-primary/90 text-2xl">
                 {formatPrice(price, defaultCurrency)}
               </div>
               {allergens && allergens.length > 0 && (

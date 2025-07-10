@@ -61,7 +61,7 @@ export const RestaurantCard = component$<RestaurantCardProps>(
               />
             )}
             <div class="top-4 right-4 z-10 absolute">
-              <div class="bg-accent/80 backdrop-blur-sm border border-accent-content/20 font-semibold badge badge-accent badge-lg">
+              <div class="bg-accent/80 backdrop-blur-sm border border-accent-content/20 text-accent-content/95 badge badge-accent badge-lg">
                 Restaurant
               </div>
             </div>
@@ -82,7 +82,7 @@ export const RestaurantCard = component$<RestaurantCardProps>(
               <div class="text-xs text-base-content/50 uppercase tracking-wide">
                 Dining
               </div>
-              <div class="font-semibold text-primary text-lg">Available</div>
+              <div class="text-primary/90 text-lg">Available</div>
             </div>
             <a href={`/${hotelSlug}/restaurant`} class="btn btn-accent btn-sm">
               View Menu

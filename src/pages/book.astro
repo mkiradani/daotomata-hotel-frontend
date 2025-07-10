@@ -36,19 +36,19 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
 ---
 
 <Layout title={pageTitle} description={pageDescription} hotel={hotel} hotelName={hotel.name}>
-  <main class="min-h-screen bg-base-200">
+  <main class="bg-base-200 min-h-screen">
     <!-- Hero Section -->
-    <section class="relative py-16 bg-gradient-to-r from-primary/20 to-secondary/20">
-      <div class="container mx-auto px-4">
+    <section class="relative bg-gradient-to-r from-primary/20 to-secondary/20 py-16">
+      <div class="mx-auto px-4 container">
         <div class="text-center">
-          <h1 class="text-4xl md:text-6xl font-bold text-primary mb-4">
+          <h1 class="mb-4 text-primary/90 text-4xl md:text-6xl">
             Book Your Stay
           </h1>
-          <p class="text-xl md:text-2xl mb-8 opacity-80">
+          <p class="opacity-80 mb-8 text-xl md:text-2xl">
             at {hotel.name}
           </p>
-          <div class="max-w-2xl mx-auto">
-            <p class="text-lg opacity-70">
+          <div class="mx-auto max-w-2xl">
+            <p class="opacity-70 text-lg">
               Experience luxury and comfort with our seamless booking system.
               Check real-time availability and secure your perfect room today.
             </p>
@@ -59,22 +59,22 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
 
     <!-- Booking Form Section -->
     <section class="py-16">
-      <div class="container mx-auto px-4">
-        <div class="max-w-4xl mx-auto">
+      <div class="mx-auto px-4 container">
+        <div class="mx-auto max-w-4xl">
           <!-- Search Form -->
-          <div class="bg-base-100 rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-bold mb-6">Check Availability</h2>
-            <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="bg-base-100 shadow-lg mb-8 p-8 rounded-lg">
+            <h2 class="mb-6 text-base-content/80 text-2xl">Check Availability</h2>
+            <form class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
               <!-- Check-in Date -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold">Check-in</span>
+                  <span class="text-base-content/80 label-text">Check-in</span>
                 </label>
                 <input 
                   type="date" 
                   name="checkin"
                   value={checkIn}
-                  class="input input-bordered w-full" 
+                  class="input-bordered w-full input" 
                   required
                 />
               </div>
@@ -82,13 +82,13 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
               <!-- Check-out Date -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold">Check-out</span>
+                  <span class="label-text text-base-content/80">Check-out</span>
                 </label>
                 <input 
                   type="date" 
                   name="checkout"
                   value={checkOut}
-                  class="input input-bordered w-full" 
+                  class="input-bordered w-full input" 
                   required
                 />
               </div>
@@ -96,9 +96,9 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
               <!-- Adults -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold">Adults</span>
+                  <span class="label-text text-base-content/80">Adults</span>
                 </label>
-                <select name="adults" class="select select-bordered w-full">
+                <select name="adults" class="w-full select-bordered select">
                   <option value="1" selected={adults === '1'}>1 Adult</option>
                   <option value="2" selected={adults === '2'}>2 Adults</option>
                   <option value="3" selected={adults === '3'}>3 Adults</option>
@@ -109,9 +109,9 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
               <!-- Children -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold">Children</span>
+                  <span class="label-text text-base-content/80">Children</span>
                 </label>
-                <select name="children" class="select select-bordered w-full">
+                <select name="children" class="w-full select-bordered select">
                   <option value="0" selected={children === '0'}>0 Children</option>
                   <option value="1" selected={children === '1'}>1 Child</option>
                   <option value="2" selected={children === '2'}>2 Children</option>
@@ -124,7 +124,7 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
                 <label class="label">
                   <span class="label-text">&nbsp;</span>
                 </label>
-                <button type="submit" class="btn btn-primary w-full">
+                <button type="submit" class="w-full btn btn-primary">
                   Search Rooms
                 </button>
               </div>
@@ -132,20 +132,20 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
           </div>
 
           <!-- Available Rooms Section -->
-          <div class="bg-base-100 rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold mb-6">Available Rooms</h2>
+          <div class="bg-base-100 shadow-lg p-8 rounded-lg">
+            <h2 class="mb-6 text-base-content/80 text-2xl">Available Rooms</h2>
             
             {/* Future: Display available rooms here */}
-            <div class="text-center py-12">
-              <div class="text-6xl mb-4">🏨</div>
-              <h3 class="text-xl font-semibold mb-2">Booking Engine Coming Soon</h3>
-              <p class="text-base-content/70 mb-6">
+            <div class="py-12 text-center">
+              <div class="mb-4 text-6xl">🏨</div>
+              <h3 class="mb-2 text-base-content/80 text-xl">Booking Engine Coming Soon</h3>
+              <p class="mb-6 text-base-content/70">
                 Our advanced booking system is being integrated. 
                 For now, please contact us directly to make a reservation.
               </p>
-              <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <div class="flex sm:flex-row flex-col justify-center gap-4">
                 <a href="/contact" class="btn btn-primary">Contact Us</a>
-                <a href="tel:+1234567890" class="btn btn-outline">Call Now</a>
+                <a href="tel:+1234567890" class="btn-outline btn">Call Now</a>
               </div>
             </div>
           </div>

@@ -230,7 +230,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                 {syncData.value.syncRecommendations.length > 0 && (
                   <div>
                     <div class="flex justify-between items-center mb-4">
-                      <h4 class="font-semibold text-warning">
+                      <h4 class="text-warning/90">
                         🔄 Rooms Ready for Sync
                       </h4>
                       <button
@@ -276,7 +276,7 @@ export const RoomSyncManager = component$<RoomSyncManagerProps>(
                 {/* Recent Sync Results */}
                 {syncResults.value.length > 0 && (
                   <div>
-                    <h4 class="mb-3 font-semibold text-success">
+                    <h4 class="mb-3 text-success/90">
                       ✅ Recent Sync Results
                     </h4>
                     <div class="space-y-2">
