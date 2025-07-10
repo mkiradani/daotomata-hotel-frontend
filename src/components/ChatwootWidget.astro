@@ -1,37 +1,11 @@
 ---
-// Multitenant Chatwoot Widget - Official SDK Integration using Directus
-import { getHotelByDomain } from '../lib/directus.js';
+// Single-tenant Chatwoot Widget - Official SDK Integration using Directus
+import { getCurrentHotel } from '../lib/directus.js';
 
-const { domain } = Astro.props;
+console.log('🔍 ChatwootWidget - Loading for current hotel...');
 
-// Smart domain detection for multitenant setup
-let targetDomain = domain;
-
-// If no domain provided, detect from URL path and map to correct domain
-if (!targetDomain) {
-  const url = Astro.url;
-  const pathSegments = url.pathname.split('/').filter(Boolean);
-
-  if (pathSegments.length > 0) {
-    const hotelSlug = pathSegments[0]; // demo, baberrih
-
-    // Map hotel slugs to their actual domains in Directus
-    const domainMapping = {
-      maisondemo: 'maisondemo.com',
-      demo: 'maisondemo.com',
-      baberrih: 'baberrih.ma',
-    };
-
-    targetDomain = domainMapping[hotelSlug] || `${hotelSlug}.daotomata.io`;
-  }
-}
-
-console.log('🔍 ChatwootWidget - Detecting domain:', targetDomain, 'from URL:', Astro.url.pathname);
-
-// Get Chatwoot configuration for this hotel domain from Directus
-console.log('🔍 ChatwootWidget - Querying Directus for domain:', targetDomain);
-
-const hotel = await getHotelByDomain(targetDomain);
+// Get current hotel data
+const hotel: any = await getCurrentHotel();
 
 console.log('🔍 ChatwootWidget - Directus query result:', {
   found: !!hotel,
@@ -48,7 +22,7 @@ const chatwootConfig = hotel?.chatwoot_website_token
   : null;
 
 if (!hotel) {
-  console.error('❌ ChatwootWidget - Hotel not found for domain:', targetDomain);
+  console.error('❌ ChatwootWidget - Hotel not found');
 } else if (hotel && chatwootConfig) {
   console.log(
     '✅ ChatwootWidget loaded for:',
@@ -83,7 +57,7 @@ if (!hotel) {
       position: 'right',
       locale: 'es', // Spanish for hotels
       type: 'standard',
-      darkMode: 'auto',
+      darkMode: 'light', // Force light mode to match hotel theme
       launcherTitle: 'Chat con ' + hotelName
     };
 

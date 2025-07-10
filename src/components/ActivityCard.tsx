@@ -90,7 +90,7 @@ export const ActivityCard = component$<ActivityCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-secondary transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? 'md:col-span-2' : ''
+          isOdd && isLast ? 'md:col-span-2 lg:col-span-2' : ''
         }`}
       >
         {imageUrl && (

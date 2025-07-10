@@ -1,0 +1,151 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import { Breadcrumb } from '../components/Breadcrumb.tsx';
+import { ContactForm } from '../components/ContactForm.tsx';
+import Layout from '../layouts/Layout.astro';
+import {
+  getCurrentHotel,
+  getContactMethodsByHotelId,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
+
+console.log(`🏗️ [BUILD] Pre-rendering contact page...`);
+
+// Get hotel data from environment variable
+const hotel: any = await getCurrentHotel();
+
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Get contact methods for this hotel
+const contactMethods = await getContactMethodsByHotelId(hotel.id);
+
+console.log(`✅ Contact processed: ${contactMethods.length} contact methods`);
+
+const pageTitle = `Contact - ${hotel.name}`;
+const pageDescription = `Get in touch with ${hotel.name}. Contact information, location, and inquiry form.`;
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  hotel={hotel}
+  hotelName={hotel.name}
+>
+  <!-- Breadcrumb -->
+  <Breadcrumb 
+    items={[
+      { label: 'Home', href: '/' },
+      { label: 'Contact', href: '/contact' }
+    ]}
+  />
+
+  <!-- Contact Header -->
+  <section class="bg-base-200 py-16">
+    <div class="mx-auto px-4 text-center container">
+      <h1 class="mb-4 font-bold text-4xl">Contact Us</h1>
+      <p class="mx-auto max-w-2xl text-base-content/80 text-xl">
+        We&apos;re here to help make your stay at {hotel.name} unforgettable
+      </p>
+    </div>
+  </section>
+
+  <!-- Contact Information -->
+  <section class="bg-base-100 py-16">
+    <div class="mx-auto px-4 container">
+      <div class="gap-12 grid grid-cols-1 lg:grid-cols-2">
+        <!-- Contact Details -->
+        <div>
+          <h2 class="mb-8 font-bold text-2xl">Get in Touch</h2>
+          
+          {/* Hotel Location */}
+          {hotel.location && (
+            <div class="mb-6">
+              <h3 class="mb-2 font-semibold text-lg">📍 Location</h3>
+              <p class="text-base-content/80">{hotel.location}</p>
+            </div>
+          )}
+
+          {/* Contact Methods */}
+          {contactMethods.length > 0 && (
+            <div class="space-y-4">
+              {contactMethods.map((method: any) => (
+                <div class="flex items-center space-x-3">
+                  <div class="text-lg">
+                    {method.contact_type === 'phone' && '📞'}
+                    {method.contact_type === 'email' && '✉️'}
+                    {method.contact_type === 'whatsapp' && '💬'}
+                    {method.contact_type === 'website' && '🌐'}
+                  </div>
+                  <div>
+                    <p class="font-semibold">{method.name}</p>
+                    {method.contact_type === 'phone' && (
+                      <a href={`tel:${method.contact_identifier}`} class="text-primary hover:underline">
+                        {method.contact_identifier}
+                      </a>
+                    )}
+                    {method.contact_type === 'email' && (
+                      <a href={`mailto:${method.contact_identifier}`} class="text-primary hover:underline">
+                        {method.contact_identifier}
+                      </a>
+                    )}
+                    {method.contact_type === 'whatsapp' && (
+                      <a href={`https://wa.me/${method.contact_identifier}`} class="text-primary hover:underline" target="_blank" rel="noreferrer">
+                        {method.contact_identifier}
+                      </a>
+                    )}
+                    {method.contact_type === 'website' && (
+                      <a href={method.contact_identifier} class="text-primary hover:underline" target="_blank" rel="noreferrer">
+                        {method.contact_identifier}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Default Contact Info if no methods */}
+          {contactMethods.length === 0 && (
+            <div class="space-y-4">
+              <div class="flex items-center space-x-3">
+                <div class="text-lg">📞</div>
+                <div>
+                  <p class="font-semibold">Phone</p>
+                  <p class="text-base-content/80">Contact information coming soon</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="text-lg">✉️</div>
+                <div>
+                  <p class="font-semibold">Email</p>
+                  <p class="text-base-content/80">Contact information coming soon</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <!-- Contact Form -->
+        <div>
+          <h2 class="mb-8 font-bold text-2xl">Send us a Message</h2>
+          <ContactForm hotel={hotel} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-primary py-16 text-primary-content">
+    <div class="mx-auto px-4 text-center container">
+      <h2 class="mb-4 font-bold text-3xl">Ready to Book?</h2>
+      <p class="mb-8 text-xl">Don&apos;t wait - secure your perfect stay at {hotel.name}</p>
+      <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
+    </div>
+  </section>
+</Layout>

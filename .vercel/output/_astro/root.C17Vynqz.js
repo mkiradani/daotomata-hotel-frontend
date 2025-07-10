@@ -1,1 +1,0 @@
-import{$ as o,I as r,O as s,X as t,N as a}from"./core.min.Cq07O2fs.js";import"./qwik-preloader.8fLela9Y.js";const n=()=>s(a,{children:s(t,null,3,"Z5_0")},1,"Z5_1"),l=o(r(n,"s_sJoksS0xR1I"));export{l as default};

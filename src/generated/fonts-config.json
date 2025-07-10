@@ -1,28 +1,6 @@
 {
-  "generated": "2025-07-09T11:03:49.234Z",
+  "generated": "2025-07-10T11:05:20.022Z",
   "hotels": {
-    "Maison Demo": {
-      "themeName": "maisondemo-theme",
-      "fonts": {
-        "primary": "Fraunces",
-        "secondary": "Tenor Sans",
-        "mono": "IBM Plex Mono",
-        "detail": "Italiana"
-      },
-      "weights": {
-        "primary": "300",
-        "secondary": "400",
-        "mono": "400",
-        "detail": "400"
-      },
-      "styles": {
-        "primary": "normal",
-        "secondary": "normal",
-        "mono": "normal",
-        "detail": "normal"
-      },
-      "googleFontsURL": "https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=Tenor+Sans:wght@400&family=IBM+Plex+Mono:wght@400&family=Italiana:wght@400&display=swap"
-    },
     "Baberrih Hotel": {
       "themeName": "baberrih-theme",
       "fonts": {

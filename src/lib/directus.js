@@ -1,11 +1,12 @@
 import { createDirectus, readItems, rest, staticToken } from "@directus/sdk";
 import fetch from "node-fetch";
+import { DEFAULT_SERVICES } from './constants.js';
 
 // Create Directus client with admin token for build-time access
 const directusUrl =
-  import.meta.env.DIRECTUS_URL || "https://hotels.daotomata.io";
+  import.meta.env.DIRECTUS_URL || DEFAULT_SERVICES.directusUrl;
 const directusToken =
-  import.meta.env.DIRECTUS_ADMIN_TOKEN || "rYncRSsu41KQQLvZYczPJyC8-8yzyED3";
+  import.meta.env.DIRECTUS_ADMIN_TOKEN;
 
 // Create Directus client with proper configuration for Node.js/Astro using node-fetch polyfill
 const directus = createDirectus(directusUrl, {
@@ -38,9 +39,17 @@ const directus = createDirectus(directusUrl, {
 export { directus };
 
 /**
- * Get all hotels for static path generation
+ * Get current hotel ID from environment variables
+ */
+export function getCurrentHotelId() {
+  return import.meta.env.HOTEL_ID || process.env.HOTEL_ID || '1';
+}
+
+/**
+ * Get all hotels for static path generation (DEPRECATED - not needed for single-tenant)
  */
 export async function getAllHotels() {
+  console.warn("⚠️ getAllHotels() is deprecated in single-tenant mode. Use getCurrentHotel() instead.");
   try {
     const hotels = await directus.request(
       readItems("hotels", {
@@ -77,16 +86,16 @@ export async function getAllHotels() {
 }
 
 /**
- * Get complete hotel data with all related content
+ * Get complete hotel data by ID with all related content
  */
-export async function getHotelByDomain(domain) {
+export async function getHotelById(hotelId) {
   try {
     // First get the hotel
     const hotels = await directus.request(
       readItems("hotels", {
         filter: {
-          domain: {
-            _eq: domain,
+          id: {
+            _eq: hotelId,
           },
         },
         fields: [
@@ -294,9 +303,45 @@ export async function getHotelByDomain(domain) {
       dishes: dishes || [],
     };
   } catch (error) {
+    console.error("❌ Error fetching hotel by ID:", error);
+    return null;
+  }
+}
+
+/**
+ * Get complete hotel data with all related content (DEPRECATED - use getHotelById)
+ */
+export async function getHotelByDomain(domain) {
+  console.warn("⚠️ getHotelByDomain() is deprecated in single-tenant mode. Use getCurrentHotel() instead.");
+
+  // For backward compatibility, try to find hotel by domain
+  try {
+    const hotels = await directus.request(
+      readItems("hotels", {
+        filter: { domain: { _eq: domain } },
+        fields: ["id"],
+        limit: 1,
+      })
+    );
+
+    if (hotels && hotels.length > 0) {
+      return await getHotelById(hotels[0].id);
+    }
+
+    return null;
+  } catch (error) {
     console.error("❌ Error fetching hotel by domain:", error);
     return null;
   }
+}
+
+/**
+ * Get current hotel data based on HOTEL_ID environment variable
+ */
+export async function getCurrentHotel() {
+  const hotelId = getCurrentHotelId();
+  console.log(`🏨 Loading current hotel with ID: ${hotelId}`);
+  return await getHotelById(hotelId);
 }
 
 /**
@@ -442,6 +487,46 @@ export function getMediaUrl(fileId, options = {}) {
 
   console.log("🖼️ getMediaUrl generated with token:", finalUrl);
   return finalUrl;
+}
+
+/**
+ * Process media gallery from Directus with automatic type detection
+ * DRY utility function to avoid code duplication across detail pages
+ */
+export function processMediaGallery(mediaGallery, fallbackTitle = 'Gallery Item') {
+  if (!mediaGallery || !Array.isArray(mediaGallery)) {
+    return [];
+  }
+
+  return mediaGallery.map((media) => {
+    // Handle the structure from Directus: media_gallery.directus_files_id
+    const fileData = media.directus_files_id;
+    if (!fileData) {
+      console.warn('⚠️ processMediaGallery: Missing directus_files_id in media item:', media);
+      return null;
+    }
+
+    const fileId = fileData.id;
+    const fileTitle = fileData.title || fallbackTitle;
+    const mimeType = fileData.type || '';
+
+    // Automatically detect type based on MIME type
+    const isVideo = mimeType.startsWith('video/');
+
+    // Generate URL with appropriate options
+    const urlOptions = isVideo
+      ? {} // Videos don't need resize options
+      : { width: 1200, height: 675, quality: 95 }; // Images get optimized
+
+    console.log(`🎬 processMediaGallery: ${fileId} detected as ${isVideo ? 'video' : 'image'} (${mimeType})`);
+
+    return {
+      id: fileId,
+      url: getMediaUrl(fileId, urlOptions) || '',
+      title: fileTitle,
+      type: isVideo ? 'video' : 'image', // Ensure correct literal type
+    };
+  }).filter(Boolean); // Remove any null entries
 }
 
 /**

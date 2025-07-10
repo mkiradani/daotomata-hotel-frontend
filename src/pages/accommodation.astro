@@ -1,0 +1,94 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import { RoomCard } from '../components/RoomCard.tsx';
+import CollectionPageLayout from '../layouts/CollectionPageLayout.astro';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
+
+console.log(`🏗️ [BUILD] Pre-rendering accommodation page...`);
+
+// Get hotel data from environment variable
+const hotel: any = await getCurrentHotel();
+
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+// Process rooms data
+const rooms = hotel.rooms || [];
+const featuredRooms = rooms.filter((room: any) => room.is_featured);
+const regularRooms = rooms.filter((room: any) => !room.is_featured);
+
+console.log(`✅ Accommodation processed: ${rooms.length} rooms (${featuredRooms.length} featured)`);
+---
+
+<CollectionPageLayout
+  title={`Accommodation - ${hotel.name}`}
+  description={`Discover our luxurious rooms and suites at ${hotel.name}`}
+  pageTitle="Our Accommodation"
+  pageDescription="Experience comfort and luxury in our carefully designed rooms and suites"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={rooms}
+  itemType="rooms"
+  breadcrumbItems={[
+    { label: hotel.name, href: "/" },
+    { label: "Accommodation" }
+  ]}
+  ctaTitle="Ready to Book?"
+  ctaDescription={`Reserve your perfect room at ${hotel.name}`}
+  ctaPrimaryText="Book Now"
+  ctaPrimaryHref="/book"
+  ctaSecondaryText="Contact Us"
+  ctaSecondaryHref="/contact"
+  gridId="rooms-grid"
+>
+  {rooms.map((room: any, index: number) => {
+      const imageUrl = room.main_photo
+        ? getMediaUrl(room.main_photo.id, {
+            width: 800,
+            height: 450,
+            quality: 95,
+          }) || ''
+        : '';
+      const videoUrl = room.main_video
+        ? getMediaUrl(room.main_video.id) || undefined
+        : undefined;
+
+      // Create slug from room name
+      const roomSlug = room.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      return (
+        <RoomCard
+          slot="items"
+          name={room.name}
+          description={room.description || ''}
+          bedConfiguration={room.bed_configuration}
+          sizeSqm={room.size_sqm}
+          basePrice={undefined}
+          defaultCurrency={hotel.default_currency || 'EUR'}
+          imageUrl={imageUrl}
+          videoUrl={videoUrl}
+          isLast={index === rooms.length - 1}
+          isOdd={rooms.length % 2 !== 0}
+          hotelSlug={hotelSlug}
+          roomSlug={roomSlug}
+          isSubdomain={true}
+        />
+      );
+    })}
+</CollectionPageLayout>

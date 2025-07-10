@@ -83,7 +83,7 @@ export const FacilityCard = component$<FacilityCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-accent transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? 'md:col-span-2' : ''
+          isOdd && isLast ? 'md:col-span-2 lg:col-span-2' : ''
         }`}
       >
         {imageUrl && (

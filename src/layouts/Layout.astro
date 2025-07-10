@@ -10,64 +10,44 @@ import { join } from 'node:path';
 export interface Props {
   title: string;
   description?: string;
-  domain?: string;
-  ga4Id?: string;
-  pixelId?: string;
-  hotel?: Record<string, unknown>; // Hotel data for automatic theme generation
-  hotelSubdomain?: string; // For theme naming
-  hotelDomain?: string; // Hotel domain for navbar links
-  isSubdomain?: boolean; // For navbar URL generation
-  // Legacy props for backward compatibility
-  themeCSS?: string;
-  themeName?: string;
+  hotel?: Record<string, unknown>; // Hotel data for theme generation
   hotelName?: string;
-  themeConfig?: Record<string, unknown>;
-  hotelLogo?: Record<string, unknown> | null;
   showNavbar?: boolean;
 }
 
 const {
   title,
   description = 'Hotel website powered by Daotomata Stack',
-  domain,
-  ga4Id,
-  pixelId,
   hotel,
-  hotelSubdomain,
-  hotelDomain,
-  isSubdomain = false,
-  // Legacy props for backward compatibility
-  themeCSS: legacyThemeCSS,
-  themeName: legacyThemeName,
   hotelName = 'Hotel',
-  themeConfig: legacyThemeConfig = {},
-  hotelLogo: legacyHotelLogo = null,
   showNavbar = true,
 } = Astro.props;
 
-// Static theme application for static pages
-let themeName: string | undefined,
-  _themeConfig: Record<string, unknown> | undefined,
-  hotelLogo: Record<string, unknown> | null | undefined;
+// Simplified theme application for single-tenant
+const hotelData: any = hotel;
+let themeName: string | undefined;
+let hotelLogo: any = null;
+let ga4Id: string | undefined;
+let pixelId: string | undefined;
 
-if (hotel && hotelSubdomain) {
-  // Apply static theme name from Directus
-  console.log('🎨 Layout.astro - Applying static theme for:', hotelSubdomain);
+if (hotelData) {
+  console.log('🎨 Layout.astro - Applying theme for:', hotelData.name);
 
-  themeName = hotel.theme?.name || `${hotelSubdomain}-theme`;
-  _themeConfig = hotel.theme || {};
-  hotelLogo = hotel.logo || null;
+  const hotelSlug = hotelData.domain?.split('.')[0] || 'default';
+  themeName = hotelData.theme?.name || `${hotelSlug}-theme`;
+  hotelLogo = hotelData.logo || null;
+  ga4Id = hotelData.ga4_token || undefined;
+  pixelId = hotelData.meta_pixel_token || undefined;
 
-  console.log('🎨 Applied static theme:', {
+  console.log('🎨 Applied theme:', {
     themeName,
     hotelLogoId: hotelLogo?.id,
+    ga4Id: ga4Id ? 'configured' : 'not configured',
+    pixelId: pixelId ? 'configured' : 'not configured',
   });
 } else {
-  // Use legacy props for backward compatibility
-  console.log('🎨 Layout.astro - Using legacy theme props');
-  themeName = legacyThemeName;
-  _themeConfig = legacyThemeConfig;
-  hotelLogo = legacyHotelLogo;
+  console.log('🎨 Layout.astro - No hotel data, using default theme');
+  themeName = 'default-theme';
 }
 
 // Generate dynamic favicon URLs from hotel logo
@@ -142,6 +122,17 @@ if (hotel?.id) {
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- IMMEDIATE THEME ENFORCEMENT -->
+    <script define:vars={{ themeName }}>
+      // Execute immediately before any other scripts
+      console.log('🎨 IMMEDIATE: Setting light theme:', themeName);
+      document.documentElement.setAttribute('data-theme', themeName);
+      document.documentElement.style.colorScheme = 'light';
+      // Let CSS custom properties handle colors instead of hardcoding
+    </script>
 
     <!-- Dynamic favicon based on hotel logo -->
     {hotelLogo && hotelLogo.id ? (
@@ -160,6 +151,71 @@ if (hotel?.id) {
 
     
     <!-- No dynamic CSS needed - DaisyUI handles themes automatically via data-theme -->
+
+    <!-- Force light theme and prevent dark mode activation -->
+    <script is:inline define:vars={{ themeName }}>
+      // Immediately force light theme
+      console.log('🎨 Forcing light theme:', themeName);
+
+      // Set theme and color scheme immediately
+      document.documentElement.setAttribute('data-theme', themeName);
+      document.documentElement.style.colorScheme = 'light';
+      // Let CSS custom properties handle colors instead of hardcoding
+
+      // Override matchMedia to block dark mode detection
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        const originalMatchMedia = window.matchMedia;
+        window.matchMedia = function(query) {
+          if (query.includes('prefers-color-scheme: dark')) {
+            console.log('🎨 Blocking dark mode query:', query);
+            return { matches: false, media: query, onchange: null, addListener: function() {}, removeListener: function() {} };
+          }
+          return originalMatchMedia.call(this, query);
+        };
+      }
+
+      // Continuously enforce light theme - more aggressive for Firefox
+      setInterval(function() {
+        const html = document.documentElement;
+        const body = document.body;
+
+        if (html.getAttribute('data-theme') !== themeName) {
+          console.log('🎨 Re-enforcing light theme');
+          html.setAttribute('data-theme', themeName);
+        }
+
+        // Force light color scheme continuously
+        html.style.colorScheme = 'light';
+        if (body) {
+          body.style.colorScheme = 'light';
+        }
+
+        // Firefox specific enforcement
+        if (navigator.userAgent.includes('Firefox')) {
+          html.style.background = 'var(--color-base-100, #ffffff)';
+          html.style.color = 'var(--color-base-content, #1f2937)';
+          if (body) {
+            body.style.background = 'var(--color-base-100, #ffffff)';
+            body.style.color = 'var(--color-base-content, #1f2937)';
+          }
+        }
+      }, 100);
+    </script>
+
+    <!-- Minimal CSS to ensure light theme -->
+    <style>
+      /* Ensure light color scheme */
+      :root, html, body {
+        color-scheme: light !important;
+      }
+
+      /* Let DaisyUI handle all colors naturally */
+      @media (prefers-color-scheme: dark) {
+        :root, html, body {
+          color-scheme: light !important;
+        }
+      }
+    </style>
 
     <!-- Dynamic Google Fonts loaded from generated configuration -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -209,12 +265,9 @@ if (hotel?.id) {
     {showNavbar && (
       <Navbar
         hotelName={hotelName}
-        hotelDomain={hotelDomain || domain || 'demo.localhost'}
         currentPath={Astro.url.pathname}
-        themeConfig={_themeConfig}
         hotelLogo={hotelLogo}
-        hotelInfo={hotelInfo}
-        isSubdomain={isSubdomain}
+        hotelInfo={undefined}
       />
     )}
 
@@ -224,17 +277,16 @@ if (hotel?.id) {
     </main>
 
     <!-- Footer -->
-    {hotel && hotelSubdomain && (
+    {hotel && (
       <Footer
         hotelName={hotelName}
-        hotelSlug={hotelSubdomain}
-        contactEmail={hotel.contact_email}
-        contactPhoneCalls={hotel.contact_phone_calls}
-        contactPhoneMessages={hotel.contact_phone_messages}
-        location={hotel.location}
-        socialProfiles={socialProfiles}
-        hotelInfo={hotelInfo}
-        isSubdomain={isSubdomain}
+        hotelSlug={(hotel as any).domain?.split('.')[0] || 'default'}
+        contactEmail={(hotel as any).contact_email || ''}
+        contactPhoneCalls={(hotel as any).contact_phone_calls || ''}
+        contactPhoneMessages={(hotel as any).contact_phone_messages || ''}
+        location={(hotel as any).location}
+        socialProfiles={[] as any[]}
+        hotelInfo={undefined}
         client:load
       />
     )}

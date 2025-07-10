@@ -4,17 +4,15 @@ import { $, component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
 interface RoomCardProps {
   name: string;
   description: string;
-  bedConfiguration?: string; // Changed from roomType to bedConfiguration
-  sizeSqm?: string; // Changed from number to string to match new schema
+  bedConfiguration?: string;
+  sizeSqm?: string;
   basePrice?: string;
   defaultCurrency: string;
   imageUrl: string;
   videoUrl?: string;
   isLast: boolean;
   isOdd: boolean;
-  hotelSlug: string;
   roomSlug: string;
-  isSubdomain?: boolean; // Add subdomain detection
 }
 
 export const RoomCard = component$<RoomCardProps>(
@@ -29,9 +27,7 @@ export const RoomCard = component$<RoomCardProps>(
     videoUrl,
     isLast,
     isOdd,
-    hotelSlug,
     roomSlug,
-    isSubdomain = false,
   }) => {
     const cardRef = useSignal<HTMLDivElement>();
     const isHovered = useSignal(false);
@@ -97,7 +93,7 @@ export const RoomCard = component$<RoomCardProps>(
       <div
         ref={cardRef}
         class={`bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300 card overflow-hidden ${
-          isOdd && isLast ? 'md:col-span-2' : ''
+          isOdd && isLast ? 'md:col-span-2 lg:col-span-2' : ''
         }`}
       >
         {imageUrl && (
@@ -165,11 +161,7 @@ export const RoomCard = component$<RoomCardProps>(
                 Book Now
               </button>
               <a
-                href={
-                  isSubdomain
-                    ? `/rooms/${roomSlug}`
-                    : `/${hotelSlug}/rooms/${roomSlug}`
-                }
+                href={`/rooms/${roomSlug}`}
                 class="btn-outline btn btn-sm"
               >
                 Details
@@ -240,11 +232,7 @@ export const RoomCard = component$<RoomCardProps>(
                     Contact Reception
                   </button>
                   <a
-                    href={
-                      isSubdomain
-                        ? `/rooms/${roomSlug}`
-                        : `/${hotelSlug}/rooms/${roomSlug}`
-                    }
+                    href={`/rooms/${roomSlug}`}
                     class="btn-outline btn"
                   >
                     View Room Details

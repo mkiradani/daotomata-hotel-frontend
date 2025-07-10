@@ -1,0 +1,91 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import { FacilityCard } from '../components/FacilityCard.tsx';
+import CollectionPageLayout from '../layouts/CollectionPageLayout.astro';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
+
+console.log(`🏗️ [BUILD] Pre-rendering facilities page...`);
+
+// Get hotel data from environment variable
+const hotel: any = await getCurrentHotel();
+
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+// Process facilities data
+const facilities = hotel.facilities || [];
+
+console.log(`✅ Facilities processed: ${facilities.length} facilities`);
+---
+
+<CollectionPageLayout
+  title={`Facilities - ${hotel.name}`}
+  description={`Explore our world-class facilities and amenities at ${hotel.name}`}
+  pageTitle="Our Facilities"
+  pageDescription="Discover our exceptional amenities designed for your comfort and enjoyment"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={facilities}
+  itemType="facilities"
+  breadcrumbItems={[
+    { label: hotel.name, href: "/" },
+    { label: "Facilities" }
+  ]}
+  ctaTitle="Experience Our Facilities"
+  ctaDescription={`Book your stay and enjoy all that ${hotel.name} has to offer`}
+  ctaPrimaryText="Book Now"
+  ctaPrimaryHref="/book"
+  ctaSecondaryText="Contact Us"
+  ctaSecondaryHref="/contact"
+  gridId="facilities-grid"
+>
+  {facilities.map((facility: any, index: number) => {
+      const imageUrl = facility.main_photo
+        ? getMediaUrl(typeof facility.main_photo === 'string' ? facility.main_photo : facility.main_photo.id, {
+            width: 800,
+            height: 450,
+            quality: 95,
+          }) || ''
+        : '';
+      const videoUrl = facility.main_video
+        ? getMediaUrl(typeof facility.main_video === 'string' ? facility.main_video : facility.main_video.id) || undefined
+        : undefined;
+
+      // Create slug from facility name
+      const facilitySlug = facility.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      return (
+        <FacilityCard
+          slot="items"
+          name={facility.name}
+          description={facility.description || ''}
+          facilityType={facility.facility_type}
+          capacity={facility.capacity}
+          accessType={facility.access_type}
+          imageUrl={imageUrl}
+          videoUrl={videoUrl}
+          isLast={index === facilities.length - 1}
+          isOdd={facilities.length % 2 !== 0}
+          hotelSlug={hotelSlug}
+          facilitySlug={facilitySlug}
+          isSubdomain={true}
+        />
+      );
+    })}
+</CollectionPageLayout>

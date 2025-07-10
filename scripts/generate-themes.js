@@ -8,6 +8,10 @@
  * for all theme configuration, generating static assets at build time for SSG.
  */
 
+// Load environment variables from .env file
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { createDirectus, readItems, rest, staticToken } from "@directus/sdk";
@@ -38,27 +42,44 @@ function createDirectusClient() {
 }
 
 /**
- * Fetch all hotels with theme configuration from Directus
+ * Fetch current hotel with theme configuration from Directus (Single-tenant)
  */
-async function fetchHotelsFromDirectus() {
-  console.log("🔄 Fetching hotels from Directus...");
+async function fetchCurrentHotelFromDirectus() {
+  const hotelId = process.env.HOTEL_ID || '1';
+  console.log(`🔄 Fetching hotel ID ${hotelId} from Directus...`);
 
   const client = createDirectusClient();
 
   try {
     const hotels = await client.request(
       readItems("hotels", {
-        fields: ["id", "name", "theme"],
-        limit: -1, // Get all hotels
+        filter: { id: { _eq: hotelId } },
+        fields: ["id", "name", "domain", "theme"],
+        limit: 1,
       }),
     );
 
-    console.log(`✅ Fetched ${hotels.length} hotels from Directus`);
-    return hotels;
+    if (!hotels || hotels.length === 0) {
+      throw new Error(`Hotel with ID ${hotelId} not found`);
+    }
+
+    const hotel = hotels[0];
+    console.log(`✅ Fetched hotel: ${hotel.name} (ID: ${hotel.id})`);
+    return hotel;
   } catch (error) {
-    console.error("❌ Error fetching hotels from Directus:", error);
+    console.error("❌ Error fetching hotel from Directus:", error);
     throw error;
   }
+}
+
+/**
+ * Fetch all hotels with theme configuration from Directus (DEPRECATED - for backward compatibility)
+ */
+async function _fetchHotelsFromDirectus() {
+  console.warn("⚠️ fetchHotelsFromDirectus() is deprecated in single-tenant mode. Use fetchCurrentHotelFromDirectus() instead.");
+
+  const hotel = await fetchCurrentHotelFromDirectus();
+  return [hotel]; // Return array for backward compatibility
 }
 
 /**
@@ -77,11 +98,8 @@ function generateThemeCSS(hotel) {
   // Generate @plugin "daisyui/theme" CSS block matching current working format
   const themeCSS = `
 /* ${hotel.name} Theme - From Directus */
-@plugin "daisyui/theme" {
-  name: "${theme.name}";
-  default: ${theme.default || false};
-  prefersdark: ${theme.prefersdark || false};
-  color-scheme: ${theme["color-scheme"] || "light"};
+[data-theme="${theme.name}"] {
+  color-scheme: ${theme["color-scheme"] || "light"} !important;
 
   /* OKLCH Colors from Directus */
 ${Object.entries(theme.colors || {})
@@ -102,6 +120,13 @@ ${Object.entries(theme.sizes || {})
 ${Object.entries(theme.effects || {})
   .map(([key, value]) => `  ${key}: ${value};`)
   .join("\n")}
+}
+
+/* Force light mode even with dark system preference */
+@media (prefers-color-scheme: dark) {
+  [data-theme="${theme.name}"] {
+    color-scheme: light !important;
+  }
 }`;
 
   return themeCSS;
@@ -268,30 +293,31 @@ function writeGeneratedFiles(themesCSS, fontsConfig) {
 }
 
 /**
- * Main theme generation function
+ * Main theme generation function (Single-tenant)
  */
 async function generateThemes() {
-  console.log("🚀 Starting DRY theme generation from Directus...");
+  console.log("🚀 Starting single-tenant theme generation from Directus...");
   console.log(`📡 Directus URL: ${DIRECTUS_URL}`);
+  console.log(`🏨 Hotel ID: ${process.env.HOTEL_ID || '1'}`);
 
   try {
-    // Fetch hotels from Directus
-    const hotels = await fetchHotelsFromDirectus();
+    // Fetch current hotel from Directus
+    const hotel = await fetchCurrentHotelFromDirectus();
 
-    if (hotels.length === 0) {
-      console.warn("⚠️  No hotels found in Directus");
+    if (!hotel) {
+      console.error("❌ No hotel found in Directus");
       return;
     }
 
-    // Generate CSS and fonts configuration
-    const themesCSS = generateCompleteThemesCSS(hotels);
-    const fontsConfig = generateFontsConfig(hotels);
+    // Generate CSS and fonts configuration for single hotel
+    const themesCSS = generateCompleteThemesCSS([hotel]);
+    const fontsConfig = generateFontsConfig([hotel]);
 
     // Write files
     writeGeneratedFiles(themesCSS, fontsConfig);
 
-    console.log("✅ DRY theme generation completed successfully!");
-    console.log(`📊 Generated themes for ${hotels.length} hotels`);
+    console.log(`✅ Single-tenant theme generation completed for: ${hotel.name}!`);
+    console.log(`📊 Generated theme for hotel: ${hotel.name} (ID: ${hotel.id})`);
   } catch (error) {
     console.error("❌ Theme generation failed:", error);
     process.exit(1);

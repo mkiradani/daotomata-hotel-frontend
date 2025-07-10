@@ -54,7 +54,7 @@ export const DishCard = component$<DishCardProps>(
         class={`
           bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300 card overflow-hidden
           ${!isAvailable ? "opacity-60" : ""}
-          ${isLast && isOdd ? "md:col-span-2" : ""}
+          ${isLast && isOdd ? "md:col-span-2 lg:col-span-2" : ""}
         `}
       >
         {imageUrl && (

@@ -13,45 +13,36 @@ interface HotelInfo {
 
 export interface Props {
   hotelName: string;
-  hotelDomain: string;
   currentPath?: string;
-  themeConfig?: Record<string, unknown>;
   hotelLogo?: Record<string, unknown> | null;
   hotelInfo?: HotelInfo | null;
-  isSubdomain?: boolean; // Add isSubdomain prop
 }
 
 const {
   hotelName,
-  hotelDomain,
   currentPath = '',
-  themeConfig: _themeConfig = {},
   hotelLogo = null,
   hotelInfo = null,
-  isSubdomain = false, // Default to false for backward compatibility
 } = Astro.props;
-
-// Extract subdomain from full domain (e.g., "baberrih" from "baberrih.daotomata.io")
-const hotelSubdomain = hotelDomain.split('.')[0];
 
 // Prioritize hotel_info logo over original hotel logo
 const priorityLogo = hotelInfo?.logo || hotelLogo;
 
-// Generate navigation URLs based on routing mode
-const _navItems = [
-  { name: 'Home', href: isSubdomain ? '/' : `/${hotelSubdomain}` },
-  { name: 'Accommodation', href: isSubdomain ? '/accommodation' : `/${hotelSubdomain}/accommodation` },
-  { name: 'Facilities', href: isSubdomain ? '/facilities' : `/${hotelSubdomain}/facilities` },
-  { name: 'Experiences', href: isSubdomain ? '/experiences' : `/${hotelSubdomain}/experiences` },
-  { name: 'Restaurant', href: isSubdomain ? '/restaurant' : `/${hotelSubdomain}/restaurant` },
-  { name: 'Contact', href: isSubdomain ? '/contact' : `/${hotelSubdomain}/contact` },
+// Simplified navigation URLs for single-tenant
+const navItems = [
+  { name: 'Home', href: '/' },
+  { name: 'Accommodation', href: '/accommodation' },
+  { name: 'Facilities', href: '/facilities' },
+  { name: 'Experiences', href: '/experiences' },
+  { name: 'Restaurant', href: '/restaurant' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 // Book Now button URL
-const bookNowHref = isSubdomain ? '/book' : `/${hotelSubdomain}/book`;
+const bookNowHref = '/book';
 
 // Logo/Brand URL
-const logoHref = isSubdomain ? '/' : `/${hotelSubdomain}`;
+const logoHref = '/';
 
 // Theme configuration is handled automatically by DaisyUI via data-theme
 ---
@@ -88,7 +79,7 @@ const logoHref = isSubdomain ? '/' : `/${hotelSubdomain}`;
         class="z-[1] bg-base-100 shadow mt-3 p-2 border border-base-300 rounded-box w-52 menu menu-sm dropdown-content"
       >
         {
-          _navItems.map(item => (
+          navItems.map((item: any) => (
             <li>
               <a
                 href={item.href}
@@ -130,7 +121,7 @@ const logoHref = isSubdomain ? '/' : `/${hotelSubdomain}`;
   <div class="hidden lg:flex navbar-center">
     <ul class="gap-1 px-1 menu menu-horizontal">
       {
-        _navItems.map(item => (
+        navItems.map((item: any) => (
           <li>
             <a
               href={item.href}

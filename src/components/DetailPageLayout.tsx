@@ -94,19 +94,26 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
     const currentSlide = useSignal(0);
     const showBookingModal = useSignal(false);
 
+    // Sort gallery images to show videos first, then images
+    const sortedGalleryImages = galleryImages.sort((a, b) => {
+      if (a.type === 'video' && b.type !== 'video') return -1;
+      if (a.type !== 'video' && b.type === 'video') return 1;
+      return 0;
+    });
+
     // Slideshow navigation functions
     const goToSlide = $((index: number) => {
       currentSlide.value = index;
     });
 
     const nextSlide = $(() => {
-      currentSlide.value = (currentSlide.value + 1) % galleryImages.length;
+      currentSlide.value = (currentSlide.value + 1) % sortedGalleryImages.length;
     });
 
     const prevSlide = $(() => {
       currentSlide.value =
         currentSlide.value === 0
-          ? galleryImages.length - 1
+          ? sortedGalleryImages.length - 1
           : currentSlide.value - 1;
     });
 
@@ -484,7 +491,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                 </div>
 
                 {/* Gallery */}
-                {galleryImages.length > 0 && (
+                {sortedGalleryImages.length > 0 && (
                   <div>
                     <h3 class="mb-6 font-primary font-bold text-2xl">
                       Gallery
@@ -492,7 +499,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
                     {/* Custom Slideshow without scroll */}
                     <div class="relative bg-base-200 mb-4 rounded-lg w-full aspect-[16/10] overflow-hidden">
-                      {galleryImages.map((media, index) => (
+                      {sortedGalleryImages.map((media, index) => (
                         <div
                           key={`slide-${media.id}-${index}`}
                           class={`absolute inset-0 w-full h-full ${
@@ -524,7 +531,7 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
                       ))}
 
                       {/* Navigation Arrows */}
-                      {galleryImages.length > 1 && (
+                      {sortedGalleryImages.length > 1 && (
                         <div class="top-1/2 right-5 left-5 absolute flex justify-between -translate-y-1/2 transform">
                           <button
                             type="button"
@@ -545,13 +552,13 @@ export const DetailPageLayout = component$<DetailPageLayoutProps>(
 
                       {/* Counter */}
                       <div class="top-4 right-4 absolute bg-neutral/70 px-3 py-1 rounded text-neutral-content text-sm">
-                        {currentSlide.value + 1} / {galleryImages.length}
+                        {currentSlide.value + 1} / {sortedGalleryImages.length}
                       </div>
                     </div>
 
                     {/* Thumbnail Navigation */}
                     <div class="flex gap-2 pb-2 overflow-x-auto">
-                      {galleryImages.map((media, index) => (
+                      {sortedGalleryImages.map((media, index) => (
                         <button
                           type="button"
                           key={`thumb-${media.id}-${index}`}

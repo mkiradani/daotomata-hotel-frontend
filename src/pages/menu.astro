@@ -1,0 +1,162 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import Layout from '../layouts/Layout.astro';
+import { Breadcrumb } from '../components/Breadcrumb.tsx';
+import { DishCard } from '../components/DishCard.tsx';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
+
+console.log(`🏗️ [BUILD] Pre-rendering menu page...`);
+
+// Get hotel data from environment variable
+const hotel: any = await getCurrentHotel();
+
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+// Process restaurant and dishes data
+const restaurant = hotel.restaurant;
+const dishes = hotel.dishes || [];
+
+// Group dishes by category if available
+const dishesByCategory = dishes.reduce((acc: any, dish: any) => {
+  const category = dish.category || 'Main Menu';
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(dish);
+  return acc;
+}, {});
+
+console.log(`✅ Menu processed: ${dishes.length} dishes in ${Object.keys(dishesByCategory).length} categories`);
+
+const pageTitle = `Menu - ${hotel.name}`;
+const pageDescription = `Explore our delicious menu at ${hotel.name}. Fresh ingredients, expertly prepared dishes.`;
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  hotel={hotel}
+  hotelName={hotel.name}
+>
+  <!-- Breadcrumb -->
+  <Breadcrumb 
+    items={[
+      { label: 'Home', href: '/' },
+      { label: 'Menu', href: '/menu' }
+    ]}
+  />
+
+  <!-- Menu Header -->
+  <section class="bg-base-200 py-16">
+    <div class="mx-auto px-4 text-center container">
+      <h1 class="mb-4 font-bold text-4xl">Our Menu</h1>
+      <p class="mx-auto max-w-2xl text-base-content/80 text-xl">
+        Discover our carefully crafted dishes made with the finest ingredients
+      </p>
+    </div>
+  </section>
+
+  <!-- Restaurant Info -->
+  {restaurant && (
+    <section class="bg-base-100 py-16">
+      <div class="mx-auto px-4 container">
+        <div class="items-center gap-12 grid grid-cols-1 lg:grid-cols-2">
+          <div>
+            <h2 class="mb-6 font-bold text-3xl">{restaurant.name}</h2>
+            <p class="text-base-content/80 text-lg">
+              {restaurant.description}
+            </p>
+          </div>
+          {restaurant.main_photo && (
+            <div class="rounded-lg aspect-video overflow-hidden">
+              <img 
+                src={getMediaUrl(restaurant.main_photo.id, { width: 800, height: 450 })}
+                alt={restaurant.main_photo.title || restaurant.name}
+                class="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Menu Categories -->
+  {Object.keys(dishesByCategory).length > 0 && (
+    <section class="bg-base-200 py-16">
+      <div class="mx-auto px-4 container">
+        {Object.entries(dishesByCategory).map(([category, categoryDishes]: [string, any]) => (
+          <div class="mb-16 last:mb-0">
+            <h2 class="mb-12 font-bold text-3xl text-center">{category}</h2>
+            <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+              {categoryDishes.map((dish: any, index: number) => {
+                const imageUrl = dish.main_photo
+                  ? getMediaUrl(typeof dish.main_photo === 'string' ? dish.main_photo : dish.main_photo.id, {
+                      width: 800,
+                      height: 450,
+                      quality: 95,
+                    }) || ''
+                  : '';
+
+                return (
+                  <DishCard
+                    name={dish.name}
+                    description={dish.description || ''}
+                    price={dish.price}
+                    ingredients={dish.ingredients || []}
+                    dietary_options={dish.dietary_options || []}
+                    allergens={dish.allergens || []}
+                    calories={dish.calories}
+                    imageUrl={imageUrl}
+                    isAvailable={dish.is_available !== false}
+                    defaultCurrency={hotel.default_currency || 'EUR'}
+                    isLast={index === categoryDishes.length - 1}
+                    isOdd={categoryDishes.length % 2 !== 0}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- No Menu Message */
+  {dishes.length === 0 && (
+    <section class="bg-base-100 py-16">
+      <div class="mx-auto px-4 text-center container">
+        <div class="mb-4 text-6xl">🍽️</div>
+        <h2 class="mb-4 font-bold text-2xl">Menu Coming Soon</h2>
+        <p class="mb-6 text-base-content/80 text-lg">
+          Our culinary team is preparing something special. Please contact us for current offerings.
+        </p>
+        <div class="flex sm:flex-row flex-col justify-center gap-4">
+          <a href="/contact" class="btn btn-primary">Contact Us</a>
+          <a href="/restaurant" class="btn-outline btn">Restaurant Info</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Section -->
+  <section class="bg-primary py-16 text-primary-content">
+    <div class="mx-auto px-4 text-center container">
+      <h2 class="mb-4 font-bold text-3xl">Make a Reservation</h2>
+      <p class="mb-8 text-xl">Experience exceptional dining at {hotel.name}</p>
+      <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
+    </div>
+  </section>
+</Layout>

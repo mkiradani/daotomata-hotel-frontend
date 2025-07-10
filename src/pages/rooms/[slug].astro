@@ -1,0 +1,120 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import { DetailPageLayout } from '../../components/DetailPageLayout.tsx';
+import Layout from '../../layouts/Layout.astro';
+import { getCurrentHotel, getMediaUrl, processMediaGallery } from '../../lib/directus.js';
+
+// Generate static paths for all rooms
+export async function getStaticPaths() {
+  console.log(`🏗️ [BUILD] Generating static paths for room detail pages...`);
+
+  const hotel: any = await getCurrentHotel();
+
+  if (!hotel || !hotel.rooms) {
+    console.log(`❌ [BUILD] No hotel or rooms found`);
+    return [];
+  }
+
+  console.log(`✅ [BUILD] Found ${hotel.rooms.length} rooms for hotel: ${hotel.name}`);
+
+  const paths = hotel.rooms.map((room: any) => {
+    const slug = room.name?.toLowerCase().replace(/\s+/g, '-') || room.id?.toString();
+    console.log(`🔗 [BUILD] Generated path: /rooms/${slug} for room: ${room.name} (ID: ${room.id})`);
+
+    return {
+      params: { slug },
+    };
+  });
+
+  console.log(`📋 [BUILD] Generated ${paths.length} room paths`);
+  return paths;
+}
+
+console.log(`🏗️ [BUILD] Pre-rendering room detail page...`);
+
+// Get hotel data from environment variable
+const hotel: any = await getCurrentHotel();
+
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const { slug } = Astro.params;
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name}, looking for room: ${slug}`);
+
+// Find the specific room
+const room = hotel.rooms?.find((r: any) => 
+  r.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
+  r.slug === slug ||
+  r.id?.toString() === slug
+);
+
+if (!room) {
+  console.error(`❌ [BUILD] Room not found: ${slug}`);
+  return Astro.redirect('/404');
+}
+
+console.log(`✅ [BUILD] Room found: ${room.name} (ID: ${room.id})`);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+// Process room media
+const mainImageUrl = room.main_photo
+  ? getMediaUrl(room.main_photo.id || room.main_photo, {
+      width: 1200,
+      height: 675,
+      quality: 95,
+    }) || ''
+  : '';
+
+const mainVideoUrl = room.main_video
+  ? getMediaUrl(room.main_video.id || room.main_video) || ''
+  : '';
+
+// Process gallery images with automatic type detection
+const galleryImages = processMediaGallery(room.media_gallery, room.name) as Array<{
+  id: string;
+  url: string;
+  title?: string;
+  type?: "image" | "video";
+}>;
+
+// Process room metadata
+const metadata = {
+  sizeSqm: room.size_sqm ? parseInt(room.size_sqm) : undefined,
+  bedConfiguration: room.bed_configuration,
+  isAccessible: room.is_accesible, // Note: typo in schema
+  amenities: room.amenities || [],
+};
+
+const pageTitle = `${room.name} - ${hotel.name}`;
+const pageDescription = room.description || `Discover ${room.name} at ${hotel.name}`;
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  hotel={hotel}
+  hotelName={hotel.name}
+>
+  <DetailPageLayout
+    title={room.name}
+    description={room.description || ''}
+    type="room"
+    imageUrl={mainImageUrl}
+    videoUrl={mainVideoUrl}
+    galleryImages={galleryImages}
+    metadata={metadata}
+    hotelName={hotel.name}
+    hotelSlug={hotelSlug}
+    defaultCurrency={hotel.default_currency || 'EUR'}
+    breadcrumbItems={[
+      { label: 'Home', href: '/' },
+      { label: 'Accommodation', href: '/accommodation' },
+      { label: room.name, href: `/rooms/${slug}` }
+    ]}
+  />
+</Layout>

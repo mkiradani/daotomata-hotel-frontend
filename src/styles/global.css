@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "./themes.css";
-@plugin "daisyui";
 
 /* Fonts are now defined per theme in themes.css */
 

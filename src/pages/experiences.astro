@@ -1,0 +1,93 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import { ActivityCard } from '../components/ActivityCard.tsx';
+import CollectionPageLayout from '../layouts/CollectionPageLayout.astro';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
+
+console.log(`🏗️ [BUILD] Pre-rendering experiences page...`);
+
+// Get hotel data from environment variable
+const hotel: any = await getCurrentHotel();
+
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+// Process activities data
+const activities = hotel.activities || [];
+
+console.log(`✅ Experiences processed: ${activities.length} activities`);
+---
+
+<CollectionPageLayout
+  title={`Experiences - ${hotel.name}`}
+  description={`Discover unique experiences and activities at ${hotel.name}`}
+  pageTitle="Unique Experiences"
+  pageDescription="Create unforgettable memories with our curated activities and experiences"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={activities}
+  itemType="experiences"
+  breadcrumbItems={[
+    { label: hotel.name, href: "/" },
+    { label: "Experiences" }
+  ]}
+  ctaTitle="Ready for Adventure?"
+  ctaDescription={`Book your stay and explore amazing experiences at ${hotel.name}`}
+  ctaPrimaryText="Book Now"
+  ctaPrimaryHref="/book"
+  ctaSecondaryText="Contact Us"
+  ctaSecondaryHref="/contact"
+  gridId="experiences-grid"
+>
+  {activities.map((activity: any, index: number) => {
+      const imageUrl = activity.main_photo
+        ? getMediaUrl(typeof activity.main_photo === 'string' ? activity.main_photo : activity.main_photo.id, {
+            width: 800,
+            height: 450,
+            quality: 95,
+          }) || ''
+        : '';
+      const videoUrl = activity.main_video
+        ? getMediaUrl(typeof activity.main_video === 'string' ? activity.main_video : activity.main_video.id) || undefined
+        : undefined;
+
+      // Create slug from activity name
+      const activitySlug = activity.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      return (
+        <ActivityCard
+          slot="items"
+          name={activity.name}
+          description={activity.description || ''}
+          maxParticipants={activity.max_participants}
+          ageRestriction={activity.age_restriction}
+          equipmentProvided={activity.equipment_provided}
+          operatingHours={activity.operating_hours}
+          defaultCurrency={hotel.default_currency || 'EUR'}
+          imageUrl={imageUrl}
+          videoUrl={videoUrl}
+          isLast={index === activities.length - 1}
+          isOdd={activities.length % 2 !== 0}
+          hotelSlug={hotelSlug}
+          activitySlug={activitySlug}
+          isSubdomain={true}
+        />
+      );
+    })}
+</CollectionPageLayout>

@@ -29,22 +29,20 @@ export async function GET(context: { url?: URL; request?: Request }) {
       `🔍 [DEBUG-ROUTING] Referer: ${context.request?.headers?.get('referer') || 'unknown'}`
     );
 
-    // Test domain mapping functions
-    const { isSubdomainBasedRouting, getHotelDomainFromRequest } = await import(
-      '../lib/domain-mapping.js'
+    // Test single-tenant configuration
+    const { getCurrentHotel, getCurrentHotelId } = await import(
+      '../lib/directus.js'
     );
 
     const hostname = context.url?.hostname || 'unknown';
-    const isSubdomain = isSubdomainBasedRouting(hostname);
-    const hotelDomain = context.url
-      ? getHotelDomainFromRequest(context.url, {})
-      : 'unknown';
+    const hotelId = getCurrentHotelId();
+    const hotel = await getCurrentHotel();
 
-    console.log(`🔍 [DEBUG-ROUTING] isSubdomain: ${isSubdomain}`);
-    console.log(`🔍 [DEBUG-ROUTING] hotelDomain: ${hotelDomain}`);
+    console.log(`🔍 [DEBUG-ROUTING] hotelId: ${hotelId}`);
+    console.log(`🔍 [DEBUG-ROUTING] hotel: ${hotel?.name || 'not found'}`);
 
     const debugData = {
-      status: 'debug-routing-working',
+      status: 'debug-routing-working-single-tenant',
       timestamp: new Date().toISOString(),
       request: {
         url: context.url?.href,
@@ -55,9 +53,10 @@ export async function GET(context: { url?: URL; request?: Request }) {
         userAgent: context.request?.headers?.get('user-agent'),
         referer: context.request?.headers?.get('referer'),
       },
-      routing: {
-        isSubdomain,
-        hotelDomain,
+      singleTenant: {
+        hotelId,
+        hotelName: hotel?.name || 'not found',
+        hotelDomain: hotel?.domain || 'not found',
         detectedFromHostname: hostname,
       },
       server: {

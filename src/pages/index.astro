@@ -1,26 +1,221 @@
 ---
-import { isSubdomainBasedRouting } from '../lib/domain-mapping.js';
+export const prerender = true; // ✅ SSG - Pre-render at build time
 
-console.log(`🔍 [INDEX] === DEBUGGING ROOT ROUTING ===`);
-console.log(`🔍 [INDEX] URL: ${Astro.url.href}`);
-console.log(`🔍 [INDEX] Hostname: ${Astro.url.hostname}`);
-console.log(`🔍 [INDEX] Pathname: ${Astro.url.pathname}`);
+import { ActivityCard } from '../components/ActivityCard.tsx';
+import { FacilityCard } from '../components/FacilityCard.tsx';
+import { HeroSection } from '../components/HeroSection.tsx';
+import { RoomCard } from '../components/RoomCard.tsx';
+import Layout from '../layouts/Layout.astro';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  getTranslatedContent,
+} from '../lib/directus.js';
+import { getHotelConfig } from '../lib/site-config.js';
 
-// Check if this is a subdomain request
-const isSubdomain = isSubdomainBasedRouting(Astro.url.hostname);
+console.log(`🏗️ [BUILD] Pre-rendering homepage...`);
 
-console.log(`🏨 Index page accessed from: ${Astro.url.hostname}`);
-console.log(`🌐 Is subdomain: ${isSubdomain}`);
+// Get hotel data and configuration dynamically - NO hardcoding
+const hotel: any = await getCurrentHotel();
 
-if (isSubdomain) {
-  // For subdomain requests, this should never be reached due to middleware rewrite
-  // But if it is, redirect to the subdomain homepage
-  const subdomain = Astro.url.hostname.split('.')[0];
-  console.log(`🔄 Subdomain fallback redirect: / → /${subdomain}`);
-  return Astro.redirect(`/${subdomain}`);
-} else {
-  // For main domain requests, redirect to multitenant showcase for hotel selection
-  console.log('🏨 Main domain - redirecting to multitenant showcase');
-  return Astro.redirect('/multitenant-showcase');
+if (!hotel) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
+
+// Get dynamic configuration from Directus
+const hotelConfig = await getHotelConfig();
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+const themeName = hotel.theme?.name || `${hotelSlug}-theme`;
+
+// Get hero media and hotel logo
+const heroPhoto = hotel.hero_media?.[0]?.main_photo;
+const heroVideo = hotel.hero_media?.[0]?.main_video;
+const hotelLogo = hotel.logo;
+
+console.log(
+  `✅ Hotel processed: ${hotel.name} (${hotel.rooms?.length || 0} rooms, ${hotel.activities?.length || 0} activities, ${hotel.facilities?.length || 0} facilities)`
+);
 ---
+
+<Layout
+  title={hotel.name}
+  hotel={hotel}
+  hotelName={hotel.name}
+>
+  <!-- Hero Section -->
+  <HeroSection
+    hotelName={hotelConfig.name}
+    heroImageUrl={heroPhoto ? getMediaUrl(heroPhoto.id, { width: 1920, height: 1080, quality: 90 }) : undefined}
+    heroVideoUrl={heroVideo ? getMediaUrl(heroVideo.id) : undefined}
+    availableLanguages={hotelConfig.availableLanguages}
+    availableCurrencies={hotelConfig.availableCurrencies}
+    currentLanguage={hotelConfig.defaultLanguage}
+    defaultCurrency={hotelConfig.defaultCurrency}
+  />
+
+  <!-- Rooms Section -->
+  {hotel.rooms && hotel.rooms.length > 0 && (
+    <section class="bg-base-100 py-16">
+      <div class="mx-auto px-4 container">
+        <h2 class="mb-12 font-bold text-3xl text-center">Our Rooms</h2>
+        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+          {hotel.rooms.slice(0, 6).map((room: any, index: number) => {
+            const imageUrl = room.main_photo
+              ? getMediaUrl(room.main_photo.id, {
+                  width: 800,
+                  height: 450,
+                  quality: 95,
+                }) || ''
+              : '';
+            const videoUrl = room.main_video
+              ? getMediaUrl(room.main_video.id) || undefined
+              : undefined;
+
+            // Create slug from room name
+            const roomSlug = room.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
+            return (
+              <RoomCard
+                name={room.name}
+                description={room.description || ''}
+                bedConfiguration={room.bed_configuration}
+                sizeSqm={room.size_sqm}
+                basePrice={undefined}
+                defaultCurrency={hotel.default_currency || 'EUR'}
+                imageUrl={imageUrl}
+                videoUrl={videoUrl}
+                isLast={index === hotel.rooms.slice(0, 6).length - 1}
+                isOdd={hotel.rooms.slice(0, 6).length % 2 !== 0}
+                hotelSlug={hotelSlug}
+                roomSlug={roomSlug}
+              />
+            );
+          })}
+        </div>
+        {hotel.rooms.length > 6 && (
+          <div class="mt-8 text-center">
+            <a href="/accommodation" class="btn btn-primary">View All Rooms</a>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- Facilities Section -->
+  {hotel.facilities && hotel.facilities.length > 0 && (
+    <section class="bg-base-200 py-16">
+      <div class="mx-auto px-4 container">
+        <h2 class="mb-12 font-bold text-3xl text-center">Our Facilities</h2>
+        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+          {hotel.facilities.slice(0, 6).map((facility: any, index: number) => {
+            const imageUrl = facility.main_photo
+              ? getMediaUrl(facility.main_photo.id, {
+                  width: 800,
+                  height: 450,
+                  quality: 95,
+                }) || ''
+              : '';
+            const videoUrl = facility.main_video
+              ? getMediaUrl(facility.main_video.id) || undefined
+              : undefined;
+
+            // Create slug from facility name
+            const facilitySlug = facility.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
+            return (
+              <FacilityCard
+                name={facility.name}
+                description={facility.description || ''}
+                facilityType={facility.facility_type}
+                capacity={facility.capacity}
+                accessType={facility.access_type}
+                imageUrl={imageUrl}
+                videoUrl={videoUrl}
+                isLast={index === hotel.facilities.slice(0, 6).length - 1}
+                isOdd={hotel.facilities.slice(0, 6).length % 2 !== 0}
+                hotelSlug={hotelSlug}
+                facilitySlug={facilitySlug}
+              />
+            );
+          })}
+        </div>
+        {hotel.facilities.length > 6 && (
+          <div class="mt-8 text-center">
+            <a href="/facilities" class="btn btn-primary">View All Facilities</a>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- Activities Section -->
+  {hotel.activities && hotel.activities.length > 0 && (
+    <section class="bg-base-100 py-16">
+      <div class="mx-auto px-4 container">
+        <h2 class="mb-12 font-bold text-3xl text-center">Experiences</h2>
+        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+          {hotel.activities.slice(0, 6).map((activity: any, index: number) => {
+            const imageUrl = activity.main_photo
+              ? getMediaUrl(activity.main_photo.id, {
+                  width: 800,
+                  height: 450,
+                  quality: 95,
+                }) || ''
+              : '';
+            const videoUrl = activity.main_video
+              ? getMediaUrl(activity.main_video.id) || undefined
+              : undefined;
+
+            // Create slug from activity name
+            const activitySlug = activity.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
+            return (
+              <ActivityCard
+                name={activity.name}
+                description={activity.description || ''}
+                maxParticipants={activity.max_participants}
+                ageRestriction={activity.age_restriction}
+                equipmentProvided={activity.equipment_provided}
+                operatingHours={activity.operating_hours}
+                defaultCurrency={hotel.default_currency || 'EUR'}
+                imageUrl={imageUrl}
+                videoUrl={videoUrl}
+                isLast={index === hotel.activities.slice(0, 6).length - 1}
+                isOdd={hotel.activities.slice(0, 6).length % 2 !== 0}
+                hotelSlug={hotelSlug}
+                activitySlug={activitySlug}
+              />
+            );
+          })}
+        </div>
+        {hotel.activities.length > 6 && (
+          <div class="mt-8 text-center">
+            <a href="/experiences" class="btn btn-primary">View All Experiences</a>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Section -->
+  <section class="bg-primary py-16 text-primary-content">
+    <div class="mx-auto px-4 text-center container">
+      <h2 class="mb-4 font-bold text-3xl">Ready to Book Your Stay?</h2>
+      <p class="mb-8 text-xl">Experience luxury and comfort at {hotel.name}</p>
+      <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
+    </div>
+  </section>
+</Layout>
