@@ -5,6 +5,7 @@ import { ActivityCard } from '../components/ActivityCard.tsx';
 import { FacilityCard } from '../components/FacilityCard.tsx';
 import { HeroSection } from '../components/HeroSection.tsx';
 import { RoomCard } from '../components/RoomCard.tsx';
+import CTASection from '../components/CTASection.astro';
 import Layout from '../layouts/Layout.astro';
 import {
   getCurrentHotel,
@@ -145,6 +146,7 @@ console.log(
                 isOdd={hotel.facilities.slice(0, 6).length % 2 !== 0}
                 hotelSlug={hotelSlug}
                 facilitySlug={facilitySlug}
+                isSubdomain={true}
               />
             );
           })}
@@ -197,6 +199,7 @@ console.log(
                 isOdd={hotel.activities.slice(0, 6).length % 2 !== 0}
                 hotelSlug={hotelSlug}
                 activitySlug={activitySlug}
+                isSubdomain={true}
               />
             );
           })}
@@ -211,11 +214,12 @@ console.log(
   )}
 
   <!-- CTA Section -->
-  <section class="bg-primary py-16 text-primary-content">
-    <div class="mx-auto px-4 text-center container">
-      <h2 class="mb-4 text-primary-content/90 text-3xl">Ready to Book Your Stay?</h2>
-      <p class="mb-8 text-xl">Experience luxury and comfort at {hotel.name}</p>
-      <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
-    </div>
-  </section>
+  <CTASection
+    title="Ready to Book Your Stay?"
+    description={`Experience luxury and comfort at ${hotel.name}`}
+    primaryText="Book Now"
+    primaryHref="/book"
+    secondaryText="Contact Us"
+    secondaryHref="/contact"
+  />
 </Layout>

@@ -1,0 +1,41 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  primaryText: string;
+  primaryHref: string;
+  secondaryText?: string;
+  secondaryHref?: string;
+}
+
+const {
+  title,
+  description,
+  primaryText,
+  primaryHref,
+  secondaryText,
+  secondaryHref,
+} = Astro.props;
+---
+
+<!-- Call to Action Section -->
+<section class="bg-base-100 px-4 py-16 border-t border-base-300">
+  <div class="mx-auto max-w-4xl text-center container">
+    <h2 class="mb-6 font-primary text-primary/90 text-3xl">
+      {title}
+    </h2>
+    <p class="mb-8 text-base-content/80 text-lg">
+      {description}
+    </p>
+    <div class="flex sm:flex-row flex-col justify-center gap-4">
+      <a href={primaryHref} class="btn btn-primary btn-lg">
+        {primaryText}
+      </a>
+      {secondaryText && secondaryHref && (
+        <a href={secondaryHref} class="btn-outline btn btn-lg">
+          {secondaryText}
+        </a>
+      )}
+    </div>
+  </div>
+</section>

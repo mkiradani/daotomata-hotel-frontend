@@ -3,6 +3,7 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import { Breadcrumb } from '../components/Breadcrumb.tsx';
 import { ContactForm } from '../components/ContactForm.tsx';
+import CTASection from '../components/CTASection.astro';
 import Layout from '../layouts/Layout.astro';
 import {
   getCurrentHotel,
@@ -145,11 +146,12 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
   </section>
 
   <!-- CTA Section -->
-  <section class="bg-primary py-16 text-primary-content">
-    <div class="mx-auto px-4 text-center container">
-      <h2 class="mb-4 text-primary-content/90 text-3xl">Ready to Book?</h2>
-      <p class="mb-8 text-xl">Don&apos;t wait - secure your perfect stay at {hotel.name}</p>
-      <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
-    </div>
-  </section>
+  <CTASection
+    title="Ready to Book?"
+    description={`Don't wait - secure your perfect stay at ${hotel.name}`}
+    primaryText="Book Now"
+    primaryHref="/book"
+    secondaryText="View Rooms"
+    secondaryHref="/accommodation"
+  />
 </Layout>

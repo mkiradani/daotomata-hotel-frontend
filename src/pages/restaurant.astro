@@ -4,6 +4,7 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 import Layout from '../layouts/Layout.astro';
 import { Breadcrumb } from '../components/Breadcrumb.tsx';
 import { DishCard } from '../components/DishCard.tsx';
+import CTASection from '../components/CTASection.astro';
 import {
   getCurrentHotel,
   getMediaUrl,
@@ -133,11 +134,12 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
   )}
 
   <!-- CTA Section -->
-  <section class="bg-primary py-16 text-primary-content">
-    <div class="mx-auto px-4 text-center container">
-      <h2 class="mb-4 text-primary-content/90 text-3xl">Make a Reservation</h2>
-      <p class="mb-8 text-xl">Book your table and enjoy exceptional dining at {hotel.name}</p>
-      <a href="/book" class="btn btn-secondary btn-lg">Book Now</a>
-    </div>
-  </section>
+  <CTASection
+    title="Make a Reservation"
+    description={`Book your table and enjoy exceptional dining at ${hotel.name}`}
+    primaryText="Book Now"
+    primaryHref="/book"
+    secondaryText="Contact Us"
+    secondaryHref="/contact"
+  />
 </Layout>
