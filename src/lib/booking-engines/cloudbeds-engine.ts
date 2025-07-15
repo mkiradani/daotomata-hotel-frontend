@@ -1048,7 +1048,7 @@ export class CloudbedsEngine implements IBookingEngine {
       childrenCount > 0 ? Array(childrenCount).fill({}) : [];
 
     const transformedData = {
-      propertyID: this.config.credentials.propertyId || '',
+      propertyID: this.config?.credentials?.propertyId || '',
       startDate: request.checkIn || '',
       endDate: request.checkOut || '',
       guestFirstName: request.guestInfo?.firstName || '',
