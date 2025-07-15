@@ -1135,7 +1135,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
                     {/* Payment Method Selector */}
                     <PaymentMethodSelector
-                      hotelDomain={hotelDomain}
+                      _hotelDomain={hotelDomain}
                       selectedMethod={selectedPaymentMethod.value}
                       selectedCardType={selectedCardType.value}
                       onMethodChange={handlePaymentMethodChange}
