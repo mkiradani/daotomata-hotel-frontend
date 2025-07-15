@@ -457,14 +457,7 @@ export async function getAIKnowledgeByHotelId(hotelId) {
  * Generate media URL for Directus files with access token
  */
 export function getMediaUrl(fileId, options = {}) {
-  console.log("🖼️ getMediaUrl called with:", {
-    fileId,
-    options,
-    type: typeof fileId,
-  });
-
   if (!fileId) {
-    console.log("🖼️ getMediaUrl: No fileId provided, returning null");
     return null;
   }
 
@@ -485,7 +478,6 @@ export function getMediaUrl(fileId, options = {}) {
   const queryString = params.join("&");
   const finalUrl = `${url}?${queryString}`;
 
-  console.log("🖼️ getMediaUrl generated with token:", finalUrl);
   return finalUrl;
 }
 
@@ -502,7 +494,6 @@ export function processMediaGallery(mediaGallery, fallbackTitle = 'Gallery Item'
     // Handle the structure from Directus: media_gallery.directus_files_id
     const fileData = media.directus_files_id;
     if (!fileData) {
-      console.warn('⚠️ processMediaGallery: Missing directus_files_id in media item:', media);
       return null;
     }
 
@@ -518,7 +509,7 @@ export function processMediaGallery(mediaGallery, fallbackTitle = 'Gallery Item'
       ? {} // Videos don't need resize options
       : { width: 1200, height: 675, quality: 95 }; // Images get optimized
 
-    console.log(`🎬 processMediaGallery: ${fileId} detected as ${isVideo ? 'video' : 'image'} (${mimeType})`);
+
 
     return {
       id: fileId,

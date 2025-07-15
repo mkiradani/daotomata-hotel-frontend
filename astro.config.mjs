@@ -32,6 +32,9 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    esbuild: {
+      jsx: 'preserve', // Preserve JSX for Qwik processing
+    },
     define: {
       // Make environment variables available to client-side code
       'import.meta.env.DIRECTUS_URL': JSON.stringify(

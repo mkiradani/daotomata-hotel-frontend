@@ -1,5 +1,18 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, useSignal, useVisibleTask$, useTask$ } from '@builder.io/qwik';
+
+interface RatePlan {
+  id: string;
+  name: string;
+  description: string;
+  rate_type: 'standard' | 'package' | 'promotional';
+  currency: string;
+  policies: {
+    cancellation_policy: string;
+    non_refundable: boolean;
+  };
+  inclusions: string[];
+}
 
 interface RoomCardProps {
   name: string;
@@ -32,6 +45,9 @@ export const RoomCard = component$<RoomCardProps>(
     const cardRef = useSignal<HTMLDivElement>();
     const isHovered = useSignal(false);
     const showBookingModal = useSignal(false);
+    const ratePlans = useSignal<RatePlan[]>([]);
+    const selectedRatePlan = useSignal<RatePlan | null>(null);
+    const isLoadingRatePlans = useSignal(false);
 
     const openBookingModal = $(() => {
       showBookingModal.value = true;
@@ -39,6 +55,27 @@ export const RoomCard = component$<RoomCardProps>(
 
     const closeBookingModal = $(() => {
       showBookingModal.value = false;
+    });
+
+    // Load rate plans when component mounts
+    useTask$(async () => {
+      try {
+        isLoadingRatePlans.value = true;
+        const response = await fetch('/api/booking/rate-plans');
+        const data = await response.json();
+
+        if (data.success && data.data?.data) {
+          ratePlans.value = data.data.data;
+          // Select first rate plan by default
+          if (data.data.data.length > 0) {
+            selectedRatePlan.value = data.data.data[0];
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load rate plans:', error);
+      } finally {
+        isLoadingRatePlans.value = false;
+      }
     });
 
     useVisibleTask$(() => {
@@ -216,28 +253,89 @@ export const RoomCard = component$<RoomCardProps>(
                 </div>
               </div>
 
-              {/* Booking form would go here */}
-              <div class="py-8 text-center">
-                <p class="mb-4 text-lg">Booking functionality coming soon!</p>
-                <p class="opacity-70 mb-6 text-sm">
-                  We're implementing the full booking system with Cloudbeds
-                  integration.
-                </p>
-                <div class="flex justify-center gap-2">
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    onClick$={closeBookingModal}
-                  >
-                    Contact Reception
-                  </button>
-                  <a
-                    href={`/rooms/${roomSlug}`}
-                    class="btn-outline btn"
-                  >
-                    View Room Details
-                  </a>
+              {/* Rate Plans Selection */}
+              {isLoadingRatePlans.value ? (
+                <div class="py-8 text-center">
+                  <div class="loading loading-spinner loading-lg"></div>
+                  <p class="opacity-70 mt-4 text-sm">Loading rate plans...</p>
                 </div>
+              ) : ratePlans.value.length > 0 ? (
+                <div class="mb-6">
+                  <h4 class="mb-4 font-medium text-lg">Select Rate Plan</h4>
+                  <div class="space-y-3">
+                    {ratePlans.value.map((plan, index) => (
+                      <div
+                        key={plan.id || index}
+                        class={`border-2 p-4 rounded-lg cursor-pointer transition-all ${
+                          selectedRatePlan.value?.id === plan.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-base-300 hover:border-primary/50'
+                        }`}
+                        onClick$={() => {
+                          selectedRatePlan.value = plan;
+                        }}
+                      >
+                        <div class="flex justify-between items-start">
+                          <div class="flex-1">
+                            <h5 class="font-medium text-base">
+                              {plan.name || `Rate Plan ${index + 1}`}
+                            </h5>
+                            {plan.description && (
+                              <p class="opacity-70 mt-1 text-sm">
+                                {plan.description}
+                              </p>
+                            )}
+                            <div class="flex flex-wrap gap-2 mt-2">
+                              {plan.inclusions?.map((inclusion, idx) => (
+                                <span
+                                  key={idx}
+                                  class="bg-base-200 px-2 py-1 rounded text-xs"
+                                >
+                                  {inclusion}
+                                </span>
+                              ))}
+                            </div>
+                            <p class="opacity-60 mt-2 text-xs">
+                              {plan.policies?.cancellation_policy}
+                            </p>
+                          </div>
+                          <div class="ml-4 text-right">
+                            <span class={`badge ${
+                              plan.rate_type === 'promotional' ? 'badge-secondary' :
+                              plan.rate_type === 'package' ? 'badge-accent' : 'badge-neutral'
+                            }`}>
+                              {plan.rate_type}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div class="py-8 text-center">
+                  <p class="mb-4 text-lg">Rate plans not available</p>
+                  <p class="opacity-70 mb-6 text-sm">
+                    Please contact reception for pricing information.
+                  </p>
+                </div>
+              )}
+
+              {/* Booking Actions */}
+              <div class="flex justify-center gap-2">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  onClick$={closeBookingModal}
+                >
+                  Contact Reception
+                </button>
+                <a
+                  href={`/rooms/${roomSlug}`}
+                  class="btn-outline btn"
+                >
+                  View Room Details
+                </a>
               </div>
 
               <div class="modal-action">

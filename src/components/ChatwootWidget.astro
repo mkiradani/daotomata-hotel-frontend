@@ -3,16 +3,8 @@
 import { getCurrentHotel } from '../lib/directus.js';
 import type { Hotel } from '../types/hotel.ts';
 
-console.log('🔍 ChatwootWidget - Loading for current hotel...');
-
 // Get current hotel data
 const hotel = await getCurrentHotel() as Hotel | null;
-
-console.log('🔍 ChatwootWidget - Directus query result:', {
-  found: !!hotel,
-  name: hotel?.name,
-  hasToken: !!hotel?.chatwoot_website_token,
-});
 
 // Use chatwoot_website_token from Directus hotels table
 const chatwootConfig = hotel?.chatwoot_website_token
@@ -22,35 +14,24 @@ const chatwootConfig = hotel?.chatwoot_website_token
     }
   : null;
 
+// Chatwoot configuration validation
 if (!hotel) {
-  console.error('❌ ChatwootWidget - Hotel not found');
+  // Hotel not found - widget will not load
 } else if (hotel && chatwootConfig) {
-  console.log(
-    '✅ ChatwootWidget loaded for:',
-    hotel.name,
-    'Token:',
-    `${chatwootConfig.website_token?.substring(0, 8)}...`
-  );
+  // Widget will load with valid configuration
 } else {
-  console.warn(
-    '⚠️ ChatwootWidget - Hotel found but no chatwoot_website_token configured for:',
-    hotel.name
-  );
+  // Hotel found but no token configured
 }
 ---
 
 {chatwootConfig?.website_token && hotel && (
   <script is:inline define:vars={{ websiteToken: chatwootConfig.website_token, hotelName: hotel.name }}>
-    console.log('🔧 CHATWOOT SCRIPT STARTING - Token:', websiteToken.substring(0, 8) + '...', 'Hotel:', hotelName);
-
-    // Store configuration globally for debugging
+    // Store configuration globally
     window.chatwootConfig = {
       websiteToken,
       hotelName,
       baseUrl: "https://chat.daotomata.io"
     };
-
-    console.log('🔧 CHATWOOT CONFIG STORED:', window.chatwootConfig);
 
     // Chatwoot Settings - Official Configuration
     window.chatwootSettings = {
@@ -62,8 +43,6 @@ if (!hotel) {
       launcherTitle: 'Chat con ' + hotelName
     };
 
-    console.log('🔧 CHATWOOT SETTINGS CONFIGURED:', window.chatwootSettings);
-
     // Official Chatwoot SDK Integration
     (function(d,t) {
       const BASE_URL = window.chatwootConfig.baseUrl;
@@ -72,17 +51,12 @@ if (!hotel) {
       g.defer=true;
       g.async=true;
 
-      console.log('🔧 Loading Chatwoot SDK from:', g.src);
-
       g.onerror = function() {
         console.error('❌ Failed to load Chatwoot SDK from:', g.src);
       };
 
       s.parentNode.insertBefore(g,s);
       g.onload=function(){
-        console.log('🔧 Initializing Chatwoot with token:', websiteToken.substring(0, 8) + '...');
-        console.log('🔧 Base URL:', BASE_URL);
-        console.log('🔧 Hotel:', hotelName);
 
         try {
           window.chatwootSDK.run({
@@ -97,29 +71,15 @@ if (!hotel) {
             // Show unread message count
             showUnreadCount: true
           });
-          console.log('✅ Chatwoot SDK initialized successfully');
         } catch (error) {
           console.error('❌ Error initializing Chatwoot SDK:', error);
         }
 
-        // Store SDK reference globally for debugging
+        // Store SDK reference globally
         window.chatwootSDKInstance = window.chatwootSDK;
 
         // Listen for Chatwoot ready event
         window.addEventListener('chatwoot:ready', function () {
-          console.log('✅ Chatwoot ready event fired for:', hotelName);
-          console.log('✅ Chatwoot widget should now be visible');
-
-          // Check if widget is actually visible
-          setTimeout(function() {
-            const widget = document.querySelector('#chatwoot_live_chat_widget');
-            if (widget) {
-              console.log('✅ Chatwoot widget element found in DOM');
-              console.log('Widget styles:', window.getComputedStyle(widget));
-            } else {
-              console.warn('⚠️ Chatwoot widget element not found in DOM');
-            }
-          }, 1000);
 
           // Setup real-time UI refresh for incoming messages
           setupRealTimeUIRefresh();
@@ -127,25 +87,21 @@ if (!hotel) {
 
         // Listen for new message events
         window.addEventListener('chatwoot:on-message', function (e) {
-          console.log('📨 New message event received:', e);
           // Force widget to open on new message
           setTimeout(function() {
             if (window.$chatwoot && window.$chatwoot.toggle) {
               window.$chatwoot.toggle('open');
-              console.log('🔄 Widget auto-opened on new message');
             }
           }, 100);
         });
 
         // Listen for unread count changes
         window.addEventListener('chatwoot:on-unread-message-count-changed', function (e) {
-          console.log('📊 Unread count changed:', e);
           if (e.detail && e.detail.unreadCount > 0) {
             // Force widget to open when there are unread messages
             setTimeout(function() {
               if (window.$chatwoot && window.$chatwoot.toggle) {
                 window.$chatwoot.toggle('open');
-                console.log('🔄 Widget auto-opened due to unread messages');
               }
             }, 100);
           }
@@ -158,7 +114,6 @@ if (!hotel) {
 
         // Function to setup real-time UI refresh
         function setupRealTimeUIRefresh() {
-          console.log('🔄 Setting up real-time UI refresh...');
 
           // Intercept WebSocket messages for real-time updates
           const originalWebSocket = window.WebSocket;

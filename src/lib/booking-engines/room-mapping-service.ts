@@ -91,18 +91,33 @@ export class RoomMappingService {
   static mapAvailabilityWithDirectusRooms(
     availability: RoomAvailability[],
     directusRooms: DirectusRoom[]
-  ): Array<RoomAvailability & { directusRoom?: DirectusRoom }> {
+  ): Array<RoomAvailability & { directusRoom?: DirectusRoom; mappingConfidence?: number }> {
     return availability.map(avail => {
-      const directusRoom = directusRooms.find(
-        room =>
-          RoomMappingService.normalizeRoomName(room.name) ===
-            RoomMappingService.normalizeRoomName(avail.roomType) ||
-          room.pms_room_id === avail.roomId
-      );
+      // Prioritize exact match by PMS ID
+      let directusRoom = directusRooms.find(room => room.pms_room_id === avail.roomId);
+      let confidence = 1.0;
+
+      // If no exact ID match, try to find the best match by name
+      if (!directusRoom) {
+        const bestMatch = RoomMappingService.findBestRoomMatch(avail.roomType, directusRooms);
+
+        if (bestMatch) {
+          directusRoom = bestMatch.room as DirectusRoom;
+          confidence = bestMatch.confidence;
+        }
+      }
+
+      // Log a warning if a room from Cloudbeds cannot be mapped
+      if (!directusRoom) {
+        console.warn(
+          `[RoomMappingService] Could not map Cloudbeds room: "${avail.roomType}" (ID: ${avail.roomId}). No matching Directus room found.`
+        );
+      }
 
       return {
         ...avail,
         directusRoom,
+        mappingConfidence: directusRoom ? confidence : 0,
       };
     });
   }
@@ -118,7 +133,7 @@ export class RoomMappingService {
       const directusRoom = directusRooms.find(
         room =>
           RoomMappingService.normalizeRoomName(room.name) ===
-            RoomMappingService.normalizeRoomName(rate.roomType) ||
+          RoomMappingService.normalizeRoomName(rate.roomType) ||
           room.pms_room_id === rate.roomId
       );
 

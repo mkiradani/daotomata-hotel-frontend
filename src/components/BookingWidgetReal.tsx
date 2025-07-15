@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useTask$ } from '@builder.io/qwik';
+import { $, component$, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik';
 
 interface BookingWidgetRealProps {
   hotelDomain: string;
@@ -61,14 +61,19 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     const children = useSignal('0');
     const rooms = useSignal('1');
 
-    // UI state
-    const isLoading = useSignal(false);
-    const error = useSignal('');
-    const availability = useSignal<RoomAvailability[]>([]);
-    const rates = useSignal<RoomRate[]>([]);
-    const showResults = useSignal(false);
-    const showBookingForm = useSignal(false);
-    const selectedRoom = useSignal<RoomAvailability | null>(null);
+    // UI state using useStore for better reactivity in Astro
+    const state = useStore({
+      isLoading: false,
+      error: '',
+      availability: [] as RoomAvailability[],
+      rates: [] as RoomRate[],
+      showResults: false,
+      showBookingForm: false,
+      selectedRoom: null as RoomAvailability | null,
+    });
+
+    // Force render trigger for Qwik reactivity
+    const renderTrigger = useSignal(0);
 
     // Booking form state
     const guestFirstName = useSignal('');
@@ -77,14 +82,24 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     const guestPhone = useSignal('');
     const specialRequests = useSignal('');
 
-    // Set default dates
+    // Set default dates (Cloudbeds requires startDate > today)
     useTask$(() => {
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
+      const dayAfter = new Date(today);
+      dayAfter.setDate(dayAfter.getDate() + 2);
 
-      checkIn.value = today.toISOString().split('T')[0];
-      checkOut.value = tomorrow.toISOString().split('T')[0];
+      checkIn.value = tomorrow.toISOString().split('T')[0];
+      checkOut.value = dayAfter.toISOString().split('T')[0];
+    });
+
+    // Force reactivity for state updates - useVisibleTask$ to ensure proper re-rendering
+    useVisibleTask$(({ track }) => {
+      // Track all relevant state changes to force re-render
+      track(() => state.showResults);
+      track(() => state.availability.length);
+      track(() => state.showBookingForm);
     });
 
     // Search for availability and rates
@@ -94,8 +109,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
         return;
       }
 
-      isLoading.value = true;
-      error.value = '';
+      state.isLoading = true;
+      state.error = '';
 
       try {
         // Call availability API
@@ -103,7 +118,6 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            hotelDomain,
             checkIn: checkIn.value,
             checkOut: checkOut.value,
             adults: parseInt(adults.value),
@@ -125,7 +139,6 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            hotelDomain,
             checkIn: checkIn.value,
             checkOut: checkOut.value,
             adults: parseInt(adults.value),
@@ -140,50 +153,53 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           throw new Error(ratesData.error || 'Failed to get rates');
         }
 
-        availability.value = availabilityData.availability || [];
-        rates.value = ratesData.rates || [];
-        showResults.value = true;
+        // Update store properties directly - useStore handles reactivity properly
+        state.availability = availabilityData.availability || [];
+        state.rates = ratesData.rates || [];
+        state.showResults = true;
+
+        // Force re-render by updating render trigger
+        renderTrigger.value++;
       } catch (err) {
-        error.value =
+        state.error =
           err instanceof Error ? err.message : 'Failed to search availability';
-        availability.value = [];
-        rates.value = [];
-        showResults.value = false;
+        state.availability = [];
+        state.rates = [];
+        state.showResults = false;
       } finally {
-        isLoading.value = false;
+        state.isLoading = false;
       }
     });
 
     // Book a room
     const selectRoom = $(async (room: RoomAvailability) => {
-      selectedRoom.value = room;
-      showBookingForm.value = true;
+      state.selectedRoom = room;
+      state.showBookingForm = true;
     });
 
     // Submit booking
     const submitBooking = $(async () => {
-      if (!selectedRoom.value) return;
+      if (!state.selectedRoom) return;
 
       if (!guestFirstName.value || !guestLastName.value || !guestEmail.value) {
-        error.value = 'Please fill in all required guest information';
+        state.error = 'Please fill in all required guest information';
         return;
       }
 
-      isLoading.value = true;
-      error.value = '';
+      state.isLoading = true;
+      state.error = '';
 
       try {
         const bookingResponse = await fetch('/api/booking/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            hotelDomain,
             checkIn: checkIn.value,
             checkOut: checkOut.value,
             adults: parseInt(adults.value),
             children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
             rooms: parseInt(rooms.value),
-            roomType: selectedRoom.value.roomType,
+            roomType: state.selectedRoom.roomType,
             guestInfo: {
               firstName: guestFirstName.value,
               lastName: guestLastName.value,
@@ -203,9 +219,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           );
 
           // Reset form
-          showBookingForm.value = false;
-          showResults.value = false;
-          selectedRoom.value = null;
+          state.showBookingForm = false;
+          state.showResults = false;
+          state.selectedRoom = null;
           guestFirstName.value = '';
           guestLastName.value = '';
           guestEmail.value = '';
@@ -219,10 +235,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           );
         }
       } catch (err) {
-        error.value =
+        state.error =
           err instanceof Error ? err.message : 'Failed to create booking';
       } finally {
-        isLoading.value = false;
+        state.isLoading = false;
       }
     });
 
@@ -242,7 +258,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     };
 
     const getRoomRate = (roomId: string) => {
-      return rates.value.find(rate => rate.roomId === roomId);
+      return state.rates.find(rate => rate.roomId === roomId);
     };
 
     return (
@@ -253,8 +269,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
               {compact ? 'Book Now' : `Book Your Stay at ${hotelName}`}
             </h3>
 
+
+
             {/* Search Form */}
-            {!showBookingForm.value && (
+            {!state.showBookingForm && (
               <div class="space-y-4">
                 <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
                   <div class="form-control">
@@ -337,18 +355,18 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 <div class="justify-center card-actions">
                   <button
                     type="button"
-                    class={`btn btn-primary ${isLoading.value ? 'loading' : ''}`}
+                    class={`btn btn-primary ${state.isLoading ? 'loading' : ''}`}
                     onClick$={searchAvailability}
-                    disabled={isLoading.value}
+                    disabled={state.isLoading}
                   >
-                    {isLoading.value ? 'Searching...' : 'Search Availability'}
+                    {state.isLoading ? 'Searching...' : 'Search Availability'}
                   </button>
                 </div>
               </div>
             )}
 
             {/* Error Message */}
-            {error.value && (
+            {state.error && (
               <div class="alert alert-error">
                 <svg
                   class="stroke-current w-6 h-6 shrink-0"
@@ -363,21 +381,28 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>{error.value}</span>
+                <span>{state.error}</span>
               </div>
             )}
 
             {/* Results */}
-            {showResults.value &&
-              availability.value.length > 0 &&
-              !showBookingForm.value && (
+            {(() => {
+              // Include render trigger to force reactivity
+              const trigger = renderTrigger.value;
+
+              const shouldRender = state.showResults &&
+                                 state.availability.length > 0 &&
+                                 !state.showBookingForm;
+
+              return shouldRender;
+            })() && (
                 <div class="mt-6">
                   <h4 class="mb-4 text-base-content/80 text-lg">
                     Available Rooms ({calculateNights()} nights)
                   </h4>
 
                   <div class="space-y-4">
-                    {availability.value.map(room => {
+                    {state.availability.map(room => {
                       const rate = getRoomRate(room.roomId);
                       const displayName =
                         room.directusRoom?.name || room.roomType;
@@ -438,7 +463,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                                   type="button"
                                   class="mt-2 btn btn-primary btn-sm"
                                   onClick$={() => selectRoom(room)}
-                                  disabled={isLoading.value}
+                                  disabled={state.isLoading}
                                 >
                                   Book Now
                                 </button>
@@ -452,9 +477,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 </div>
               )}
 
-            {showResults.value &&
-              availability.value.length === 0 &&
-              !showBookingForm.value && (
+            {state.showResults &&
+              state.availability.length === 0 &&
+              !state.showBookingForm && (
                 <div class="mt-6 alert alert-info">
                   <svg
                     class="stroke-current w-6 h-6 shrink-0"
@@ -477,7 +502,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
               )}
 
             {/* Booking Form */}
-            {showBookingForm.value && selectedRoom.value && (
+            {state.showBookingForm && state.selectedRoom && (
               <div class="mt-6">
                 <div class="flex justify-between items-center mb-4">
                   <h4 class="text-base-content/80 text-lg">Complete Your Booking</h4>
@@ -485,8 +510,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     type="button"
                     class="btn btn-sm btn-ghost"
                     onClick$={() => {
-                      showBookingForm.value = false;
-                      selectedRoom.value = null;
+                      state.showBookingForm = false;
+                      state.selectedRoom = null;
                     }}
                   >
                     ← Back to Results
@@ -497,8 +522,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 <div class="bg-primary/10 mb-6 card">
                   <div class="card-body">
                     <h5 class="font-semibold">
-                      {selectedRoom.value.directusRoom?.name ||
-                        selectedRoom.value.roomType}
+                      {state.selectedRoom.directusRoom?.name ||
+                        state.selectedRoom.roomType}
                     </h5>
                     <div class="gap-4 grid grid-cols-2 text-sm">
                       <div>
@@ -526,13 +551,13 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                           <div class="text-primary/90 text-xl">
                             {(() => {
                               const rate = getRoomRate(
-                                selectedRoom.value?.roomId
+                                state.selectedRoom?.roomId
                               );
                               return rate
                                 ? formatPrice(rate.totalPrice, rate.currency)
                                 : formatPrice(
-                                    selectedRoom.value?.price,
-                                    selectedRoom.value?.currency
+                                    state.selectedRoom?.price,
+                                    state.selectedRoom?.currency
                                   );
                             })()}
                           </div>
@@ -623,25 +648,25 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                       type="button"
                       class="btn-outline btn"
                       onClick$={() => {
-                        showBookingForm.value = false;
-                        selectedRoom.value = null;
+                        state.showBookingForm = false;
+                        state.selectedRoom = null;
                       }}
-                      disabled={isLoading.value}
+                      disabled={state.isLoading}
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
-                      class={`btn btn-primary ${isLoading.value ? 'loading' : ''}`}
+                      class={`btn btn-primary ${state.isLoading ? 'loading' : ''}`}
                       onClick$={submitBooking}
                       disabled={
-                        isLoading.value ||
+                        state.isLoading ||
                         !guestFirstName.value ||
                         !guestLastName.value ||
                         !guestEmail.value
                       }
                     >
-                      {isLoading.value ? 'Processing...' : 'Confirm Booking'}
+                      {state.isLoading ? 'Processing...' : 'Confirm Booking'}
                     </button>
                   </div>
                 </div>

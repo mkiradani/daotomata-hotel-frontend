@@ -48,19 +48,10 @@ export const Footer = component$<FooterProps>(
 
     // Helper function to generate URLs based on routing type
     const generateUrl = (path: string) => {
-      // Debug: Log the isSubdomain value
-      console.log(
-        `🔍 Footer generateUrl: isSubdomain=${isSubdomain}, path=${path}, hotelSlug=${hotelSlug}`
-      );
-
       if (isSubdomain) {
-        const result = path || '/'; // For subdomain routing: /accommodation or / for home
-        console.log(`✅ Subdomain routing: ${result}`);
-        return result;
+        return path || '/'; // For subdomain routing: /accommodation or / for home
       } else {
-        const result = `/${hotelSlug}${path}`; // For path-based routing: /maisondemo/accommodation
-        console.log(`✅ Path-based routing: ${result}`);
-        return result;
+        return `/${hotelSlug}${path}`; // For path-based routing: /maisondemo/accommodation
       }
     };
 

@@ -87,13 +87,11 @@ try {
       ...fontsConfig.hotels[hotel.name].fonts,
       weights: fontsConfig.hotels[hotel.name].weights,
     };
-    console.log(`🔤 Loading dynamic fonts for ${hotel.name}:`, googleFontsURL);
-    console.log(`🔤 Font configuration:`, hotelFonts);
   } else {
-    console.log('🔤 Using fallback fonts - hotel not found in fonts config');
+    // Using fallback fonts - hotel not found in fonts config
   }
 } catch (error) {
-  console.warn('⚠️ Could not load fonts config, using fallback fonts:', error.message);
+  // Could not load fonts config, using fallback fonts
 }
 
 // Load social profiles and hotel info for the hotel
@@ -128,7 +126,6 @@ if (hotel?.id) {
     <!-- IMMEDIATE THEME ENFORCEMENT -->
     <script define:vars={{ themeName }}>
       // Execute immediately before any other scripts
-      console.log('🎨 IMMEDIATE: Setting light theme:', themeName);
       document.documentElement.setAttribute('data-theme', themeName);
       document.documentElement.style.colorScheme = 'light';
       // Let CSS custom properties handle colors instead of hardcoding
@@ -167,7 +164,6 @@ if (hotel?.id) {
         const originalMatchMedia = window.matchMedia;
         window.matchMedia = function(query) {
           if (query.includes('prefers-color-scheme: dark')) {
-            console.log('🎨 Blocking dark mode query:', query);
             return { matches: false, media: query, onchange: null, addListener: function() {}, removeListener: function() {} };
           }
           return originalMatchMedia.call(this, query);
