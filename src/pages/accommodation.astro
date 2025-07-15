@@ -8,15 +8,18 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../lib/directus.js';
+import type { Hotel, Room } from '../types/hotel.ts';
 
 console.log(`🏗️ [BUILD] Pre-rendering accommodation page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
+
+const hotel = hotelData as Hotel;
 
 console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
 
@@ -25,10 +28,11 @@ const hotelSlug = hotel.domain?.split('.')[0] || 'default';
 
 // Process rooms data
 const rooms = hotel.rooms || [];
-const featuredRooms = rooms.filter((room: any) => room.is_featured);
-const regularRooms = rooms.filter((room: any) => !room.is_featured);
+const featuredRooms = rooms.filter((room: Room) => room.is_featured);
 
-console.log(`✅ Accommodation processed: ${rooms.length} rooms (${featuredRooms.length} featured)`);
+console.log(
+  `✅ Accommodation processed: ${rooms.length} rooms (${featuredRooms.length} featured)`
+);
 ---
 
 <CollectionPageLayout
@@ -43,8 +47,8 @@ console.log(`✅ Accommodation processed: ${rooms.length} rooms (${featuredRooms
   items={rooms}
   itemType="rooms"
   breadcrumbItems={[
-    { label: hotel.name, href: "/" },
-    { label: "Accommodation" }
+    { label: hotel.name, href: '/' },
+    { label: 'Accommodation' },
   ]}
   ctaTitle="Ready to Book?"
   ctaDescription={`Reserve your perfect room at ${hotel.name}`}
@@ -54,7 +58,8 @@ console.log(`✅ Accommodation processed: ${rooms.length} rooms (${featuredRooms
   ctaSecondaryHref="/contact"
   gridId="rooms-grid"
 >
-  {rooms.map((room: any, index: number) => {
+  {
+    rooms.map((room: Room, index: number) => {
       const imageUrl = room.main_photo
         ? getMediaUrl(room.main_photo.id, {
             width: 800,
@@ -78,17 +83,16 @@ console.log(`✅ Accommodation processed: ${rooms.length} rooms (${featuredRooms
           name={room.name}
           description={room.description || ''}
           bedConfiguration={room.bed_configuration}
-          sizeSqm={room.size_sqm}
+          sizeSqm={room.size_sqm?.toString()}
           basePrice={undefined}
           defaultCurrency={hotel.default_currency || 'EUR'}
           imageUrl={imageUrl}
           videoUrl={videoUrl}
           isLast={index === rooms.length - 1}
           isOdd={rooms.length % 2 !== 0}
-          hotelSlug={hotelSlug}
           roomSlug={roomSlug}
-          isSubdomain={true}
         />
       );
-    })}
+    })
+  }
 </CollectionPageLayout>

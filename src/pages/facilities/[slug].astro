@@ -3,19 +3,28 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import { DetailPageLayout } from '../../components/DetailPageLayout.tsx';
 import Layout from '../../layouts/Layout.astro';
-import { getCurrentHotel, getMediaUrl, processMediaGallery } from '../../lib/directus.js';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  processMediaGallery,
+} from '../../lib/directus.js';
+import type { Hotel, Facility } from '../../types/hotel.ts';
 
 // Generate static paths for all facilities
 export async function getStaticPaths() {
-  const hotel: any = await getCurrentHotel();
+  const hotelData = await getCurrentHotel();
 
-  if (!hotel || !hotel.facilities) {
+  if (!hotelData || !hotelData.facilities) {
     return [];
   }
 
-  return hotel.facilities.map((facility: any) => ({
+  const hotel = hotelData as Hotel;
+
+  return hotel.facilities.map((facility: Facility) => ({
     params: {
-      slug: facility.name?.toLowerCase().replace(/\s+/g, '-') || facility.id?.toString()
+      slug:
+        facility.name?.toLowerCase().replace(/\s+/g, '-') ||
+        facility.id?.toString(),
     },
   }));
 }
@@ -23,21 +32,26 @@ export async function getStaticPaths() {
 console.log(`🏗️ [BUILD] Pre-rendering facility detail page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData2 = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData2) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
 
+const hotel2 = hotelData2 as Hotel;
+
 const { slug } = Astro.params;
 
-console.log(`✅ [BUILD] Hotel loaded: ${hotel.name}, looking for facility: ${slug}`);
+console.log(
+  `✅ [BUILD] Hotel loaded: ${hotel2.name}, looking for facility: ${slug}`
+);
 
 // Find the specific facility
-const facility = hotel.facilities?.find((f: any) => 
-  f.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
-  f.slug === slug ||
-  f.id?.toString() === slug
+const facility = hotel2.facilities?.find(
+  (f: Facility) =>
+    f.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
+    f.slug === slug ||
+    f.id?.toString() === slug
 );
 
 if (!facility) {
@@ -48,7 +62,7 @@ if (!facility) {
 console.log(`✅ [BUILD] Facility found: ${facility.name} (ID: ${facility.id})`);
 
 // Simple theme name extraction
-const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+const hotelSlug = hotel2.domain?.split('.')[0] || 'default';
 
 // Process facility media
 const mainImageUrl = facility.main_photo
@@ -64,33 +78,38 @@ const mainVideoUrl = facility.main_video
   : '';
 
 // Process gallery images with automatic type detection
-const galleryImages = processMediaGallery(facility.media_gallery, facility.name) as Array<{
+const galleryImages = processMediaGallery(
+  facility.media_gallery,
+  facility.name
+) as Array<{
   id: string;
   url: string;
   title?: string;
-  type?: "image" | "video";
+  type?: 'image' | 'video';
 }>;
 
 // Process facility metadata
 const metadata = {
   capacity: facility.capacity,
   operatingHours: facility.operating_hours,
-  bookingRequired: facility.booking_requiered, // Note: typo in schema
-  price: facility.price,
-  amenities: facility.amenities,
-  ageRestriction: facility.age_restriction,
-  isAccessible: facility.is_accessible,
+  facilityBookingRequired: facility.booking_requiered, // Note: typo in schema
+  pricePerHour: facility.price?.toString(),
+  facilityAmenities: facility.amenities,
+  facilityAgeRestriction: facility.age_restriction,
+  facilityIsAccessible: facility.is_accessible,
+  facilityCategory: facility.facility_type,
 };
 
-const pageTitle = `${facility.name} - ${hotel.name}`;
-const pageDescription = facility.description || `Discover ${facility.name} at ${hotel.name}`;
+const pageTitle = `${facility.name} - ${hotel2.name}`;
+const pageDescription =
+  facility.description || `Discover ${facility.name} at ${hotel2.name}`;
 ---
 
 <Layout
   title={pageTitle}
   description={pageDescription}
-  hotel={hotel}
-  hotelName={hotel.name}
+  hotel={hotel2}
+  hotelName={hotel2.name}
 >
   <DetailPageLayout
     title={facility.name}
@@ -100,13 +119,13 @@ const pageDescription = facility.description || `Discover ${facility.name} at ${
     videoUrl={mainVideoUrl}
     galleryImages={galleryImages}
     metadata={metadata}
-    hotelName={hotel.name}
+    hotelName={hotel2.name}
     hotelSlug={hotelSlug}
-    defaultCurrency={hotel.default_currency || 'EUR'}
+    defaultCurrency={hotel2.default_currency || 'EUR'}
     breadcrumbItems={[
       { label: 'Home', href: '/' },
       { label: 'Facilities', href: '/facilities' },
-      { label: facility.name, href: `/facilities/${slug}` }
+      { label: facility.name, href: `/facilities/${slug}` },
     ]}
   />
 </Layout>

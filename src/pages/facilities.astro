@@ -8,15 +8,18 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../lib/directus.js';
+import type { Hotel, Facility } from '../types/hotel.ts';
 
 console.log(`🏗️ [BUILD] Pre-rendering facilities page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
+
+const hotel = hotelData as Hotel;
 
 console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
 
@@ -40,10 +43,7 @@ console.log(`✅ Facilities processed: ${facilities.length} facilities`);
   isSubdomain={true}
   items={facilities}
   itemType="facilities"
-  breadcrumbItems={[
-    { label: hotel.name, href: "/" },
-    { label: "Facilities" }
-  ]}
+  breadcrumbItems={[{ label: hotel.name, href: '/' }, { label: 'Facilities' }]}
   ctaTitle="Experience Our Facilities"
   ctaDescription={`Book your stay and enjoy all that ${hotel.name} has to offer`}
   ctaPrimaryText="Book Now"
@@ -52,16 +52,26 @@ console.log(`✅ Facilities processed: ${facilities.length} facilities`);
   ctaSecondaryHref="/contact"
   gridId="facilities-grid"
 >
-  {facilities.map((facility: any, index: number) => {
+  {
+    facilities.map((facility: Facility, index: number) => {
       const imageUrl = facility.main_photo
-        ? getMediaUrl(typeof facility.main_photo === 'string' ? facility.main_photo : facility.main_photo.id, {
-            width: 800,
-            height: 450,
-            quality: 95,
-          }) || ''
+        ? getMediaUrl(
+            typeof facility.main_photo === 'string'
+              ? facility.main_photo
+              : facility.main_photo.id,
+            {
+              width: 800,
+              height: 450,
+              quality: 95,
+            }
+          ) || ''
         : '';
       const videoUrl = facility.main_video
-        ? getMediaUrl(typeof facility.main_video === 'string' ? facility.main_video : facility.main_video.id) || undefined
+        ? getMediaUrl(
+            typeof facility.main_video === 'string'
+              ? facility.main_video
+              : facility.main_video.id
+          ) || undefined
         : undefined;
 
       // Create slug from facility name
@@ -87,5 +97,6 @@ console.log(`✅ Facilities processed: ${facilities.length} facilities`);
           isSubdomain={true}
         />
       );
-    })}
+    })
+  }
 </CollectionPageLayout>

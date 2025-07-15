@@ -8,15 +8,18 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../lib/directus.js';
+import type { Hotel, Activity } from '../types/hotel.ts';
 
 console.log(`🏗️ [BUILD] Pre-rendering experiences page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
+
+const hotel = hotelData as Hotel;
 
 console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
 
@@ -40,10 +43,7 @@ console.log(`✅ Experiences processed: ${activities.length} activities`);
   isSubdomain={true}
   items={activities}
   itemType="experiences"
-  breadcrumbItems={[
-    { label: hotel.name, href: "/" },
-    { label: "Experiences" }
-  ]}
+  breadcrumbItems={[{ label: hotel.name, href: '/' }, { label: 'Experiences' }]}
   ctaTitle="Ready for Adventure?"
   ctaDescription={`Book your stay and explore amazing experiences at ${hotel.name}`}
   ctaPrimaryText="Book Now"
@@ -52,16 +52,26 @@ console.log(`✅ Experiences processed: ${activities.length} activities`);
   ctaSecondaryHref="/contact"
   gridId="experiences-grid"
 >
-  {activities.map((activity: any, index: number) => {
+  {
+    activities.map((activity: Activity, index: number) => {
       const imageUrl = activity.main_photo
-        ? getMediaUrl(typeof activity.main_photo === 'string' ? activity.main_photo : activity.main_photo.id, {
-            width: 800,
-            height: 450,
-            quality: 95,
-          }) || ''
+        ? getMediaUrl(
+            typeof activity.main_photo === 'string'
+              ? activity.main_photo
+              : activity.main_photo.id,
+            {
+              width: 800,
+              height: 450,
+              quality: 95,
+            }
+          ) || ''
         : '';
       const videoUrl = activity.main_video
-        ? getMediaUrl(typeof activity.main_video === 'string' ? activity.main_video : activity.main_video.id) || undefined
+        ? getMediaUrl(
+            typeof activity.main_video === 'string'
+              ? activity.main_video
+              : activity.main_video.id
+          ) || undefined
         : undefined;
 
       // Create slug from activity name
@@ -76,7 +86,11 @@ console.log(`✅ Experiences processed: ${activities.length} activities`);
           name={activity.name}
           description={activity.description || ''}
           maxParticipants={activity.max_participants}
-          ageRestriction={activity.age_restriction}
+          ageRestriction={
+            activity.age_restriction
+              ? parseInt(activity.age_restriction)
+              : undefined
+          }
           equipmentProvided={activity.equipment_provided}
           operatingHours={activity.operating_hours}
           defaultCurrency={hotel.default_currency || 'EUR'}
@@ -89,5 +103,6 @@ console.log(`✅ Experiences processed: ${activities.length} activities`);
           isSubdomain={true}
         />
       );
-    })}
+    })
+  }
 </CollectionPageLayout>

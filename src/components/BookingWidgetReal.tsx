@@ -1,5 +1,12 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik';
+import {
+  $,
+  component$,
+  useSignal,
+  useStore,
+  useTask$,
+  useVisibleTask$,
+} from '@builder.io/qwik';
 
 interface BookingWidgetRealProps {
   hotelDomain: string;
@@ -48,7 +55,7 @@ interface RoomRate {
 
 export const BookingWidgetReal = component$<BookingWidgetRealProps>(
   ({
-    hotelDomain,
+    hotelDomain: _hotelDomain,
     hotelName,
     defaultCurrency: _defaultCurrency,
     className = '',
@@ -121,7 +128,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             checkIn: checkIn.value,
             checkOut: checkOut.value,
             adults: parseInt(adults.value),
-            children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+            children:
+              parseInt(children.value) > 0
+                ? parseInt(children.value)
+                : undefined,
             rooms: parseInt(rooms.value),
           }),
         });
@@ -142,7 +152,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             checkIn: checkIn.value,
             checkOut: checkOut.value,
             adults: parseInt(adults.value),
-            children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+            children:
+              parseInt(children.value) > 0
+                ? parseInt(children.value)
+                : undefined,
             rooms: parseInt(rooms.value),
           }),
         });
@@ -197,7 +210,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             checkIn: checkIn.value,
             checkOut: checkOut.value,
             adults: parseInt(adults.value),
-            children: parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+            children:
+              parseInt(children.value) > 0
+                ? parseInt(children.value)
+                : undefined,
             rooms: parseInt(rooms.value),
             roomType: state.selectedRoom.roomType,
             guestInfo: {
@@ -258,7 +274,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     };
 
     const getRoomRate = (roomId: string) => {
-      return state.rates.find(rate => rate.roomId === roomId);
+      return state.rates.find((rate) => rate.roomId === roomId);
     };
 
     return (
@@ -268,8 +284,6 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             <h3 class="text-primary card-title">
               {compact ? 'Book Now' : `Book Your Stay at ${hotelName}`}
             </h3>
-
-
 
             {/* Search Form */}
             {!state.showBookingForm && (
@@ -388,94 +402,89 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {/* Results */}
             {(() => {
               // Include render trigger to force reactivity
-              const trigger = renderTrigger.value;
+              const _trigger = renderTrigger.value;
 
-              const shouldRender = state.showResults &&
-                                 state.availability.length > 0 &&
-                                 !state.showBookingForm;
+              const shouldRender =
+                state.showResults &&
+                state.availability.length > 0 &&
+                !state.showBookingForm;
 
               return shouldRender;
             })() && (
-                <div class="mt-6">
-                  <h4 class="mb-4 text-base-content/80 text-lg">
-                    Available Rooms ({calculateNights()} nights)
-                  </h4>
+              <div class="mt-6">
+                <h4 class="mb-4 text-base-content/80 text-lg">
+                  Available Rooms ({calculateNights()} nights)
+                </h4>
 
-                  <div class="space-y-4">
-                    {state.availability.map(room => {
-                      const rate = getRoomRate(room.roomId);
-                      const displayName =
-                        room.directusRoom?.name || room.roomType;
-                      const description = room.directusRoom?.description;
+                <div class="space-y-4">
+                  {state.availability.map((room) => {
+                    const rate = getRoomRate(room.roomId);
+                    const displayName =
+                      room.directusRoom?.name || room.roomType;
+                    const description = room.directusRoom?.description;
 
-                      return (
-                        <div key={room.roomId} class="bg-base-200 card">
-                          <div class="card-body">
-                            <div class="flex justify-between items-start">
-                              <div class="flex-1">
-                                <h5 class="text-base card-title">
-                                  {displayName}
-                                </h5>
-                                {description && (
-                                  <p class="opacity-70 mb-2 text-sm">
-                                    {description}
-                                  </p>
-                                )}
-                                <p class="opacity-70 text-sm">
-                                  Max occupancy: {room.maxOccupancy} guests
+                    return (
+                      <div key={room.roomId} class="bg-base-200 card">
+                        <div class="card-body">
+                          <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                              <h5 class="text-base card-title">
+                                {displayName}
+                              </h5>
+                              {description && (
+                                <p class="opacity-70 mb-2 text-sm">
+                                  {description}
                                 </p>
-                                {room.directusRoom?.size_sqm && (
-                                  <p class="opacity-70 text-sm">
-                                    Size: {room.directusRoom.size_sqm} m²
+                              )}
+                              <p class="opacity-70 text-sm">
+                                Max occupancy: {room.maxOccupancy} guests
+                              </p>
+                              {room.directusRoom?.size_sqm && (
+                                <p class="opacity-70 text-sm">
+                                  Size: {room.directusRoom.size_sqm} m²
+                                </p>
+                              )}
+                              {rate && (
+                                <div class="mt-2">
+                                  <p class="text-sm">
+                                    Base price:{' '}
+                                    {formatPrice(rate.basePrice, rate.currency)}{' '}
+                                    per night
                                   </p>
-                                )}
-                                {rate && (
-                                  <div class="mt-2">
+                                  {rate.taxes && rate.taxes > 0 && (
                                     <p class="text-sm">
-                                      Base price:{' '}
-                                      {formatPrice(
-                                        rate.basePrice,
-                                        rate.currency
-                                      )}{' '}
-                                      per night
+                                      Taxes:{' '}
+                                      {formatPrice(rate.taxes, rate.currency)}
                                     </p>
-                                    {rate.taxes && rate.taxes > 0 && (
-                                      <p class="text-sm">
-                                        Taxes:{' '}
-                                        {formatPrice(rate.taxes, rate.currency)}
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-
-                              <div class="text-right">
-                                <div class="text-primary/90 text-2xl">
-                                  {rate
-                                    ? formatPrice(
-                                        rate.totalPrice,
-                                        rate.currency
-                                      )
-                                    : formatPrice(room.price, room.currency)}
+                                  )}
                                 </div>
-                                <p class="opacity-70 text-sm">per night</p>
-                                <button
-                                  type="button"
-                                  class="mt-2 btn btn-primary btn-sm"
-                                  onClick$={() => selectRoom(room)}
-                                  disabled={state.isLoading}
-                                >
-                                  Book Now
-                                </button>
+                              )}
+                            </div>
+
+                            <div class="text-right">
+                              <div class="text-primary/90 text-2xl">
+                                {rate
+                                  ? formatPrice(rate.totalPrice, rate.currency)
+                                  : formatPrice(room.price, room.currency)}
                               </div>
+                              <p class="opacity-70 text-sm">per night</p>
+                              <button
+                                type="button"
+                                class="mt-2 btn btn-primary btn-sm"
+                                onClick$={() => selectRoom(room)}
+                                disabled={state.isLoading}
+                              >
+                                Book Now
+                              </button>
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
+            )}
 
             {state.showResults &&
               state.availability.length === 0 &&
@@ -505,7 +514,9 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {state.showBookingForm && state.selectedRoom && (
               <div class="mt-6">
                 <div class="flex justify-between items-center mb-4">
-                  <h4 class="text-base-content/80 text-lg">Complete Your Booking</h4>
+                  <h4 class="text-base-content/80 text-lg">
+                    Complete Your Booking
+                  </h4>
                   <button
                     type="button"
                     class="btn btn-sm btn-ghost"

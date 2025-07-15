@@ -9,77 +9,90 @@ import type { Hotel } from '../../../types/hotel.js';
 
 export const GET: APIRoute = async () => {
   try {
-    console.log("🔍 [DEBUG] Starting Cloudbeds rate plans debug...");
+    console.log('🔍 [DEBUG] Starting Cloudbeds rate plans debug...');
 
     // Get current hotel from Directus (single-tenant)
-    const hotel = await getCurrentHotel() as Hotel | null;
-    
+    const hotel = (await getCurrentHotel()) as Hotel | null;
+
     if (!hotel) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: "Hotel not found in Directus",
-        timestamp: new Date().toISOString()
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Hotel not found in Directus',
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     console.log(`🔍 [DEBUG] Found hotel: ${hotel.name} (ID: ${hotel.id})`);
 
     // Check if hotel has Cloudbeds configuration
     if (hotel.pms_type !== 'cloudbeds') {
-      return new Response(JSON.stringify({
-        success: false,
-        error: "Hotel is not configured for Cloudbeds",
-        hotel: {
-          id: hotel.id,
-          name: hotel.name,
-          pms_type: hotel.pms_type
-        },
-        timestamp: new Date().toISOString()
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Hotel is not configured for Cloudbeds',
+          hotel: {
+            id: hotel.id,
+            name: hotel.name,
+            pms_type: hotel.pms_type,
+          },
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Use the factory to create and initialize the engine with hotel data
     const factory = getBookingEngineFactory();
     const engine = await factory.createFromHotelConfig(hotel);
 
-    console.log("🔍 [DEBUG] Engine initialized, testing rate plans...");
-    
-    // Test rate plans endpoint
-    const ratePlans = await (engine as any).getRatePlans();
-    
-    return new Response(JSON.stringify({
-      success: true,
-      message: "Cloudbeds rate plans debug completed",
-      hotel: {
-        id: hotel.id,
-        name: hotel.name,
-        pms_type: hotel.pms_type
-      },
-      rate_plans: ratePlans,
-      rate_plans_count: ratePlans.data?.length || 0,
-      timestamp: new Date().toISOString()
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.log('🔍 [DEBUG] Engine initialized, testing rate plans...');
 
+    // Test rate plans endpoint
+    const ratePlans = await (
+      engine as Record<string, unknown> & { getRatePlans(): Promise<unknown> }
+    ).getRatePlans();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'Cloudbeds rate plans debug completed',
+        hotel: {
+          id: hotel.id,
+          name: hotel.name,
+          pms_type: hotel.pms_type,
+        },
+        rate_plans: ratePlans,
+        rate_plans_count: ratePlans.data?.length || 0,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("❌ [DEBUG] Cloudbeds rate plans debug failed:", error);
-    
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      details: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString()
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('❌ [DEBUG] Cloudbeds rate plans debug failed:', error);
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 };

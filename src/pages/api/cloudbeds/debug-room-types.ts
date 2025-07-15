@@ -13,7 +13,7 @@ export const GET: APIRoute = async () => {
     console.log('🔍 [DEBUG] Starting room types debug...');
 
     // Get current hotel data (single-tenant mode)
-    const hotel = await getCurrentHotel() as Hotel | null;
+    const hotel = (await getCurrentHotel()) as Hotel | null;
     if (!hotel) {
       return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
@@ -32,25 +32,29 @@ export const GET: APIRoute = async () => {
     if (!engine || !('debugCloudbedsRoomTypes' in engine)) {
       return new Response(
         JSON.stringify({
-          error: "Cloudbeds engine not available or debug method not found",
+          error: 'Cloudbeds engine not available or debug method not found',
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
-        },
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
     }
 
     console.log('🔍 [DEBUG] Calling debugCloudbedsRoomTypes...');
 
     // Debug Cloudbeds room types
-    const roomTypesData = await (engine as any).debugCloudbedsRoomTypes();
+    const roomTypesData = await (
+      engine as Record<string, unknown> & {
+        debugCloudbedsRoomTypes(): Promise<unknown>;
+      }
+    ).debugCloudbedsRoomTypes();
 
     console.log('🔍 [DEBUG] Room types data received:', roomTypesData);
 
     // Also test availability for comparison
     console.log('🔍 [DEBUG] Testing availability for comparison...');
-    
+
     const availabilityQuery = {
       checkIn: '2025-07-20',
       checkOut: '2025-07-21',
@@ -83,8 +87,8 @@ export const GET: APIRoute = async () => {
         analysis: {
           totalRoomTypesConfigured: roomTypesData?.data?.length || 0,
           availableRoomTypes: availability.length,
-          message: "Compare room types configured vs available for booking"
-        }
+          message: 'Compare room types configured vs available for booking',
+        },
       }),
       {
         status: 200,

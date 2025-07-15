@@ -10,26 +10,28 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../lib/directus.js';
+import type { Hotel, Dish } from '../types/hotel.ts';
 
 console.log(`🏗️ [BUILD] Pre-rendering restaurant page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
 
-console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+const hotel = hotelData as Hotel;
 
-// Simple theme name extraction
-const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
 
 // Process restaurant and dishes data
 const restaurant = hotel.restaurant;
 const dishes = hotel.dishes || [];
 
-console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not available'}, ${dishes.length} dishes`);
+console.log(
+  `✅ Restaurant processed: ${restaurant ? 'Available' : 'Not available'}, ${dishes.length} dishes`
+);
 ---
 
 <Layout
@@ -39,86 +41,108 @@ console.log(`✅ Restaurant processed: ${restaurant ? 'Available' : 'Not availab
   hotelName={hotel.name}
 >
   <!-- Breadcrumb -->
-  <Breadcrumb 
+  <Breadcrumb
     items={[
       { label: 'Home', href: '/' },
-      { label: 'Restaurant', href: '/restaurant' }
+      { label: 'Restaurant', href: '/restaurant' },
     ]}
   />
 
   <!-- Restaurant Hero -->
-  {restaurant && (
-    <section class="bg-base-200 py-16">
-      <div class="mx-auto px-4 container">
-        <div class="items-center gap-12 grid grid-cols-1 lg:grid-cols-2">
-          <div>
-            <h1 class="mb-6 text-base-content/80 text-4xl">{restaurant.name}</h1>
-            <p class="mb-8 text-base-content/80 text-lg">
-              {restaurant.description}
-            </p>
-          </div>
-          {restaurant.main_photo && (
-            <div class="rounded-lg aspect-video overflow-hidden">
-              <img
-                src={getMediaUrl(typeof restaurant.main_photo === 'string' ? restaurant.main_photo : restaurant.main_photo.id, { width: 800, height: 450 }) || ''}
-                alt={restaurant.name}
-                class="w-full h-full object-cover"
-              />
+  {
+    restaurant && (
+      <section class="bg-base-200 py-16">
+        <div class="mx-auto px-4 container">
+          <div class="items-center gap-12 grid grid-cols-1 lg:grid-cols-2">
+            <div>
+              <h1 class="mb-6 text-base-content/80 text-4xl">
+                {restaurant.name}
+              </h1>
+              <p class="mb-8 text-base-content/80 text-lg">
+                {restaurant.description}
+              </p>
             </div>
-          )}
+            {restaurant.main_photo && (
+              <div class="rounded-lg aspect-video overflow-hidden">
+                <img
+                  src={
+                    getMediaUrl(
+                      typeof restaurant.main_photo === 'string'
+                        ? restaurant.main_photo
+                        : restaurant.main_photo.id,
+                      { width: 800, height: 450 }
+                    ) || ''
+                  }
+                  alt={restaurant.name}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Default Header if no restaurant -->
-  {!restaurant && (
-    <section class="bg-base-200 py-16">
-      <div class="mx-auto px-4 text-center container">
-        <h1 class="mb-4 text-base-content/80 text-4xl">Our Restaurant</h1>
-        <p class="mx-auto max-w-2xl text-base-content/80 text-xl">
-          Experience exceptional dining at {hotel.name}
-        </p>
-      </div>
-    </section>
-  )}
+  {
+    !restaurant && (
+      <section class="bg-base-200 py-16">
+        <div class="mx-auto px-4 text-center container">
+          <h1 class="mb-4 text-base-content/80 text-4xl">Our Restaurant</h1>
+          <p class="mx-auto max-w-2xl text-base-content/80 text-xl">
+            Experience exceptional dining at {hotel.name}
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   <!-- Menu/Dishes Section -->
-  {dishes.length > 0 && (
-    <section class="bg-base-100 py-16">
-      <div class="mx-auto px-4 container">
-        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Our Menu</h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {dishes.map((dish: any, index: number) => {
-            const imageUrl = dish.main_photo
-              ? getMediaUrl(typeof dish.main_photo === 'string' ? dish.main_photo : dish.main_photo.id, {
-                  width: 800,
-                  height: 450,
-                  quality: 95,
-                }) || ''
-              : '';
+  {
+    dishes.length > 0 && (
+      <section class="bg-base-100 py-16">
+        <div class="mx-auto px-4 container">
+          <h2 class="mb-12 text-base-content/80 text-3xl text-center">
+            Our Menu
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {dishes.map((dish: Dish, index: number) => {
+              const imageUrl = dish.main_photo
+                ? getMediaUrl(
+                    typeof dish.main_photo === 'string'
+                      ? dish.main_photo
+                      : dish.main_photo.id,
+                    {
+                      width: 800,
+                      height: 450,
+                      quality: 95,
+                    }
+                  ) || ''
+                : '';
 
-            return (
-              <DishCard
-                name={dish.name}
-                description={dish.description || ''}
-                price={dish.price}
-                ingredients={dish.ingredients}
-                dietary_options={dish.dietary_options}
-                allergens={dish.allergens}
-                calories={dish.calories}
-                imageUrl={imageUrl}
-                isAvailable={dish.is_available}
-                defaultCurrency={hotel.default_currency || 'EUR'}
-                isLast={index === dishes.length - 1}
-                isOdd={dishes.length % 2 !== 0}
-              />
-            );
-          })}
+              return (
+                <DishCard
+                  name={dish.name}
+                  description={dish.description || ''}
+                  price={dish.price || 0}
+                  ingredients={dish.ingredients}
+                  dietary_options={dish.dietary_options}
+                  allergens={dish.allergens}
+                  calories={dish.calories}
+                  imageUrl={imageUrl}
+                  isAvailable={dish.is_available !== false}
+                  defaultCurrency={hotel.default_currency || 'EUR'}
+                  isLast={index === dishes.length - 1}
+                  isOdd={dishes.length % 2 !== 0}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- No Menu Message */
   {dishes.length === 0 && (

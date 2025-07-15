@@ -13,11 +13,12 @@ import {
   getTranslatedContent,
 } from '../lib/directus.js';
 import { getHotelConfig } from '../lib/site-config.js';
+import type { Hotel } from '../types/hotel.js';
 
 console.log(`🏗️ [BUILD] Pre-rendering homepage...`);
 
 // Get hotel data and configuration dynamically - NO hardcoding
-const hotel: any = await getCurrentHotel();
+const hotel = (await getCurrentHotel()) as Hotel | null;
 
 if (!hotel) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
@@ -42,15 +43,13 @@ console.log(
 );
 ---
 
-<Layout
-  title={hotel.name}
-  hotel={hotel}
-  hotelName={hotel.name}
->
+<Layout title={hotel.name} hotel={hotel} hotelName={hotel.name}>
   <!-- Hero Section -->
   <HeroSection
     hotelName={hotelConfig.name}
-    heroImageUrl={heroPhoto ? getMediaUrl(heroPhoto.id, { width: 1920, height: 1080, quality: 90 }) : undefined}
+    heroImageUrl={heroPhoto
+      ? getMediaUrl(heroPhoto.id, { width: 1920, height: 1080, quality: 90 })
+      : undefined}
     heroVideoUrl={heroVideo ? getMediaUrl(heroVideo.id) : undefined}
     availableLanguages={hotelConfig.availableLanguages}
     availableCurrencies={hotelConfig.availableCurrencies}
@@ -59,159 +58,177 @@ console.log(
   />
 
   <!-- Rooms Section -->
-  {hotel.rooms && hotel.rooms.length > 0 && (
-    <section class="bg-base-100 py-16">
-      <div class="mx-auto px-4 container">
-        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Our Rooms</h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {hotel.rooms.slice(0, 6).map((room: any, index: number) => {
-            const imageUrl = room.main_photo
-              ? getMediaUrl(room.main_photo.id, {
-                  width: 800,
-                  height: 450,
-                  quality: 95,
-                }) || ''
-              : '';
-            const videoUrl = room.main_video
-              ? getMediaUrl(room.main_video.id) || undefined
-              : undefined;
+  {
+    hotel.rooms && hotel.rooms.length > 0 && (
+      <section class="bg-base-100 py-16">
+        <div class="mx-auto px-4 container">
+          <h2 class="mb-12 text-base-content/80 text-3xl text-center">
+            Our Rooms
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {hotel.rooms.slice(0, 6).map((room, index: number) => {
+              const imageUrl = room.main_photo
+                ? getMediaUrl(room.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                    quality: 95,
+                  }) || ''
+                : '';
+              const videoUrl = room.main_video
+                ? getMediaUrl(room.main_video.id) || undefined
+                : undefined;
 
-            // Create slug from room name
-            const roomSlug = room.name
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+              // Create slug from room name
+              const roomSlug = room.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
 
-            return (
-              <RoomCard
-                name={room.name}
-                description={room.description || ''}
-                bedConfiguration={room.bed_configuration}
-                sizeSqm={room.size_sqm}
-                basePrice={undefined}
-                defaultCurrency={hotel.default_currency || 'EUR'}
-                imageUrl={imageUrl}
-                videoUrl={videoUrl}
-                isLast={index === hotel.rooms.slice(0, 6).length - 1}
-                isOdd={hotel.rooms.slice(0, 6).length % 2 !== 0}
-                hotelSlug={hotelSlug}
-                roomSlug={roomSlug}
-              />
-            );
-          })}
-        </div>
-        {hotel.rooms.length > 6 && (
-          <div class="mt-8 text-center">
-            <a href="/accommodation" class="btn btn-primary">View All Rooms</a>
+              return (
+                <RoomCard
+                  name={room.name}
+                  description={room.description || ''}
+                  bedConfiguration={room.bed_configuration}
+                  sizeSqm={room.size_sqm}
+                  basePrice={undefined}
+                  defaultCurrency={hotel.default_currency || 'EUR'}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotel.rooms.slice(0, 6).length - 1}
+                  isOdd={hotel.rooms.slice(0, 6).length % 2 !== 0}
+                  hotelSlug={hotelSlug}
+                  roomSlug={roomSlug}
+                />
+              );
+            })}
           </div>
-        )}
-      </div>
-    </section>
-  )}
+          {hotel.rooms.length > 6 && (
+            <div class="mt-8 text-center">
+              <a href="/accommodation" class="btn btn-primary">
+                View All Rooms
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
 
   <!-- Facilities Section -->
-  {hotel.facilities && hotel.facilities.length > 0 && (
-    <section class="bg-base-200 py-16">
-      <div class="mx-auto px-4 container">
-        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Our Facilities</h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {hotel.facilities.slice(0, 6).map((facility: any, index: number) => {
-            const imageUrl = facility.main_photo
-              ? getMediaUrl(facility.main_photo.id, {
-                  width: 800,
-                  height: 450,
-                  quality: 95,
-                }) || ''
-              : '';
-            const videoUrl = facility.main_video
-              ? getMediaUrl(facility.main_video.id) || undefined
-              : undefined;
+  {
+    hotel.facilities && hotel.facilities.length > 0 && (
+      <section class="bg-base-200 py-16">
+        <div class="mx-auto px-4 container">
+          <h2 class="mb-12 text-base-content/80 text-3xl text-center">
+            Our Facilities
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {hotel.facilities.slice(0, 6).map((facility, index: number) => {
+              const imageUrl = facility.main_photo
+                ? getMediaUrl(facility.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                    quality: 95,
+                  }) || ''
+                : '';
+              const videoUrl = facility.main_video
+                ? getMediaUrl(facility.main_video.id) || undefined
+                : undefined;
 
-            // Create slug from facility name
-            const facilitySlug = facility.name
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+              // Create slug from facility name
+              const facilitySlug = facility.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
 
-            return (
-              <FacilityCard
-                name={facility.name}
-                description={facility.description || ''}
-                facilityType={facility.facility_type}
-                capacity={facility.capacity}
-                accessType={facility.access_type}
-                imageUrl={imageUrl}
-                videoUrl={videoUrl}
-                isLast={index === hotel.facilities.slice(0, 6).length - 1}
-                isOdd={hotel.facilities.slice(0, 6).length % 2 !== 0}
-                hotelSlug={hotelSlug}
-                facilitySlug={facilitySlug}
-                isSubdomain={true}
-              />
-            );
-          })}
-        </div>
-        {hotel.facilities.length > 6 && (
-          <div class="mt-8 text-center">
-            <a href="/facilities" class="btn btn-primary">View All Facilities</a>
+              return (
+                <FacilityCard
+                  name={facility.name}
+                  description={facility.description || ''}
+                  facilityType={facility.facility_type}
+                  capacity={facility.capacity}
+                  accessType={facility.access_type}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotel.facilities.slice(0, 6).length - 1}
+                  isOdd={hotel.facilities.slice(0, 6).length % 2 !== 0}
+                  hotelSlug={hotelSlug}
+                  facilitySlug={facilitySlug}
+                  isSubdomain={true}
+                />
+              );
+            })}
           </div>
-        )}
-      </div>
-    </section>
-  )}
+          {hotel.facilities.length > 6 && (
+            <div class="mt-8 text-center">
+              <a href="/facilities" class="btn btn-primary">
+                View All Facilities
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
 
   <!-- Activities Section -->
-  {hotel.activities && hotel.activities.length > 0 && (
-    <section class="bg-base-100 py-16">
-      <div class="mx-auto px-4 container">
-        <h2 class="mb-12 text-base-content/80 text-3xl text-center">Experiences</h2>
-        <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
-          {hotel.activities.slice(0, 6).map((activity: any, index: number) => {
-            const imageUrl = activity.main_photo
-              ? getMediaUrl(activity.main_photo.id, {
-                  width: 800,
-                  height: 450,
-                  quality: 95,
-                }) || ''
-              : '';
-            const videoUrl = activity.main_video
-              ? getMediaUrl(activity.main_video.id) || undefined
-              : undefined;
+  {
+    hotel.activities && hotel.activities.length > 0 && (
+      <section class="bg-base-100 py-16">
+        <div class="mx-auto px-4 container">
+          <h2 class="mb-12 text-base-content/80 text-3xl text-center">
+            Experiences
+          </h2>
+          <div class="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {hotel.activities.slice(0, 6).map((activity, index: number) => {
+              const imageUrl = activity.main_photo
+                ? getMediaUrl(activity.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                    quality: 95,
+                  }) || ''
+                : '';
+              const videoUrl = activity.main_video
+                ? getMediaUrl(activity.main_video.id) || undefined
+                : undefined;
 
-            // Create slug from activity name
-            const activitySlug = activity.name
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+              // Create slug from activity name
+              const activitySlug = activity.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
 
-            return (
-              <ActivityCard
-                name={activity.name}
-                description={activity.description || ''}
-                maxParticipants={activity.max_participants}
-                ageRestriction={activity.age_restriction}
-                equipmentProvided={activity.equipment_provided}
-                operatingHours={activity.operating_hours}
-                defaultCurrency={hotel.default_currency || 'EUR'}
-                imageUrl={imageUrl}
-                videoUrl={videoUrl}
-                isLast={index === hotel.activities.slice(0, 6).length - 1}
-                isOdd={hotel.activities.slice(0, 6).length % 2 !== 0}
-                hotelSlug={hotelSlug}
-                activitySlug={activitySlug}
-                isSubdomain={true}
-              />
-            );
-          })}
-        </div>
-        {hotel.activities.length > 6 && (
-          <div class="mt-8 text-center">
-            <a href="/experiences" class="btn btn-primary">View All Experiences</a>
+              return (
+                <ActivityCard
+                  name={activity.name}
+                  description={activity.description || ''}
+                  maxParticipants={activity.max_participants}
+                  ageRestriction={activity.age_restriction}
+                  equipmentProvided={activity.equipment_provided}
+                  operatingHours={activity.operating_hours}
+                  defaultCurrency={hotel.default_currency || 'EUR'}
+                  imageUrl={imageUrl}
+                  videoUrl={videoUrl}
+                  isLast={index === hotel.activities.slice(0, 6).length - 1}
+                  isOdd={hotel.activities.slice(0, 6).length % 2 !== 0}
+                  hotelSlug={hotelSlug}
+                  activitySlug={activitySlug}
+                  isSubdomain={true}
+                />
+              );
+            })}
           </div>
-        )}
-      </div>
-    </section>
-  )}
+          {hotel.activities.length > 6 && (
+            <div class="mt-8 text-center">
+              <a href="/experiences" class="btn btn-primary">
+                View All Experiences
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
 
   <!-- CTA Section -->
   <CTASection

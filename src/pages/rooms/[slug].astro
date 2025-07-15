@@ -3,24 +3,36 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import { DetailPageLayout } from '../../components/DetailPageLayout.tsx';
 import Layout from '../../layouts/Layout.astro';
-import { getCurrentHotel, getMediaUrl, processMediaGallery } from '../../lib/directus.js';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  processMediaGallery,
+} from '../../lib/directus.js';
+import type { Hotel, Room } from '../../types/hotel.ts';
 
 // Generate static paths for all rooms
 export async function getStaticPaths() {
   console.log(`🏗️ [BUILD] Generating static paths for room detail pages...`);
 
-  const hotel: any = await getCurrentHotel();
+  const hotelData = await getCurrentHotel();
 
-  if (!hotel || !hotel.rooms) {
+  if (!hotelData || !hotelData.rooms) {
     console.log(`❌ [BUILD] No hotel or rooms found`);
     return [];
   }
 
-  console.log(`✅ [BUILD] Found ${hotel.rooms.length} rooms for hotel: ${hotel.name}`);
+  const hotel = hotelData as Hotel;
 
-  const paths = hotel.rooms.map((room: any) => {
-    const slug = room.name?.toLowerCase().replace(/\s+/g, '-') || room.id?.toString();
-    console.log(`🔗 [BUILD] Generated path: /rooms/${slug} for room: ${room.name} (ID: ${room.id})`);
+  console.log(
+    `✅ [BUILD] Found ${hotel.rooms.length} rooms for hotel: ${hotel.name}`
+  );
+
+  const paths = hotel.rooms.map((room: Room) => {
+    const slug =
+      room.name?.toLowerCase().replace(/\s+/g, '-') || room.id?.toString();
+    console.log(
+      `🔗 [BUILD] Generated path: /rooms/${slug} for room: ${room.name} (ID: ${room.id})`
+    );
 
     return {
       params: { slug },
@@ -34,21 +46,26 @@ export async function getStaticPaths() {
 console.log(`🏗️ [BUILD] Pre-rendering room detail page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData2 = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData2) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
 
+const hotel2 = hotelData2 as Hotel;
+
 const { slug } = Astro.params;
 
-console.log(`✅ [BUILD] Hotel loaded: ${hotel.name}, looking for room: ${slug}`);
+console.log(
+  `✅ [BUILD] Hotel loaded: ${hotel2.name}, looking for room: ${slug}`
+);
 
 // Find the specific room
-const room = hotel.rooms?.find((r: any) => 
-  r.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
-  r.slug === slug ||
-  r.id?.toString() === slug
+const room = hotel2.rooms?.find(
+  (r: Room) =>
+    r.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
+    r.slug === slug ||
+    r.id?.toString() === slug
 );
 
 if (!room) {
@@ -59,7 +76,7 @@ if (!room) {
 console.log(`✅ [BUILD] Room found: ${room.name} (ID: ${room.id})`);
 
 // Simple theme name extraction
-const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+const hotelSlug = hotel2.domain?.split('.')[0] || 'default';
 
 // Process room media
 const mainImageUrl = room.main_photo
@@ -75,11 +92,14 @@ const mainVideoUrl = room.main_video
   : '';
 
 // Process gallery images with automatic type detection
-const galleryImages = processMediaGallery(room.media_gallery, room.name) as Array<{
+const galleryImages = processMediaGallery(
+  room.media_gallery,
+  room.name
+) as Array<{
   id: string;
   url: string;
   title?: string;
-  type?: "image" | "video";
+  type?: 'image' | 'video';
 }>;
 
 // Process room metadata
@@ -90,15 +110,16 @@ const metadata = {
   amenities: room.amenities || [],
 };
 
-const pageTitle = `${room.name} - ${hotel.name}`;
-const pageDescription = room.description || `Discover ${room.name} at ${hotel.name}`;
+const pageTitle = `${room.name} - ${hotel2.name}`;
+const pageDescription =
+  room.description || `Discover ${room.name} at ${hotel2.name}`;
 ---
 
 <Layout
   title={pageTitle}
   description={pageDescription}
-  hotel={hotel}
-  hotelName={hotel.name}
+  hotel={hotel2}
+  hotelName={hotel2.name}
 >
   <DetailPageLayout
     title={room.name}
@@ -108,13 +129,13 @@ const pageDescription = room.description || `Discover ${room.name} at ${hotel.na
     videoUrl={mainVideoUrl}
     galleryImages={galleryImages}
     metadata={metadata}
-    hotelName={hotel.name}
+    hotelName={hotel2.name}
     hotelSlug={hotelSlug}
-    defaultCurrency={hotel.default_currency || 'EUR'}
+    defaultCurrency={hotel2.default_currency || 'EUR'}
     breadcrumbItems={[
       { label: 'Home', href: '/' },
       { label: 'Accommodation', href: '/accommodation' },
-      { label: room.name, href: `/rooms/${slug}` }
+      { label: room.name, href: `/rooms/${slug}` },
     ]}
   />
 </Layout>

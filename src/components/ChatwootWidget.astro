@@ -86,7 +86,7 @@ if (!hotel) {
         });
 
         // Listen for new message events
-        window.addEventListener('chatwoot:on-message', function (e) {
+        window.addEventListener('chatwoot:on-message', function (_e) {
           // Force widget to open on new message
           setTimeout(function() {
             if (window.$chatwoot && window.$chatwoot.toggle) {

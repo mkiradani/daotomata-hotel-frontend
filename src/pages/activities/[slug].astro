@@ -3,19 +3,28 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import { DetailPageLayout } from '../../components/DetailPageLayout.tsx';
 import Layout from '../../layouts/Layout.astro';
-import { getCurrentHotel, getMediaUrl, processMediaGallery } from '../../lib/directus.js';
+import {
+  getCurrentHotel,
+  getMediaUrl,
+  processMediaGallery,
+} from '../../lib/directus.js';
+import type { Hotel, Activity } from '../../types/hotel.ts';
 
 // Generate static paths for all activities
 export async function getStaticPaths() {
-  const hotel: any = await getCurrentHotel();
+  const hotelData = await getCurrentHotel();
 
-  if (!hotel || !hotel.activities) {
+  if (!hotelData || !hotelData.activities) {
     return [];
   }
 
-  return hotel.activities.map((activity: any) => ({
+  const hotel = hotelData as Hotel;
+
+  return hotel.activities.map((activity: Activity) => ({
     params: {
-      slug: activity.name?.toLowerCase().replace(/\s+/g, '-') || activity.id?.toString()
+      slug:
+        activity.name?.toLowerCase().replace(/\s+/g, '-') ||
+        activity.id?.toString(),
     },
   }));
 }
@@ -23,21 +32,26 @@ export async function getStaticPaths() {
 console.log(`🏗️ [BUILD] Pre-rendering activity detail page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData2 = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData2) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
 
+const hotel2 = hotelData2 as Hotel;
+
 const { slug } = Astro.params;
 
-console.log(`✅ [BUILD] Hotel loaded: ${hotel.name}, looking for activity: ${slug}`);
+console.log(
+  `✅ [BUILD] Hotel loaded: ${hotel2.name}, looking for activity: ${slug}`
+);
 
 // Find the specific activity
-const activity = hotel.activities?.find((a: any) => 
-  a.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
-  a.slug === slug ||
-  a.id?.toString() === slug
+const activity = hotel2.activities?.find(
+  (a: Activity) =>
+    a.name?.toLowerCase().replace(/\s+/g, '-') === slug ||
+    a.slug === slug ||
+    a.id?.toString() === slug
 );
 
 if (!activity) {
@@ -48,7 +62,7 @@ if (!activity) {
 console.log(`✅ [BUILD] Activity found: ${activity.name} (ID: ${activity.id})`);
 
 // Simple theme name extraction
-const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+const hotelSlug = hotel2.domain?.split('.')[0] || 'default';
 
 // Process activity media
 const mainImageUrl = activity.main_photo
@@ -64,11 +78,14 @@ const mainVideoUrl = activity.main_video
   : '';
 
 // Process gallery images with automatic type detection
-const galleryImages = processMediaGallery(activity.media_gallery, activity.name) as Array<{
+const galleryImages = processMediaGallery(
+  activity.media_gallery,
+  activity.name
+) as Array<{
   id: string;
   url: string;
   title?: string;
-  type?: "image" | "video";
+  type?: 'image' | 'video';
 }>;
 
 // Process activity metadata
@@ -82,15 +99,16 @@ const metadata = {
   requirements: activity.requirements,
 };
 
-const pageTitle = `${activity.name} - ${hotel.name}`;
-const pageDescription = activity.description || `Experience ${activity.name} at ${hotel.name}`;
+const pageTitle = `${activity.name} - ${hotel2.name}`;
+const pageDescription =
+  activity.description || `Experience ${activity.name} at ${hotel2.name}`;
 ---
 
 <Layout
   title={pageTitle}
   description={pageDescription}
-  hotel={hotel}
-  hotelName={hotel.name}
+  hotel={hotel2}
+  hotelName={hotel2.name}
 >
   <DetailPageLayout
     title={activity.name}
@@ -100,13 +118,13 @@ const pageDescription = activity.description || `Experience ${activity.name} at 
     videoUrl={mainVideoUrl}
     galleryImages={galleryImages}
     metadata={metadata}
-    hotelName={hotel.name}
+    hotelName={hotel2.name}
     hotelSlug={hotelSlug}
-    defaultCurrency={hotel.default_currency || 'EUR'}
+    defaultCurrency={hotel2.default_currency || 'EUR'}
     breadcrumbItems={[
       { label: 'Home', href: '/' },
       { label: 'Experiences', href: '/experiences' },
-      { label: activity.name, href: `/activities/${slug}` }
+      { label: activity.name, href: `/activities/${slug}` },
     ]}
   />
 </Layout>

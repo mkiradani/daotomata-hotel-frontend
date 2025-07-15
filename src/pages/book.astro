@@ -6,11 +6,12 @@ import { BookingWidgetReal } from '../components/BookingWidgetReal.tsx';
 import { Breadcrumb } from '../components/Breadcrumb.tsx';
 import CTASection from '../components/CTASection.astro';
 import { getCurrentHotel } from '../lib/directus.js';
+import type { Hotel } from '../types/hotel.js';
 
 console.log(`🔄 [SSR] Processing booking request...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotel = (await getCurrentHotel()) as Hotel | null;
 
 if (!hotel) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
@@ -30,7 +31,14 @@ const children = url.searchParams.get('children') || '0';
 const rooms = url.searchParams.get('rooms') || '1';
 const roomType = url.searchParams.get('roomType') || '';
 
-console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, children, rooms, roomType });
+console.log(`🔄 [SSR] Booking parameters:`, {
+  checkIn,
+  checkOut,
+  adults,
+  children,
+  rooms,
+  roomType,
+});
 ---
 
 <Layout
@@ -41,10 +49,7 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
 >
   <!-- Breadcrumb Navigation -->
   <Breadcrumb
-    items={[
-      { label: hotel.name, href: "/" },
-      { label: "Book Your Stay" }
-    ]}
+    items={[{ label: hotel.name, href: '/' }, { label: 'Book Your Stay' }]}
     client:load
   />
 
@@ -59,8 +64,8 @@ console.log(`🔄 [SSR] Booking parameters:`, { checkIn, checkOut, adults, child
           at {hotel.name}
         </p>
         <p class="text-base-content/70 text-lg">
-          Experience luxury and comfort with our seamless booking system.
-          Check real-time availability and secure your perfect room today.
+          Experience luxury and comfort with our seamless booking system. Check
+          real-time availability and secure your perfect room today.
         </p>
       </div>
     </div>

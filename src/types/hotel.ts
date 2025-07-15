@@ -57,6 +57,7 @@ export interface Room {
   max_occupancy?: number;
   amenities?: string[];
   is_accesible?: boolean;
+  is_featured?: boolean;
   main_photo?: {
     id: string;
     filename_disk: string;
@@ -84,6 +85,9 @@ export interface Activity {
   duration?: string;
   capacity?: number;
   age_restriction?: string;
+  max_participants?: number;
+  equipment_provided?: string[];
+  operating_hours?: Record<string, unknown>;
   main_photo?: {
     id: string;
     filename_disk: string;
@@ -107,6 +111,8 @@ export interface Facility {
   amenities?: string[];
   age_restriction?: string;
   is_accessible?: boolean;
+  facility_type?: string;
+  access_type?: string;
   main_photo?: {
     id: string;
     filename_disk: string;
@@ -127,6 +133,11 @@ export interface Restaurant {
   operating_hours?: string;
   capacity?: number;
   price_range?: string;
+  main_photo?: {
+    id: string;
+    filename_disk: string;
+    title: string;
+  };
 }
 
 export interface Dish {
@@ -138,6 +149,15 @@ export interface Dish {
   allergens?: string[];
   is_vegetarian?: boolean;
   is_vegan?: boolean;
+  ingredients?: string[];
+  dietary_options?: string[];
+  calories?: number;
+  is_available?: boolean;
+  main_photo?: {
+    id: string;
+    filename_disk: string;
+    title: string;
+  };
 }
 
 export interface Gallery {
@@ -149,6 +169,27 @@ export interface Gallery {
 export interface HeroMedia {
   id: string;
   type?: string;
+}
+
+/**
+ * Navigation item interface for UI components
+ */
+export interface NavItem {
+  name: string;
+  href: string;
+  active?: boolean;
+}
+
+/**
+ * Contact method interface
+ */
+export interface ContactMethod {
+  id: string;
+  contact_type: 'phone' | 'email' | 'whatsapp' | 'website' | 'other';
+  contact_value: string;
+  contact_identifier: string;
+  label?: string;
+  is_primary?: boolean;
 }
 
 /**

@@ -11,15 +11,26 @@ import {
   getMediaUrl,
   getTranslatedContent,
 } from '../lib/directus.js';
+import type { Hotel } from '../types/hotel.ts';
+
+// Local ContactMethod interface to match what ContactForm expects
+interface ContactMethod {
+  id: number;
+  contact_type: string;
+  contact_identifier: string;
+  name: string;
+}
 
 console.log(`🏗️ [BUILD] Pre-rendering contact page...`);
 
 // Get hotel data from environment variable
-const hotel: any = await getCurrentHotel();
+const hotelData = await getCurrentHotel();
 
-if (!hotel) {
+if (!hotelData) {
   throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
 }
+
+const hotel = hotelData as Hotel;
 
 console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
 
@@ -39,10 +50,10 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
   hotelName={hotel.name}
 >
   <!-- Breadcrumb -->
-  <Breadcrumb 
+  <Breadcrumb
     items={[
       { label: 'Home', href: '/' },
-      { label: 'Contact', href: '/contact' }
+      { label: 'Contact', href: '/contact' },
     ]}
   />
 
@@ -63,73 +74,101 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
         <!-- Contact Details -->
         <div>
           <h2 class="mb-8 text-base-content/80 text-2xl">Get in Touch</h2>
-          
+
           {/* Hotel Location */}
-          {hotel.location && (
-            <div class="mb-6">
-              <h3 class="mb-2 text-base-content/80 text-lg">📍 Location</h3>
-              <p class="text-base-content/80">{hotel.location}</p>
-            </div>
-          )}
+          {
+            hotel.location && (
+              <div class="mb-6">
+                <h3 class="mb-2 text-base-content/80 text-lg">📍 Location</h3>
+                <p class="text-base-content/80">{hotel.location}</p>
+              </div>
+            )
+          }
 
           {/* Contact Methods */}
-          {contactMethods.length > 0 && (
-            <div class="space-y-4">
-              {contactMethods.map((method: any) => (
-                <div class="flex items-center space-x-3">
-                  <div class="text-lg">
-                    {method.contact_type === 'phone' && '📞'}
-                    {method.contact_type === 'email' && '✉️'}
-                    {method.contact_type === 'whatsapp' && '💬'}
-                    {method.contact_type === 'website' && '🌐'}
-                  </div>
-                  <div>
-                    <p class="text-base-content/80">{method.name}</p>
-                    {method.contact_type === 'phone' && (
-                      <a href={`tel:${method.contact_identifier}`} class="text-primary hover:underline">
-                        {method.contact_identifier}
-                      </a>
-                    )}
-                    {method.contact_type === 'email' && (
-                      <a href={`mailto:${method.contact_identifier}`} class="text-primary hover:underline">
-                        {method.contact_identifier}
-                      </a>
-                    )}
-                    {method.contact_type === 'whatsapp' && (
-                      <a href={`https://wa.me/${method.contact_identifier}`} class="text-primary hover:underline" target="_blank" rel="noreferrer">
-                        {method.contact_identifier}
-                      </a>
-                    )}
-                    {method.contact_type === 'website' && (
-                      <a href={method.contact_identifier} class="text-primary hover:underline" target="_blank" rel="noreferrer">
-                        {method.contact_identifier}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {
+            contactMethods.length > 0 && (
+              <div class="space-y-4">
+                {(contactMethods as ContactMethod[]).map(
+                  (method: ContactMethod) => (
+                    <div class="flex items-center space-x-3">
+                      <div class="text-lg">
+                        {method.contact_type === 'phone' && '📞'}
+                        {method.contact_type === 'email' && '✉️'}
+                        {method.contact_type === 'whatsapp' && '💬'}
+                        {method.contact_type === 'website' && '🌐'}
+                      </div>
+                      <div>
+                        <p class="text-base-content/80">{method.name}</p>
+                        {method.contact_type === 'phone' && (
+                          <a
+                            href={`tel:${method.contact_identifier}`}
+                            class="text-primary hover:underline"
+                          >
+                            {method.contact_identifier}
+                          </a>
+                        )}
+                        {method.contact_type === 'email' && (
+                          <a
+                            href={`mailto:${method.contact_identifier}`}
+                            class="text-primary hover:underline"
+                          >
+                            {method.contact_identifier}
+                          </a>
+                        )}
+                        {method.contact_type === 'whatsapp' && (
+                          <a
+                            href={`https://wa.me/${method.contact_identifier}`}
+                            class="text-primary hover:underline"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {method.contact_identifier}
+                          </a>
+                        )}
+                        {method.contact_type === 'website' && (
+                          <a
+                            href={method.contact_identifier}
+                            class="text-primary hover:underline"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {method.contact_identifier}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            )
+          }
 
           {/* Default Contact Info if no methods */}
-          {contactMethods.length === 0 && (
-            <div class="space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="text-lg">📞</div>
-                <div>
-                  <p class="font-semibold">Phone</p>
-                  <p class="text-base-content/80">Contact information coming soon</p>
+          {
+            contactMethods.length === 0 && (
+              <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                  <div class="text-lg">📞</div>
+                  <div>
+                    <p class="font-semibold">Phone</p>
+                    <p class="text-base-content/80">
+                      Contact information coming soon
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <div class="text-lg">✉️</div>
+                  <div>
+                    <p class="font-semibold">Email</p>
+                    <p class="text-base-content/80">
+                      Contact information coming soon
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div class="flex items-center space-x-3">
-                <div class="text-lg">✉️</div>
-                <div>
-                  <p class="font-semibold">Email</p>
-                  <p class="text-base-content/80">Contact information coming soon</p>
-                </div>
-              </div>
-            </div>
-          )}
+            )
+          }
         </div>
 
         <!-- Contact Form -->
@@ -138,7 +177,7 @@ const pageDescription = `Get in touch with ${hotel.name}. Contact information, l
           <ContactForm
             hotelId={hotel.id}
             hotelName={hotel.name}
-            contactMethods={contactMethods as any}
+            contactMethods={contactMethods as ContactMethod[]}
           />
         </div>
       </div>

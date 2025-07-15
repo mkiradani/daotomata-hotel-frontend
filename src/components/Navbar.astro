@@ -1,20 +1,23 @@
 ---
 import { getMediaUrl } from '../lib/directus.js';
+import type { NavItem } from '../types/hotel.ts';
+
+interface LogoInfo {
+  id: string;
+  filename_disk: string;
+  title?: string;
+}
 
 interface HotelInfo {
   id: number;
   location: string;
-  logo?: {
-    id: string;
-    filename_disk: string;
-    title: string;
-  };
+  logo?: LogoInfo;
 }
 
 export interface Props {
   hotelName: string;
   currentPath?: string;
-  hotelLogo?: Record<string, unknown> | null;
+  hotelLogo?: LogoInfo | null;
   hotelInfo?: HotelInfo | null;
 }
 
@@ -29,7 +32,7 @@ const {
 const priorityLogo = hotelInfo?.logo || hotelLogo;
 
 // Simplified navigation URLs for single-tenant
-const navItems = [
+const navItems: NavItem[] = [
   { name: 'Home', href: '/' },
   { name: 'Accommodation', href: '/accommodation' },
   { name: 'Facilities', href: '/facilities' },
@@ -79,7 +82,7 @@ const logoHref = '/';
         class="z-[1] bg-base-100 shadow mt-3 p-2 border border-base-300 rounded-box w-52 menu menu-sm dropdown-content"
       >
         {
-          navItems.map((item: any) => (
+          navItems.map((item: NavItem) => (
             <li>
               <a
                 href={item.href}
@@ -121,7 +124,7 @@ const logoHref = '/';
   <div class="hidden lg:flex navbar-center">
     <ul class="gap-1 px-1 menu menu-horizontal">
       {
-        navItems.map((item: any) => (
+        navItems.map((item: NavItem) => (
           <li>
             <a
               href={item.href}
