@@ -53,6 +53,13 @@ export class BookingService {
   }
 
   /**
+   * Get booking engine for debug purposes (public access)
+   */
+  getEngineForDebug(hotelId: string): IBookingEngine {
+    return this.getEngine(hotelId);
+  }
+
+  /**
    * Check room availability for a hotel
    */
   async checkAvailability(

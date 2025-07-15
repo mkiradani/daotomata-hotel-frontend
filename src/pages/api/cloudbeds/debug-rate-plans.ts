@@ -58,7 +58,9 @@ export const GET: APIRoute = async () => {
 
     // Test rate plans endpoint
     const ratePlans = await (
-      engine as Record<string, unknown> & { getRatePlans(): Promise<unknown> }
+      engine as unknown as Record<string, unknown> & {
+        getRatePlans(): Promise<unknown>;
+      }
     ).getRatePlans();
 
     return new Response(
@@ -71,7 +73,11 @@ export const GET: APIRoute = async () => {
           pms_type: hotel.pms_type,
         },
         rate_plans: ratePlans,
-        rate_plans_count: ratePlans.data?.length || 0,
+        rate_plans_count: (ratePlans as Record<string, unknown>)?.data
+          ? Array.isArray((ratePlans as Record<string, unknown>).data)
+            ? ((ratePlans as Record<string, unknown>).data as unknown[]).length
+            : 0
+          : 0,
         timestamp: new Date().toISOString(),
       }),
       {

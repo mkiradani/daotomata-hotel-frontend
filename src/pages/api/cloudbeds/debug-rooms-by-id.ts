@@ -89,7 +89,7 @@ export const GET: APIRoute = async ({ url }) => {
       await bookingService.initializeForHotel(hotel);
 
       // Get the Cloudbeds engine
-      const engine = bookingService.getEngine(String(hotel.id));
+      const engine = bookingService.getEngineForDebug(String(hotel.id));
       if (!engine || !('debugCloudbedsRooms' in engine)) {
         return new Response(
           JSON.stringify({
@@ -110,7 +110,7 @@ export const GET: APIRoute = async ({ url }) => {
       console.log(`🔍 [DEBUG] Calling Cloudbeds API...`);
 
       // Debug Cloudbeds rooms, room types, and basic connectivity
-      const engineWithDebug = engine as Record<string, unknown> & {
+      const engineWithDebug = engine as unknown as Record<string, unknown> & {
         debugCloudbedsRooms(): Promise<unknown>;
         debugCloudbedsRoomTypes(): Promise<unknown>;
         debugCloudbedsHotels(): Promise<unknown>;
@@ -177,10 +177,13 @@ export const GET: APIRoute = async ({ url }) => {
         analysis: {
           directus_rooms_count: hotel.rooms?.length || 0,
           cloudbeds_rooms_count:
-            roomsData.status === 'fulfilled' && roomsData.value?.data
-              ? Array.isArray(roomsData.value.data)
-                ? roomsData.value.data.length
-                : 0
+            roomsData.status === 'fulfilled' &&
+            roomsData.value &&
+            typeof roomsData.value === 'object' &&
+            'data' in roomsData.value &&
+            Array.isArray((roomsData.value as Record<string, unknown>).data)
+              ? ((roomsData.value as Record<string, unknown>).data as unknown[])
+                  .length
               : 0,
           mapping_strategy_recommendations: [
             '1. Check if Cloudbeds returns room_number or room_code fields',

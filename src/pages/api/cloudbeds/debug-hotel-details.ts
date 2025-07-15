@@ -58,7 +58,7 @@ export const GET: APIRoute = async () => {
 
     // Test hotel details endpoint
     const hotelDetails = await (
-      engine as Record<string, unknown> & {
+      engine as unknown as Record<string, unknown> & {
         getHotelDetails(): Promise<unknown>;
       }
     ).getHotelDetails();
@@ -73,9 +73,15 @@ export const GET: APIRoute = async () => {
           pms_type: hotel.pms_type,
         },
         hotel_details: hotelDetails,
-        has_amenities: hotelDetails.amenities?.length > 0,
-        has_policies: !!hotelDetails.policies,
-        has_contact_info: !!hotelDetails.contact,
+        has_amenities: (hotelDetails as Record<string, unknown>)?.amenities
+          ? Array.isArray(
+              (hotelDetails as Record<string, unknown>).amenities
+            ) &&
+            ((hotelDetails as Record<string, unknown>).amenities as unknown[])
+              .length > 0
+          : false,
+        has_policies: !!(hotelDetails as Record<string, unknown>)?.policies,
+        has_contact_info: !!(hotelDetails as Record<string, unknown>)?.contact,
         timestamp: new Date().toISOString(),
       }),
       {

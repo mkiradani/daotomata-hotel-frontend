@@ -71,7 +71,7 @@ export const GET: APIRoute = async () => {
     // Test hotels endpoint first
     console.log('🔍 [DEBUG] Testing getHotels endpoint...');
     const hotelsResponse = await (
-      engine as Record<string, unknown> & {
+      engine as unknown as Record<string, unknown> & {
         debugCloudbedsHotels(): Promise<unknown>;
       }
     ).debugCloudbedsHotels();
@@ -79,7 +79,7 @@ export const GET: APIRoute = async () => {
     // Test rooms endpoint
     console.log('🔍 [DEBUG] Testing getRooms endpoint...');
     const roomsResponse = await (
-      engine as Record<string, unknown> & {
+      engine as unknown as Record<string, unknown> & {
         debugCloudbedsRooms(): Promise<unknown>;
       }
     ).debugCloudbedsRooms();

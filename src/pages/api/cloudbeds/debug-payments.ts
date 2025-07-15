@@ -58,7 +58,7 @@ export const GET: APIRoute = async () => {
 
     // Test payment methods endpoint
     const paymentMethods = await (
-      engine as Record<string, unknown> & {
+      engine as unknown as Record<string, unknown> & {
         getPaymentMethods(): Promise<unknown>;
       }
     ).getPaymentMethods();
@@ -73,7 +73,9 @@ export const GET: APIRoute = async () => {
           pms_type: hotel.pms_type,
         },
         payment_methods: paymentMethods,
-        payment_methods_count: paymentMethods.length,
+        payment_methods_count: Array.isArray(paymentMethods)
+          ? paymentMethods.length
+          : 0,
         timestamp: new Date().toISOString(),
       }),
       {

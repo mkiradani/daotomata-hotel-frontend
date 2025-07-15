@@ -112,7 +112,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     // Search for availability and rates
     const searchAvailability = $(async () => {
       if (!checkIn.value || !checkOut.value) {
-        error.value = 'Please select check-in and check-out dates';
+        state.error = 'Please select check-in and check-out dates';
         return;
       }
 

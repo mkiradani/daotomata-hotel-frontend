@@ -28,7 +28,7 @@ export const GET: APIRoute = async () => {
     await bookingService.initializeForHotel(hotel);
 
     // Get the Cloudbeds engine
-    const engine = bookingService.getEngine(String(hotel.id));
+    const engine = bookingService.getEngineForDebug(String(hotel.id));
     if (!engine || !('debugCloudbedsRoomTypes' in engine)) {
       return new Response(
         JSON.stringify({
@@ -45,7 +45,7 @@ export const GET: APIRoute = async () => {
 
     // Debug Cloudbeds room types
     const roomTypesData = await (
-      engine as Record<string, unknown> & {
+      engine as unknown as Record<string, unknown> & {
         debugCloudbedsRoomTypes(): Promise<unknown>;
       }
     ).debugCloudbedsRoomTypes();
@@ -85,7 +85,13 @@ export const GET: APIRoute = async () => {
           count: availability.length,
         },
         analysis: {
-          totalRoomTypesConfigured: roomTypesData?.data?.length || 0,
+          totalRoomTypesConfigured: (roomTypesData as Record<string, unknown>)
+            ?.data
+            ? Array.isArray((roomTypesData as Record<string, unknown>).data)
+              ? ((roomTypesData as Record<string, unknown>).data as unknown[])
+                  .length
+              : 0
+            : 0,
           availableRoomTypes: availability.length,
           message: 'Compare room types configured vs available for booking',
         },
