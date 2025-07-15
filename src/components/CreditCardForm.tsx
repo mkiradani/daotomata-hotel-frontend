@@ -221,7 +221,10 @@ export const CreditCardForm = component$<CreditCardFormProps>(
               >
                 <option value="">Month</option>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                  <option key={month} value={month.toString().padStart(2, '0')}>
+                  <option
+                    key={month.toString()}
+                    value={month.toString().padStart(2, '0')}
+                  >
                     {month.toString().padStart(2, '0')} -{' '}
                     {new Date(0, month - 1).toLocaleString('default', {
                       month: 'long',
@@ -250,8 +253,8 @@ export const CreditCardForm = component$<CreditCardFormProps>(
               >
                 <option value="">Year</option>
                 {yearOptions.map((year) => (
-                  <option key={year} value={year.toString()}>
-                    {year}
+                  <option key={year.toString()} value={year.toString()}>
+                    {year.toString()}
                   </option>
                 ))}
               </select>
@@ -314,7 +317,7 @@ export const CreditCardForm = component$<CreditCardFormProps>(
             </div>
           </div>
 
-          <div class="p-3 bg-base-100 border border-base-300 rounded-lg">
+          <div class="bg-base-100 p-3 border border-base-300 rounded-lg">
             <div class="flex items-center gap-2 text-sm text-base-content/70">
               <span>🔒</span>
               <span>Your payment information is encrypted and secure</span>
