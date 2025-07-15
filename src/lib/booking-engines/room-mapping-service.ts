@@ -23,6 +23,10 @@ export interface CloudbedsRoom {
   available: boolean;
   price: number;
   currency: string;
+  // Cloudbeds-specific fields for room type mapping
+  roomTypeID?: string;
+  roomTypeName?: string;
+  roomTypeNameShort?: string;
   [key: string]: unknown;
 }
 
@@ -54,7 +58,7 @@ export class RoomMappingService {
     for (const directusRoom of directusRooms) {
       // Find matching Cloudbeds room by name (case-insensitive)
       const cloudbedsRoom = cloudbedsRooms.find(
-        cbRoom =>
+        (cbRoom) =>
           RoomMappingService.normalizeRoomName(cbRoom.name) ===
           RoomMappingService.normalizeRoomName(directusRoom.name)
       );
@@ -91,15 +95,25 @@ export class RoomMappingService {
   static mapAvailabilityWithDirectusRooms(
     availability: RoomAvailability[],
     directusRooms: DirectusRoom[]
-  ): Array<RoomAvailability & { directusRoom?: DirectusRoom; mappingConfidence?: number }> {
-    return availability.map(avail => {
+  ): Array<
+    RoomAvailability & {
+      directusRoom?: DirectusRoom;
+      mappingConfidence?: number;
+    }
+  > {
+    return availability.map((avail) => {
       // Prioritize exact match by PMS ID
-      let directusRoom = directusRooms.find(room => room.pms_room_id === avail.roomId);
+      let directusRoom = directusRooms.find(
+        (room) => room.pms_room_id === avail.roomId
+      );
       let confidence = 1.0;
 
       // If no exact ID match, try to find the best match by name
       if (!directusRoom) {
-        const bestMatch = RoomMappingService.findBestRoomMatch(avail.roomType, directusRooms);
+        const bestMatch = RoomMappingService.findBestRoomMatch(
+          avail.roomType,
+          directusRooms
+        );
 
         if (bestMatch) {
           directusRoom = bestMatch.room as DirectusRoom;
@@ -129,11 +143,11 @@ export class RoomMappingService {
     rates: RoomRate[],
     directusRooms: DirectusRoom[]
   ): Array<RoomRate & { directusRoom?: DirectusRoom }> {
-    return rates.map(rate => {
+    return rates.map((rate) => {
       const directusRoom = directusRooms.find(
-        room =>
+        (room) =>
           RoomMappingService.normalizeRoomName(room.name) ===
-          RoomMappingService.normalizeRoomName(rate.roomType) ||
+            RoomMappingService.normalizeRoomName(rate.roomType) ||
           room.pms_room_id === rate.roomId
       );
 
@@ -151,9 +165,9 @@ export class RoomMappingService {
     directusRooms: DirectusRoom[],
     cloudbedsRooms: CloudbedsRoom[]
   ): Array<DirectusRoom & { suggested_pms_room_id?: string }> {
-    return directusRooms.map(directusRoom => {
+    return directusRooms.map((directusRoom) => {
       const cloudbedsRoom = cloudbedsRooms.find(
-        cbRoom =>
+        (cbRoom) =>
           RoomMappingService.normalizeRoomName(cbRoom.name) ===
           RoomMappingService.normalizeRoomName(directusRoom.name)
       );
@@ -186,16 +200,16 @@ export class RoomMappingService {
       directusRooms,
       cloudbedsRooms
     );
-    const mappedDirectusIds = mappedRooms.map(r => r.directusId);
-    const mappedCloudbedsIds = mappedRooms.map(r => r.cloudbedsId);
+    const mappedDirectusIds = mappedRooms.map((r) => r.directusId);
+    const mappedCloudbedsIds = mappedRooms.map((r) => r.cloudbedsId);
 
     const unmappedDirectusRooms = directusRooms
-      .filter(room => !mappedDirectusIds.includes(room.id))
-      .map(room => room.name);
+      .filter((room) => !mappedDirectusIds.includes(room.id))
+      .map((room) => room.name);
 
     const unmappedCloudbedsRooms = cloudbedsRooms
-      .filter(room => !mappedCloudbedsIds.includes(room.id))
-      .map(room => room.name);
+      .filter((room) => !mappedCloudbedsIds.includes(room.id))
+      .map((room) => room.name);
 
     return {
       totalDirectusRooms: directusRooms.length,
@@ -313,7 +327,7 @@ export class RoomMappingService {
     const warnings: string[] = [];
 
     // Check for duplicate room names in Directus
-    const directusNames = directusRooms.map(r =>
+    const directusNames = directusRooms.map((r) =>
       RoomMappingService.normalizeRoomName(r.name)
     );
     const duplicateDirectusNames = directusNames.filter(
@@ -326,7 +340,7 @@ export class RoomMappingService {
     }
 
     // Check for duplicate room names in Cloudbeds
-    const cloudbedsNames = cloudbedsRooms.map(r =>
+    const cloudbedsNames = cloudbedsRooms.map((r) =>
       RoomMappingService.normalizeRoomName(r.name)
     );
     const duplicateCloudbedsNames = cloudbedsNames.filter(

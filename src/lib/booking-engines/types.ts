@@ -48,6 +48,7 @@ export interface BookingRequest {
     lastName: string;
     email: string;
     phone?: string;
+    country?: string; // ISO-Code 2 characters (e.g., 'US', 'ES', 'FR')
     address?: {
       street?: string;
       city?: string;
@@ -57,6 +58,7 @@ export interface BookingRequest {
   };
   specialRequests?: string;
   promoCode?: string;
+  paymentMethod?: string; // Payment method selection
 }
 
 export interface BookingResponse {

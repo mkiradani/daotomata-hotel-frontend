@@ -1,9 +1,8 @@
 ---
-import { getHotelByDomain } from '../../lib/directus.js';
+import { getCurrentHotel } from '../../lib/directus.js';
 
-// Get hotel from domain
-const hotelDomain = Astro.url.hostname;
-const hotel = await getHotelByDomain(hotelDomain);
+// Get current hotel from Directus (single-tenant)
+const hotel = await getCurrentHotel();
 
 if (!hotel) {
   return Astro.redirect('/404');
@@ -308,14 +307,14 @@ const _pageTitle = `Booking Management - ${hotel.name}`;
     }
 
     // Tab functionality
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', e => {
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', (e) => {
         e.preventDefault();
 
         // Remove active class from all tabs
         document
           .querySelectorAll('.tab')
-          .forEach(t => t.classList.remove('tab-active'));
+          .forEach((t) => t.classList.remove('tab-active'));
 
         // Add active class to clicked tab
         tab.classList.add('tab-active');
@@ -323,7 +322,7 @@ const _pageTitle = `Booking Management - ${hotel.name}`;
         // Hide all tab content
         document
           .querySelectorAll('.tab-content')
-          .forEach(content => content.classList.add('hidden'));
+          .forEach((content) => content.classList.add('hidden'));
 
         // Show selected tab content
         const tabName = tab.getAttribute('data-tab');

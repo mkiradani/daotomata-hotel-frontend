@@ -1,9 +1,8 @@
 ---
-import { getHotelByDomain } from '../../lib/directus.js';
+import { getCurrentHotel } from '../../lib/directus.js';
 
-// Get hotel from domain
-const hotelDomain = Astro.url.hostname;
-const hotel = await getHotelByDomain(hotelDomain);
+// Get current hotel from Directus (single-tenant)
+const hotel = await getCurrentHotel();
 
 if (!hotel) {
   return Astro.redirect('/404');
@@ -248,7 +247,7 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
                   <tbody>
                     ${diagnostics.rooms.list
                       .map(
-                        room => `
+                        (room) => `
                       <tr>
                         <td>${room.name}</td>
                         <td>${room.room_type}</td>
@@ -279,7 +278,7 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
             <div class="card-body">
               <h3 class="text-error card-title">Issues Found</h3>
               <ul class="space-y-1 list-disc list-inside">
-                ${diagnostics.issues.map(issue => `<li class="text-error">${issue}</li>`).join('')}
+                ${diagnostics.issues.map((issue) => `<li class="text-error">${issue}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -294,7 +293,7 @@ const _pageTitle = `Booking Diagnostics - ${hotel.name}`;
             <div class="card-body">
               <h3 class="text-warning card-title">Recommendations</h3>
               <ul class="space-y-1 list-disc list-inside">
-                ${diagnostics.recommendations.map(rec => `<li class="text-warning">${rec}</li>`).join('')}
+                ${diagnostics.recommendations.map((rec) => `<li class="text-warning">${rec}</li>`).join('')}
               </ul>
             </div>
           </div>

@@ -1,5 +1,11 @@
 /** @jsxImportSource @builder.io/qwik */
-import { $, component$, useSignal, useVisibleTask$, useTask$ } from '@builder.io/qwik';
+import {
+  $,
+  component$,
+  useSignal,
+  useVisibleTask$,
+  useTask$,
+} from '@builder.io/qwik';
 
 interface RatePlan {
   id: string;
@@ -129,7 +135,7 @@ export const RoomCard = component$<RoomCardProps>(
     return (
       <div
         ref={cardRef}
-        class={`bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300 card overflow-hidden ${
+        class={`bg-base-100 border border-base-300 hover:border-primary transition-all duration-300 rounded-lg overflow-hidden ${
           isOdd && isLast ? 'md:col-span-2 lg:col-span-2' : ''
         }`}
       >
@@ -197,10 +203,7 @@ export const RoomCard = component$<RoomCardProps>(
               >
                 Book Now
               </button>
-              <a
-                href={`/rooms/${roomSlug}`}
-                class="btn-outline btn btn-sm"
-              >
+              <a href={`/rooms/${roomSlug}`} class="btn-outline btn btn-sm">
                 Details
                 <svg
                   class="ml-1 w-4 h-4"
@@ -300,10 +303,15 @@ export const RoomCard = component$<RoomCardProps>(
                             </p>
                           </div>
                           <div class="ml-4 text-right">
-                            <span class={`badge ${
-                              plan.rate_type === 'promotional' ? 'badge-secondary' :
-                              plan.rate_type === 'package' ? 'badge-accent' : 'badge-neutral'
-                            }`}>
+                            <span
+                              class={`badge ${
+                                plan.rate_type === 'promotional'
+                                  ? 'badge-secondary'
+                                  : plan.rate_type === 'package'
+                                    ? 'badge-accent'
+                                    : 'badge-neutral'
+                              }`}
+                            >
                               {plan.rate_type}
                             </span>
                           </div>
@@ -330,10 +338,7 @@ export const RoomCard = component$<RoomCardProps>(
                 >
                   Contact Reception
                 </button>
-                <a
-                  href={`/rooms/${roomSlug}`}
-                  class="btn-outline btn"
-                >
+                <a href={`/rooms/${roomSlug}`} class="btn-outline btn">
                   View Room Details
                 </a>
               </div>

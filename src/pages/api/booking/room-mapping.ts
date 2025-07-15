@@ -2,32 +2,19 @@
  * API endpoint for room mapping statistics and management
  */
 
-import type { APIRoute } from "astro";
-import { getBookingService } from "../../../lib/booking-engines";
-import { getHotelByDomain } from "../../../lib/directus.js";
-import type { Hotel } from "../../../types/hotel.js";
+import type { APIRoute } from 'astro';
+import { getBookingService } from '../../../lib/booking-engines';
+import { getCurrentHotel } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async () => {
   try {
-    const searchParams = new URL(url).searchParams;
-    const hotelDomain = searchParams.get("hotelDomain");
-
-    if (!hotelDomain) {
-      return new Response(
-        JSON.stringify({ error: "Missing required parameter: hotelDomain" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    // Get hotel data with rooms
-    const hotel = (await getHotelByDomain(hotelDomain)) as Hotel | null;
+    // Get current hotel from Directus (single-tenant)
+    const hotel = (await getCurrentHotel()) as Hotel | null;
     if (!hotel) {
-      return new Response(JSON.stringify({ error: "Hotel not found" }), {
+      return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -63,21 +50,21 @@ export const GET: APIRoute = async ({ url }) => {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   } catch (error) {
-    console.error("Room mapping error:", error);
+    console.error('Room mapping error:', error);
 
     return new Response(
       JSON.stringify({
-        error: "Failed to get room mapping information",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to get room mapping information',
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 };

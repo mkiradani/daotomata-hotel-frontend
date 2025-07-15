@@ -353,11 +353,79 @@ export class CloudbedsEngine implements IBookingEngine {
         JSON.stringify(bookingData, null, 2)
       );
 
+      // Convert to form data as required by Cloudbeds API
+      const formData = new URLSearchParams();
+
+      // Add all fields as form data
+      formData.append('propertyID', bookingData.propertyID);
+      formData.append('startDate', bookingData.startDate);
+      formData.append('endDate', bookingData.endDate);
+      formData.append('guestFirstName', bookingData.guestFirstName);
+      formData.append('guestLastName', bookingData.guestLastName);
+      formData.append('guestEmail', bookingData.guestEmail);
+      formData.append('guestCountry', bookingData.guestCountry);
+      formData.append('guestZip', '00000'); // Default ZIP code - should be configurable
+      formData.append('paymentMethod', bookingData.paymentMethod);
+
+      if (bookingData.guestPhone) {
+        formData.append('guestPhone', bookingData.guestPhone);
+      }
+
+      if (bookingData.specialRequests) {
+        formData.append('specialRequests', bookingData.specialRequests);
+      }
+
+      if (bookingData.promoCode) {
+        formData.append('promoCode', bookingData.promoCode);
+      }
+
+      // Handle arrays according to Cloudbeds API documentation
+      // Each array should contain objects with roomTypeID and quantity
+
+      // For rooms array - according to docs: { roomTypeID, quantity }
+      bookingData.rooms.forEach((room, index) => {
+        if (room.roomTypeID) {
+          formData.append(`rooms[${index}][roomTypeID]`, room.roomTypeID);
+          formData.append(`rooms[${index}][quantity]`, '1'); // 1 room of this type
+        }
+      });
+
+      // For adults array - according to docs: { roomTypeID, quantity }
+      const totalAdults = bookingData.adults?.length || 2;
+      bookingData.rooms.forEach((room, index) => {
+        if (room.roomTypeID) {
+          formData.append(`adults[${index}][roomTypeID]`, room.roomTypeID);
+          formData.append(`adults[${index}][quantity]`, totalAdults.toString());
+        }
+      });
+
+      // For children array - according to docs: { roomTypeID, quantity }
+      const totalChildren = bookingData.children?.length || 0;
+      bookingData.rooms.forEach((room, index) => {
+        if (room.roomTypeID) {
+          formData.append(`children[${index}][roomTypeID]`, room.roomTypeID);
+          formData.append(
+            `children[${index}][quantity]`,
+            totalChildren.toString()
+          );
+        }
+      });
+
+      formData.append(
+        'sendEmailConfirmation',
+        bookingData.sendEmailConfirmation ? 'true' : 'false'
+      );
+
+      console.log('🌐 [CLOUDBEDS] Form data:', formData.toString());
+
       const response = await this.makeRequest<CloudbedsBookingResponse>(
         CLOUDBEDS_ENDPOINTS.postReservation,
         {
           method: 'POST',
-          body: JSON.stringify(bookingData),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString(),
         }
       );
 
@@ -777,21 +845,52 @@ export class CloudbedsEngine implements IBookingEngine {
     response: CloudbedsRoomsListResponse
   ): CloudbedsRoom[] {
     // Transform Cloudbeds rooms response to our CloudbedsRoom format
-    return (
-      response.data?.map((room: unknown) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const roomData = room as any;
-        return {
-          id: String(roomData.id || ''),
-          name: String(roomData.name || ''),
-          type: String(roomData.type || ''),
-          max_occupancy: Number(roomData.max_occupancy || 0),
-          available: Boolean(roomData.available),
-          price: Number(0), // Will be set from rates
-          currency: String(roomData.currency || 'USD'),
-        };
-      }) || []
+    // The response structure is: { data: [{ propertyID, rooms: [...] }] }
+    const allRooms: CloudbedsRoom[] = [];
+
+    if (response.data && Array.isArray(response.data)) {
+      response.data.forEach((property: unknown) => {
+        const propertyData = property as { rooms?: unknown[] };
+        if (propertyData.rooms && Array.isArray(propertyData.rooms)) {
+          propertyData.rooms.forEach((room: unknown) => {
+            const roomData = room as {
+              roomID?: string;
+              roomName?: string;
+              roomTypeName?: string;
+              maxGuests?: number;
+              roomBlocked?: boolean;
+              roomTypeID?: string;
+              roomTypeNameShort?: string;
+            };
+            allRooms.push({
+              id: String(roomData.roomID || ''),
+              name: String(roomData.roomName || ''),
+              type: String(roomData.roomTypeName || ''),
+              max_occupancy: Number(roomData.maxGuests || 0),
+              available: !roomData.roomBlocked,
+              price: Number(0), // Will be set from rates
+              currency: String('USD'), // Default currency
+              // Add Cloudbeds-specific fields for mapping
+              roomTypeID: String(roomData.roomTypeID || ''),
+              roomTypeName: String(roomData.roomTypeName || ''),
+              roomTypeNameShort: String(roomData.roomTypeNameShort || ''),
+            });
+          });
+        }
+      });
+    }
+
+    console.log('🔄 [CLOUDBEDS] Transformed rooms:', allRooms.length, 'rooms');
+    console.log(
+      '🔄 [CLOUDBEDS] Room types found:',
+      allRooms.map((r) => ({
+        id: r.roomTypeID,
+        name: r.roomTypeName,
+        short: r.roomTypeNameShort,
+      }))
     );
+
+    return allRooms;
   }
 
   private transformAvailabilityResponse(
@@ -897,33 +996,103 @@ export class CloudbedsEngine implements IBookingEngine {
   private transformBookingRequest(
     request: Partial<BookingRequest>
   ): CloudbedsBookingRequest {
-    // Transform our common booking request to Cloudbeds format
-    return {
-      start_date: request.checkIn || '',
-      end_date: request.checkOut || '',
-      adults: request.adults || 1,
-      children: request.children,
-      rooms: request.rooms,
-      room_type_id: request.roomType,
-      guest_first_name: request.guestInfo?.firstName,
-      guest_last_name: request.guestInfo?.lastName,
-      guest_email: request.guestInfo?.email,
-      guest_phone: request.guestInfo?.phone,
-      special_requests: request.specialRequests,
-      promo_code: request.promoCode,
+    // Transform our common booking request to Cloudbeds API v1.3 format
+    // According to official documentation: https://docs.cloudbeds.com/api/v1.3/postReservation
+
+    console.log(
+      '🔍 [CLOUDBEDS] Raw booking request received:',
+      JSON.stringify(request, null, 2)
+    );
+
+    const roomsCount = request.rooms || 1;
+    const adultsCount = request.adults || 1;
+    const childrenCount = request.children || 0;
+
+    // Find the correct roomTypeID from Cloudbeds data
+    let roomTypeID = request.roomType;
+    if (this.cloudbedsRooms && this.cloudbedsRooms.length > 0) {
+      const matchingRoom = this.cloudbedsRooms.find(
+        (room) =>
+          room.roomTypeName === request.roomType ||
+          room.roomTypeNameShort === request.roomType ||
+          room.roomTypeID === request.roomType
+      );
+      if (matchingRoom) {
+        roomTypeID = matchingRoom.roomTypeID;
+        console.log(
+          '🔍 [CLOUDBEDS] Mapped room type:',
+          request.roomType,
+          '->',
+          roomTypeID
+        );
+      } else {
+        console.warn(
+          '⚠️ [CLOUDBEDS] Could not find roomTypeID for:',
+          request.roomType
+        );
+        console.log(
+          '🔍 [CLOUDBEDS] Available room types:',
+          this.cloudbedsRooms.map((r) => ({
+            id: r.roomTypeID,
+            name: r.roomTypeName,
+            short: r.roomTypeNameShort,
+          }))
+        );
+      }
+    }
+
+    // Create arrays as required by Cloudbeds API
+    const roomsArray = Array(roomsCount).fill({ roomTypeID });
+    const adultsArray = Array(adultsCount).fill({});
+    const childrenArray =
+      childrenCount > 0 ? Array(childrenCount).fill({}) : [];
+
+    const transformedData = {
+      propertyID: this.config.credentials.propertyId,
+      startDate: request.checkIn || '',
+      endDate: request.checkOut || '',
+      guestFirstName: request.guestInfo?.firstName || '',
+      guestLastName: request.guestInfo?.lastName || '',
+      guestEmail: request.guestInfo?.email || '',
+      guestPhone: request.guestInfo?.phone || '',
+      guestCountry:
+        request.guestInfo?.country ||
+        request.guestInfo?.address?.country ||
+        'US', // Default to US if not provided
+      rooms: roomsArray,
+      adults: adultsArray,
+      children: childrenArray,
+      paymentMethod: request.paymentMethod || 'cash', // Default to cash if not provided
+      specialRequests: request.specialRequests || '',
+      promoCode: request.promoCode || '',
+      sendEmailConfirmation: true,
     };
+
+    console.log(
+      '🔍 [CLOUDBEDS] Transformed booking data:',
+      JSON.stringify(transformedData, null, 2)
+    );
+    console.log('🔍 [CLOUDBEDS] Key fields check:');
+    console.log('  - propertyID:', transformedData.propertyID);
+    console.log('  - startDate:', transformedData.startDate);
+    console.log('  - endDate:', transformedData.endDate);
+    console.log('  - checkIn from request:', request.checkIn);
+    console.log('  - checkOut from request:', request.checkOut);
+
+    return transformedData;
   }
 
   private transformBookingResponse(
     response: CloudbedsBookingResponse
   ): BookingResponse {
     // Transform Cloudbeds booking response to our common format
+    // Cloudbeds returns reservationID, grandTotal, etc.
     return {
-      success: !!response.id,
-      bookingId: String(response.id),
-      confirmationNumber: String(response.reservation_id || response.id),
-      totalAmount: Number(response.total_amount),
-      currency: String(response.currency),
+      success: Boolean(response.success),
+      bookingId: String(response.reservationID || 'undefined'),
+      confirmationNumber: String(response.reservationID || 'undefined'), // Use reservationID as confirmation
+      totalAmount: Number(response.grandTotal) || undefined,
+      currency: String('USD'), // Default currency - could be made configurable
       details: response,
     };
   }

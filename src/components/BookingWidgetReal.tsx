@@ -32,6 +32,14 @@ interface RoomAvailability {
     room_type: string;
     max_occupancy: number;
     size_sqm?: number;
+    bed_configuration?: string;
+    amenities?: string[];
+    is_accesible?: boolean;
+    main_photo?: {
+      id: string;
+      filename_disk: string;
+      title: string;
+    };
   };
 }
 
@@ -61,6 +69,11 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     className = '',
     compact = false,
   }) => {
+    // Helper function for media URLs
+    const getImageUrl = (photoId: string) => {
+      if (!photoId) return null;
+      return `https://hotels.daotomata.io/assets/${photoId}?width=400&height=250&quality=90`;
+    };
     // Form state
     const checkIn = useSignal('');
     const checkOut = useSignal('');
@@ -87,6 +100,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     const guestLastName = useSignal('');
     const guestEmail = useSignal('');
     const guestPhone = useSignal('');
+    const guestCountry = useSignal('US'); // Default to US
+    const paymentMethod = useSignal('cash'); // Default to cash
     const specialRequests = useSignal('');
 
     // Set default dates (Cloudbeds requires startDate > today)
@@ -203,27 +218,34 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       state.error = '';
 
       try {
+        const bookingRequest = {
+          checkIn: checkIn.value,
+          checkOut: checkOut.value,
+          adults: parseInt(adults.value),
+          children:
+            parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
+          rooms: parseInt(rooms.value),
+          roomType: state.selectedRoom.roomType,
+          guestInfo: {
+            firstName: guestFirstName.value,
+            lastName: guestLastName.value,
+            email: guestEmail.value,
+            phone: guestPhone.value || undefined,
+            country: guestCountry.value,
+          },
+          paymentMethod: paymentMethod.value,
+          specialRequests: specialRequests.value || undefined,
+        };
+
+        console.log(
+          '📝 [FRONTEND] Sending booking request:',
+          JSON.stringify(bookingRequest, null, 2)
+        );
+
         const bookingResponse = await fetch('/api/booking/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            checkIn: checkIn.value,
-            checkOut: checkOut.value,
-            adults: parseInt(adults.value),
-            children:
-              parseInt(children.value) > 0
-                ? parseInt(children.value)
-                : undefined,
-            rooms: parseInt(rooms.value),
-            roomType: state.selectedRoom.roomType,
-            guestInfo: {
-              firstName: guestFirstName.value,
-              lastName: guestLastName.value,
-              email: guestEmail.value,
-              phone: guestPhone.value || undefined,
-            },
-            specialRequests: specialRequests.value || undefined,
-          }),
+          body: JSON.stringify(bookingRequest),
         });
 
         const bookingData = await bookingResponse.json();
@@ -242,6 +264,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           guestLastName.value = '';
           guestEmail.value = '';
           guestPhone.value = '';
+          guestCountry.value = 'US';
+          paymentMethod.value = 'cash';
           specialRequests.value = '';
         } else {
           throw new Error(
@@ -279,24 +303,27 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
     return (
       <div class={`booking-widget-real ${className}`}>
-        <div class="bg-base-100 shadow-xl card">
-          <div class="card-body">
-            <h3 class="text-primary card-title">
+        <div class="bg-base-100 border border-base-300 rounded-lg">
+          <div class="p-6">
+            <h3 class="mb-6 font-semibold text-primary text-xl">
               {compact ? 'Book Now' : `Book Your Stay at ${hotelName}`}
             </h3>
 
             {/* Search Form */}
             {!state.showBookingForm && (
-              <div class="space-y-4">
-                <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
+              <div class="space-y-6">
+                {/* Dates Section */}
+                <div class="gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <div class="form-control">
                     <label class="label" for="checkin-date">
-                      <span class="label-text">Check-in</span>
+                      <span class="font-medium text-base-content label-text">
+                        Check-in Date
+                      </span>
                     </label>
                     <input
                       id="checkin-date"
                       type="date"
-                      class="input-bordered input"
+                      class="input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
                       bind:value={checkIn}
                       min={new Date().toISOString().split('T')[0]}
                     />
@@ -304,76 +331,116 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
                   <div class="form-control">
                     <label class="label" for="checkout-date">
-                      <span class="label-text">Check-out</span>
+                      <span class="font-medium text-base-content label-text">
+                        Check-out Date
+                      </span>
                     </label>
                     <input
                       id="checkout-date"
                       type="date"
-                      class="input-bordered input"
+                      class="input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
                       bind:value={checkOut}
                       min={
                         checkIn.value || new Date().toISOString().split('T')[0]
                       }
                     />
                   </div>
+                </div>
 
+                {/* Guests and Rooms Section */}
+                <div class="gap-4 grid grid-cols-1 sm:grid-cols-3">
                   <div class="form-control">
                     <label class="label" for="adults-select">
-                      <span class="label-text">Adults</span>
+                      <span class="font-medium text-base-content label-text">
+                        Adults
+                      </span>
                     </label>
                     <select
                       id="adults-select"
-                      class="select-bordered select"
+                      class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
                       bind:value={adults}
                     >
                       <option value={1}>1 Adult</option>
                       <option value={2}>2 Adults</option>
                       <option value={3}>3 Adults</option>
                       <option value={4}>4 Adults</option>
+                      <option value={5}>5 Adults</option>
+                      <option value={6}>6 Adults</option>
                     </select>
                   </div>
 
                   <div class="form-control">
                     <label class="label" for="children-select">
-                      <span class="label-text">Children</span>
+                      <span class="font-medium text-base-content label-text">
+                        Children
+                      </span>
                     </label>
                     <select
                       id="children-select"
-                      class="select-bordered select"
+                      class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
                       bind:value={children}
                     >
                       <option value={0}>0 Children</option>
                       <option value={1}>1 Child</option>
                       <option value={2}>2 Children</option>
                       <option value={3}>3 Children</option>
+                      <option value={4}>4 Children</option>
                     </select>
                   </div>
 
                   <div class="form-control">
                     <label class="label" for="rooms-select">
-                      <span class="label-text">Rooms</span>
+                      <span class="font-medium text-base-content label-text">
+                        Rooms
+                      </span>
                     </label>
                     <select
                       id="rooms-select"
-                      class="select-bordered select"
+                      class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
                       bind:value={rooms}
                     >
                       <option value={1}>1 Room</option>
                       <option value={2}>2 Rooms</option>
                       <option value={3}>3 Rooms</option>
+                      <option value={4}>4 Rooms</option>
                     </select>
                   </div>
                 </div>
 
                 {/* Search Button */}
-                <div class="justify-center card-actions">
+                <div class="flex justify-center pt-2">
                   <button
                     type="button"
-                    class={`btn btn-primary ${state.isLoading ? 'loading' : ''}`}
+                    class={`btn btn-primary btn-lg px-8 ${state.isLoading ? 'loading' : ''} transition-all duration-200 hover:scale-105`}
                     onClick$={searchAvailability}
-                    disabled={state.isLoading}
+                    disabled={
+                      state.isLoading || !checkIn.value || !checkOut.value
+                    }
                   >
-                    {state.isLoading ? 'Searching...' : 'Search Availability'}
+                    {state.isLoading ? (
+                      <>
+                        <span class="mr-2 loading loading-spinner loading-sm"></span>
+                        Searching Rooms...
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          class="mr-2 w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <title>Search icon</title>
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                          />
+                        </svg>
+                        Search Available Rooms
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -381,7 +448,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
             {/* Error Message */}
             {state.error && (
-              <div class="alert alert-error">
+              <div class="animate-pulse alert alert-error">
                 <svg
                   class="stroke-current w-6 h-6 shrink-0"
                   fill="none"
@@ -395,7 +462,29 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>{state.error}</span>
+                <div>
+                  <h4 class="font-semibold">Booking Error</h4>
+                  <span>{state.error}</span>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-ghost"
+                  onClick$={() => (state.error = '')}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {state.isLoading && (
+              <div class="flex justify-center items-center py-8">
+                <div class="text-center">
+                  <span class="text-primary loading loading-spinner loading-lg"></span>
+                  <p class="mt-4 text-base-content/70">
+                    Searching for available rooms...
+                  </p>
+                </div>
               </div>
             )}
 
@@ -416,66 +505,174 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                   Available Rooms ({calculateNights()} nights)
                 </h4>
 
-                <div class="space-y-4">
+                <div class="gap-6 grid grid-cols-1 lg:grid-cols-2">
                   {state.availability.map((room) => {
                     const rate = getRoomRate(room.roomId);
                     const displayName =
                       room.directusRoom?.name || room.roomType;
                     const description = room.directusRoom?.description;
 
+                    const imageUrl = room.directusRoom?.main_photo?.id
+                      ? getImageUrl(room.directusRoom.main_photo.id)
+                      : null;
+
                     return (
-                      <div key={room.roomId} class="bg-base-200 card">
-                        <div class="card-body">
-                          <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                              <h5 class="text-base card-title">
-                                {displayName}
-                              </h5>
-                              {description && (
-                                <p class="opacity-70 mb-2 text-sm">
-                                  {description}
-                                </p>
-                              )}
-                              <p class="opacity-70 text-sm">
-                                Max occupancy: {room.maxOccupancy} guests
+                      <div
+                        key={room.roomId}
+                        class="bg-base-100 border hover:border-primary border-base-300 rounded-lg overflow-hidden transition-all duration-300"
+                      >
+                        {/* Room Image */}
+                        {imageUrl && (
+                          <figure class="relative overflow-hidden">
+                            <img
+                              src={imageUrl}
+                              alt={displayName}
+                              class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                            {room.directusRoom?.is_accesible && (
+                              <div class="top-3 right-3 absolute bg-primary px-3 py-1 rounded-full font-medium text-primary-content text-xs">
+                                ♿ Accessible
+                              </div>
+                            )}
+                          </figure>
+                        )}
+
+                        <div class="p-6">
+                          <div class="mb-4">
+                            <h5 class="mb-2 font-primary font-semibold text-primary text-xl">
+                              {displayName}
+                            </h5>
+                            {description && (
+                              <p class="text-sm text-base-content/70 line-clamp-2 leading-relaxed">
+                                {description}
                               </p>
-                              {room.directusRoom?.size_sqm && (
-                                <p class="opacity-70 text-sm">
-                                  Size: {room.directusRoom.size_sqm} m²
-                                </p>
-                              )}
-                              {rate && (
-                                <div class="mt-2">
-                                  <p class="text-sm">
-                                    Base price:{' '}
-                                    {formatPrice(rate.basePrice, rate.currency)}{' '}
-                                    per night
-                                  </p>
-                                  {rate.taxes && rate.taxes > 0 && (
-                                    <p class="text-sm">
-                                      Taxes:{' '}
-                                      {formatPrice(rate.taxes, rate.currency)}
-                                    </p>
-                                  )}
+                            )}
+                          </div>
+
+                          {/* Room Features */}
+                          <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="badge-outline badge badge-sm">
+                              <svg
+                                class="mr-1 w-3 h-3"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <title>WiFi icon</title>
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                              </svg>
+                              Free WiFi
+                            </span>
+                            <span class="badge-outline badge badge-sm">
+                              <svg
+                                class="mr-1 w-3 h-3"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <title>Cancel icon</title>
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clip-rule="evenodd"
+                                />
+                              </svg>
+                              Free Cancellation
+                            </span>
+                            {room.directusRoom?.bed_configuration && (
+                              <span class="badge-outline badge badge-sm">
+                                🛏️ {room.directusRoom.bed_configuration}
+                              </span>
+                            )}
+                          </div>
+
+                          <div class="flex flex-wrap gap-4 mb-4 text-sm text-base-content/70">
+                            <div class="flex items-center">
+                              <svg
+                                class="mr-1 w-4 h-4"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <title>Occupancy icon</title>
+                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                              </svg>
+                              {room.maxOccupancy} guests
+                            </div>
+                            {room.directusRoom?.size_sqm && (
+                              <div class="flex items-center">
+                                <svg
+                                  class="mr-1 w-4 h-4"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <title>Size icon</title>
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z"
+                                    clip-rule="evenodd"
+                                  />
+                                </svg>
+                                {room.directusRoom.size_sqm}m²
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Pricing Section */}
+                          <div class="flex justify-between items-end pt-4 border-t border-base-200">
+                            <div class="text-left">
+                              {rate && rate.taxes && rate.taxes > 0 && (
+                                <div class="mb-1 text-xs text-base-content/50">
+                                  Base:{' '}
+                                  {formatPrice(rate.basePrice, rate.currency)} +
+                                  Tax: {formatPrice(rate.taxes, rate.currency)}
                                 </div>
                               )}
-                            </div>
-
-                            <div class="text-right">
-                              <div class="text-primary/90 text-2xl">
+                              <div class="text-xs text-base-content/50 uppercase tracking-wide">
+                                Total per night
+                              </div>
+                              <div class="font-bold text-primary text-3xl">
                                 {rate
                                   ? formatPrice(rate.totalPrice, rate.currency)
                                   : formatPrice(room.price, room.currency)}
                               </div>
-                              <p class="opacity-70 text-sm">per night</p>
+                              <div class="mt-1 text-xs text-base-content/60">
+                                {calculateNights()} nights • Total:{' '}
+                                {rate
+                                  ? formatPrice(
+                                      rate.totalPrice * calculateNights(),
+                                      rate.currency
+                                    )
+                                  : formatPrice(
+                                      room.price * calculateNights(),
+                                      room.currency
+                                    )}
+                              </div>
+                            </div>
+                            <div class="text-right">
                               <button
                                 type="button"
-                                class="mt-2 btn btn-primary btn-sm"
+                                class="px-6 hover:scale-105 transition-transform btn btn-primary btn-lg"
                                 onClick$={() => selectRoom(room)}
                                 disabled={state.isLoading}
                               >
+                                <svg
+                                  class="mr-2 w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <title>Calendar icon</title>
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
+                                </svg>
                                 Book Now
                               </button>
+                              <div class="mt-2 text-xs text-base-content/60">
+                                Free cancellation until 24h before
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -489,24 +686,72 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             {state.showResults &&
               state.availability.length === 0 &&
               !state.showBookingForm && (
-                <div class="mt-6 alert alert-info">
-                  <svg
-                    class="stroke-current w-6 h-6 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <title>Information icon</title>
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>
-                    No rooms available for the selected dates. Please try
-                    different dates.
-                  </span>
+                <div class="mt-6 py-12 text-center">
+                  <div class="flex justify-center items-center bg-base-200 mx-auto mb-6 rounded-full w-24 h-24">
+                    <svg
+                      class="w-12 h-12 text-base-content/40"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <title>No rooms icon</title>
+                      <path
+                        fill-rule="evenodd"
+                        d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z"
+                        clip-rule="evenodd"
+                      />
+                      <path d="M7 8h6v2H7V8zM7 12h4v2H7v-2z" />
+                    </svg>
+                  </div>
+                  <h3 class="mb-2 text-base-content/80 text-xl">
+                    No Rooms Available
+                  </h3>
+                  <p class="mb-6 text-base-content/60">
+                    Unfortunately, no rooms are available for your selected
+                    dates.
+                  </p>
+                  <div class="space-y-3">
+                    <p class="text-sm text-base-content/70">
+                      Try these suggestions:
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                      <button
+                        type="button"
+                        class="btn-outline btn btn-sm"
+                        onClick$={() => {
+                          // Suggest dates 1 day later
+                          const newCheckIn = new Date(checkIn.value);
+                          newCheckIn.setDate(newCheckIn.getDate() + 1);
+                          const newCheckOut = new Date(checkOut.value);
+                          newCheckOut.setDate(newCheckOut.getDate() + 1);
+                          checkIn.value = newCheckIn
+                            .toISOString()
+                            .split('T')[0];
+                          checkOut.value = newCheckOut
+                            .toISOString()
+                            .split('T')[0];
+                        }}
+                      >
+                        Try Next Day
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-outline btn btn-sm"
+                        onClick$={() => {
+                          // Reduce stay by 1 night
+                          const newCheckOut = new Date(checkOut.value);
+                          newCheckOut.setDate(newCheckOut.getDate() - 1);
+                          checkOut.value = newCheckOut
+                            .toISOString()
+                            .split('T')[0];
+                        }}
+                      >
+                        Shorter Stay
+                      </button>
+                      <a href="/contact" class="btn btn-sm btn-primary">
+                        Contact Us
+                      </a>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -637,6 +882,47 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                         bind:value={guestPhone}
                         placeholder="Enter phone number"
                       />
+                    </div>
+                  </div>
+
+                  <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
+                    <div class="form-control">
+                      <label class="label" for="guest-country">
+                        <span class="label-text">Country *</span>
+                      </label>
+                      <select
+                        id="guest-country"
+                        class="select-bordered select"
+                        bind:value={guestCountry}
+                        required
+                      >
+                        <option value="US">United States</option>
+                        <option value="ES">Spain</option>
+                        <option value="FR">France</option>
+                        <option value="DE">Germany</option>
+                        <option value="IT">Italy</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="CA">Canada</option>
+                        <option value="MX">Mexico</option>
+                        <option value="BR">Brazil</option>
+                        <option value="AR">Argentina</option>
+                      </select>
+                    </div>
+
+                    <div class="form-control">
+                      <label class="label" for="payment-method">
+                        <span class="label-text">Payment Method *</span>
+                      </label>
+                      <select
+                        id="payment-method"
+                        class="select-bordered select"
+                        bind:value={paymentMethod}
+                        required
+                      >
+                        <option value="cash">Cash at Reception</option>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                      </select>
                     </div>
                   </div>
 

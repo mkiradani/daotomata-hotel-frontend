@@ -83,7 +83,8 @@ export interface CloudbedsRoomResponse {
   };
 }
 
-export type CloudbedsRoomsListResponse = CloudbedsListResponse<CloudbedsRoomResponse>;
+export type CloudbedsRoomsListResponse =
+  CloudbedsListResponse<CloudbedsRoomResponse>;
 
 // Rate-related types
 export interface CloudbedsRateResponse {
@@ -104,21 +105,23 @@ export interface CloudbedsRatesResponse extends CloudbedsBaseResponse {
   rates: CloudbedsRateResponse[];
 }
 
-// Booking-related types
+// Booking-related types - Updated to match Cloudbeds API v1.3 format
 export interface CloudbedsBookingRequest {
-  start_date: string;
-  end_date: string;
-  adults: number;
-  children?: number;
-  rooms?: number;
-  room_type_id?: string;
-  rate_plan_id?: string;
-  guest_first_name?: string;
-  guest_last_name?: string;
-  guest_email?: string;
-  guest_phone?: string;
-  special_requests?: string;
-  promo_code?: string;
+  propertyID: string;
+  startDate: string;
+  endDate: string;
+  guestFirstName: string;
+  guestLastName: string;
+  guestEmail: string;
+  guestPhone?: string;
+  guestCountry: string; // ISO-Code 2 characters
+  rooms: Array<{ roomTypeID?: string }>;
+  adults: Array<Record<string, unknown>>;
+  children: Array<Record<string, unknown>>;
+  paymentMethod: string;
+  specialRequests?: string;
+  promoCode?: string;
+  sendEmailConfirmation?: boolean;
 }
 
 export interface CloudbedsBookingResponse extends CloudbedsBaseResponse {
@@ -221,7 +224,6 @@ export interface CloudbedsRatePlansResponse extends CloudbedsBaseResponse {
   data: CloudbedsRatePlan[];
 }
 
-
 // Guest-related types
 export interface CloudbedsGuestResponse {
   id: string | number;
@@ -263,7 +265,8 @@ export interface CloudbedsGuestCreateRequest {
   };
 }
 
-export type CloudbedsGuestListResponse = CloudbedsListResponse<CloudbedsGuestResponse>;
+export type CloudbedsGuestListResponse =
+  CloudbedsListResponse<CloudbedsGuestResponse>;
 
 // CONSOLIDATED: Unified Payment-related types to avoid conflicts.
 export interface CloudbedsCardType {
@@ -288,7 +291,6 @@ export interface CloudbedsPaymentMethodResponse extends CloudbedsBaseResponse {
     }>;
   };
 }
-
 
 export interface CloudbedsPaymentRequest {
   reservation_id: string | number;

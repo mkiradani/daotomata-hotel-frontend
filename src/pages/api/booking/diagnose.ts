@@ -2,29 +2,25 @@
  * API endpoint for diagnosing booking system configuration
  */
 
-import type { APIRoute } from "astro";
-import { hasBookingCapabilities } from "../../../lib/booking-engines";
-import { getHotelByDomain } from "../../../lib/directus.js";
-import type { Hotel } from "../../../types/hotel.js";
+import type { APIRoute } from 'astro';
+import { hasBookingCapabilities } from '../../../lib/booking-engines';
+import { getCurrentHotel } from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.js';
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async () => {
   try {
-    const searchParams = new URL(url).searchParams;
-    const hotelDomain =
-      searchParams.get("hotelDomain") || new URL(url).hostname;
-
-    // Get hotel data
-    const hotel = (await getHotelByDomain(hotelDomain)) as Hotel | null;
+    // Get current hotel from Directus (single-tenant)
+    const hotel = (await getCurrentHotel()) as Hotel | null;
     if (!hotel) {
       return new Response(
         JSON.stringify({
-          error: "Hotel not found",
-          domain: hotelDomain,
+          error: 'Hotel not found',
+          code: 'HOTEL_NOT_FOUND',
         }),
         {
           status: 404,
-          headers: { "Content-Type": "application/json" },
-        },
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
     }
 
@@ -42,18 +38,18 @@ export const GET: APIRoute = async ({ url }) => {
       configuration: {
         hasBookingCapabilities,
         cloudbeds: {
-          client_id: hotel.cloudbeds_client_id ? "✅ Configured" : "❌ Missing",
+          client_id: hotel.cloudbeds_client_id ? '✅ Configured' : '❌ Missing',
           client_secret: hotel.cloudbeds_client_secret
-            ? "✅ Configured"
-            : "❌ Missing",
-          api_key: hotel.cloudbeds_api_key ? "✅ Configured" : "❌ Missing",
+            ? '✅ Configured'
+            : '❌ Missing',
+          api_key: hotel.cloudbeds_api_key ? '✅ Configured' : '❌ Missing',
           property_id: hotel.cloudbeds_property_id
-            ? "✅ Configured"
-            : "❌ Missing",
+            ? '✅ Configured'
+            : '❌ Missing',
         },
         other: {
-          default_currency: hotel.default_currency || "Not set",
-          default_language: hotel.default_language || "Not set",
+          default_currency: hotel.default_currency || 'Not set',
+          default_language: hotel.default_language || 'Not set',
         },
       },
       rooms: {
@@ -78,7 +74,7 @@ export const GET: APIRoute = async ({ url }) => {
                 id: room.id,
                 name: room.name,
                 room_type: roomData.room_type,
-                pms_room_id: roomData.pms_room_id || "Not set",
+                pms_room_id: roomData.pms_room_id || 'Not set',
                 max_occupancy: roomData.max_occupancy,
               };
             })
@@ -91,52 +87,52 @@ export const GET: APIRoute = async ({ url }) => {
     // Identify issues and recommendations
     if (!hasCapabilities) {
       diagnostics.issues.push(
-        "Hotel does not have booking capabilities configured",
+        'Hotel does not have booking capabilities configured'
       );
       diagnostics.recommendations.push(
-        "Configure Cloudbeds credentials in Directus",
+        'Configure Cloudbeds credentials in Directus'
       );
     }
 
     if (!hotel.cloudbeds_client_id) {
-      diagnostics.issues.push("Missing Cloudbeds Client ID");
+      diagnostics.issues.push('Missing Cloudbeds Client ID');
       diagnostics.recommendations.push(
-        "Set cloudbeds_client_id field in hotels table",
+        'Set cloudbeds_client_id field in hotels table'
       );
     }
 
     if (!hotel.cloudbeds_client_secret) {
-      diagnostics.issues.push("Missing Cloudbeds Client Secret");
+      diagnostics.issues.push('Missing Cloudbeds Client Secret');
       diagnostics.recommendations.push(
-        "Set cloudbeds_client_secret field in hotels table",
+        'Set cloudbeds_client_secret field in hotels table'
       );
     }
 
     if (!hotel.cloudbeds_api_key) {
-      diagnostics.issues.push("Missing Cloudbeds API Key");
+      diagnostics.issues.push('Missing Cloudbeds API Key');
       diagnostics.recommendations.push(
-        "Set cloudbeds_api_key field in hotels table",
+        'Set cloudbeds_api_key field in hotels table'
       );
     }
 
     if (!hotel.cloudbeds_property_id) {
-      diagnostics.issues.push("Missing Cloudbeds Property ID");
+      diagnostics.issues.push('Missing Cloudbeds Property ID');
       diagnostics.recommendations.push(
-        "Set cloudbeds_property_id field in hotels table",
+        'Set cloudbeds_property_id field in hotels table'
       );
     }
 
     if (hotel.rooms && hotel.rooms.length === 0) {
-      diagnostics.issues.push("No rooms configured");
-      diagnostics.recommendations.push("Add rooms to the hotel in Directus");
+      diagnostics.issues.push('No rooms configured');
+      diagnostics.recommendations.push('Add rooms to the hotel in Directus');
     }
 
     if (hotel.rooms && diagnostics.rooms.withoutPmsId > 0) {
       diagnostics.issues.push(
-        `${diagnostics.rooms.withoutPmsId} rooms missing PMS room IDs`,
+        `${diagnostics.rooms.withoutPmsId} rooms missing PMS room IDs`
       );
       diagnostics.recommendations.push(
-        "Use the room sync functionality to map room IDs",
+        'Use the room sync functionality to map room IDs'
       );
     }
 
@@ -146,23 +142,23 @@ export const GET: APIRoute = async ({ url }) => {
       try {
         // Try to initialize the booking service
         const { getBookingService } = await import(
-          "../../../lib/booking-engines"
+          '../../../lib/booking-engines'
         );
         const bookingService = getBookingService();
         await bookingService.initializeForHotel(hotel);
 
         connectionTest = {
-          status: "success",
-          message: "Successfully initialized booking service",
+          status: 'success',
+          message: 'Successfully initialized booking service',
         };
       } catch (error) {
         connectionTest = {
-          status: "error",
-          message: error instanceof Error ? error.message : "Unknown error",
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error',
           error: error instanceof Error ? error.stack : undefined,
         };
         diagnostics.issues.push(
-          `Connection test failed: ${connectionTest.message}`,
+          `Connection test failed: ${connectionTest.message}`
         );
       }
     }
@@ -176,22 +172,22 @@ export const GET: APIRoute = async ({ url }) => {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   } catch (error) {
-    console.error("Booking diagnostics error:", error);
+    console.error('Booking diagnostics error:', error);
 
     return new Response(
       JSON.stringify({
-        error: "Failed to run diagnostics",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to run diagnostics',
+        details: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 };
@@ -199,56 +195,46 @@ export const GET: APIRoute = async ({ url }) => {
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { hotelDomain, action } = body;
+    const { action } = body;
 
-    if (!hotelDomain) {
-      return new Response(
-        JSON.stringify({ error: "Missing hotelDomain parameter" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    // Get hotel data
-    const hotel = await getHotelByDomain(hotelDomain);
+    // Get current hotel from Directus (single-tenant)
+    const hotel = await getCurrentHotel();
     if (!hotel) {
-      return new Response(JSON.stringify({ error: "Hotel not found" }), {
+      return new Response(JSON.stringify({ error: 'Hotel not found' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     let result = null;
 
     switch (action) {
-      case "test-connection":
+      case 'test-connection':
         try {
           const { getBookingService } = await import(
-            "../../../lib/booking-engines"
+            '../../../lib/booking-engines'
           );
           const bookingService = getBookingService();
           await bookingService.initializeForHotel(hotel);
 
           result = {
-            status: "success",
-            message: "Connection successful",
+            status: 'success',
+            message: 'Connection successful',
             timestamp: new Date().toISOString(),
           };
         } catch (error) {
           result = {
-            status: "error",
-            message: error instanceof Error ? error.message : "Unknown error",
+            status: 'error',
+            message: error instanceof Error ? error.message : 'Unknown error',
             timestamp: new Date().toISOString(),
           };
         }
         break;
 
-      case "test-availability":
+      case 'test-availability':
         try {
           const { getBookingService } = await import(
-            "../../../lib/booking-engines"
+            '../../../lib/booking-engines'
           );
           const bookingService = getBookingService();
           await bookingService.initializeForHotel(hotel);
@@ -264,31 +250,31 @@ export const POST: APIRoute = async ({ request }) => {
           const availability = await bookingService.checkAvailability(
             String(hotelData.id),
             {
-              checkIn: tomorrow.toISOString().split("T")[0],
-              checkOut: dayAfter.toISOString().split("T")[0],
+              checkIn: tomorrow.toISOString().split('T')[0],
+              checkOut: dayAfter.toISOString().split('T')[0],
               adults: 2,
-            },
+            }
           );
 
           result = {
-            status: "success",
-            message: "Availability check successful",
+            status: 'success',
+            message: 'Availability check successful',
             data: availability,
             timestamp: new Date().toISOString(),
           };
         } catch (error) {
           result = {
-            status: "error",
-            message: error instanceof Error ? error.message : "Unknown error",
+            status: 'error',
+            message: error instanceof Error ? error.message : 'Unknown error',
             timestamp: new Date().toISOString(),
           };
         }
         break;
 
       default:
-        return new Response(JSON.stringify({ error: "Unknown action" }), {
+        return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         });
     }
 
@@ -299,21 +285,21 @@ export const POST: APIRoute = async ({ request }) => {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   } catch (error) {
-    console.error("Booking diagnostics action error:", error);
+    console.error('Booking diagnostics action error:', error);
 
     return new Response(
       JSON.stringify({
-        error: "Failed to execute action",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to execute action',
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 };
