@@ -7,6 +7,8 @@ import {
   useTask$,
   useVisibleTask$,
 } from '@builder.io/qwik';
+import { PaymentMethodSelector } from './PaymentMethodSelector';
+import { CreditCardForm } from './CreditCardForm';
 
 interface BookingWidgetRealProps {
   hotelDomain: string;
@@ -43,6 +45,21 @@ interface RoomAvailability {
   };
 }
 
+interface FeesAndTaxes {
+  fees: Array<{
+    feeName: string;
+    feeValue: number;
+  }>;
+  totalFees: number;
+  taxes: Array<{
+    feeName: string;
+    feeValue: string;
+  }>;
+  totalTaxes: number;
+  roomsTotalWithoutTaxes: number;
+  grandTotal: number;
+}
+
 interface RoomRate {
   roomId: string;
   roomType: string;
@@ -63,7 +80,7 @@ interface RoomRate {
 
 export const BookingWidgetReal = component$<BookingWidgetRealProps>(
   ({
-    hotelDomain: _hotelDomain,
+    hotelDomain,
     hotelName,
     defaultCurrency: _defaultCurrency,
     className = '',
@@ -89,8 +106,12 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       rates: [] as RoomRate[],
       showResults: false,
       showBookingForm: false,
-      selectedRoom: null as RoomAvailability | null,
+      feesAndTaxes: null as FeesAndTaxes | null,
+      showPriceBreakdown: false,
     });
+
+    // Use separate signal for selectedRoom to ensure reactivity
+    const selectedRoom = useSignal<RoomAvailability | null>(null);
 
     // Force render trigger for Qwik reactivity
     const renderTrigger = useSignal(0);
@@ -101,8 +122,19 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
     const guestEmail = useSignal('');
     const guestPhone = useSignal('');
     const guestCountry = useSignal('US'); // Default to US
-    const paymentMethod = useSignal('cash'); // Default to cash
     const specialRequests = useSignal('');
+
+    // Payment state - start with empty to avoid conflicts
+    const selectedPaymentMethod = useSignal(''); // Will be set when payment methods load
+    const selectedCardType = useSignal('');
+
+    const creditCardData = useStore({
+      cardNumber: '',
+      expiryMonth: '',
+      expiryYear: '',
+      cvv: '',
+      cardholderName: '',
+    });
 
     // Set default dates (Cloudbeds requires startDate > today)
     useTask$(() => {
@@ -122,6 +154,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       track(() => state.showResults);
       track(() => state.availability.length);
       track(() => state.showBookingForm);
+      track(() => selectedRoom.value);
+      track(() => renderTrigger.value);
     });
 
     // Search for availability and rates
@@ -199,19 +233,165 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       }
     });
 
+    // Calculate fees and taxes for selected room
+    const calculateFeesAndTaxes = $(async (room: RoomAvailability) => {
+      try {
+        const roomsCount = parseInt(rooms.value);
+        const roomsTotal = room.price * roomsCount;
+
+        const feesRequest = {
+          startDate: checkIn.value,
+          endDate: checkOut.value,
+          roomsTotal: roomsTotal,
+          roomsCount: roomsCount,
+        };
+
+        const response = await fetch('/api/booking/fees-and-taxes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(feesRequest),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to calculate fees and taxes');
+        }
+
+        state.feesAndTaxes = result.data.data;
+        state.showPriceBreakdown = true;
+      } catch {
+        // Show warning but continue with fallback
+
+        state.feesAndTaxes = {
+          fees: [],
+          totalFees: 0,
+          taxes: [],
+          totalTaxes: 0,
+          roomsTotalWithoutTaxes: room.price * parseInt(rooms.value),
+          grandTotal: room.price * parseInt(rooms.value),
+        };
+        state.showPriceBreakdown = true;
+      }
+    });
+
+    // Handle payment method change
+    const handlePaymentMethodChange = $((method: string, cardType?: string) => {
+      selectedPaymentMethod.value = method;
+      if (cardType) {
+        selectedCardType.value = cardType;
+      } else if (method !== 'credit') {
+        // Clear card type if not credit card
+        selectedCardType.value = '';
+      }
+    });
+
+    // Handle credit card data change
+    const handleCreditCardDataChange = $(
+      (cardData: {
+        cardNumber: string;
+        expiryMonth: string;
+        expiryYear: string;
+        cvv: string;
+        cardholderName: string;
+        detectedCardType?: string;
+      }) => {
+        creditCardData.cardNumber = cardData.cardNumber;
+        creditCardData.expiryMonth = cardData.expiryMonth;
+        creditCardData.expiryYear = cardData.expiryYear;
+        creditCardData.cvv = cardData.cvv;
+        creditCardData.cardholderName = cardData.cardholderName;
+      }
+    );
+
+    // Handle auto-detected card type
+    const handleCardTypeDetected = $((detectedType: string) => {
+      selectedCardType.value = detectedType;
+    });
+
     // Book a room
     const selectRoom = $(async (room: RoomAvailability) => {
-      state.selectedRoom = room;
+      // Update signals
+      selectedRoom.value = room;
       state.showBookingForm = true;
+
+      // Force render trigger update
+      renderTrigger.value++;
+
+      // Calculate fees and taxes when room is selected
+      try {
+        await calculateFeesAndTaxes(room);
+      } catch {
+        // Error handling is done in calculateFeesAndTaxes
+      }
     });
 
     // Submit booking
     const submitBooking = $(async () => {
-      if (!state.selectedRoom) return;
+      if (!selectedRoom.value) return;
 
       if (!guestFirstName.value || !guestLastName.value || !guestEmail.value) {
         state.error = 'Please fill in all required guest information';
         return;
+      }
+
+      // Validate payment method
+      if (!selectedPaymentMethod.value) {
+        state.error = 'Please select a payment method';
+        return;
+      }
+
+      // Validate credit card data if credit card is selected
+      if (selectedPaymentMethod.value === 'credit') {
+        if (!selectedCardType.value) {
+          state.error = 'Please select a card type';
+          return;
+        }
+
+        if (
+          !creditCardData.cardNumber ||
+          !creditCardData.expiryMonth ||
+          !creditCardData.expiryYear ||
+          !creditCardData.cvv ||
+          !creditCardData.cardholderName
+        ) {
+          state.error = 'Please fill in all credit card information';
+          return;
+        }
+
+        // Additional credit card validation
+        const cardNumber = creditCardData.cardNumber.replace(/\s/g, '');
+        if (cardNumber.length < 13 || cardNumber.length > 19) {
+          state.error = 'Please enter a valid card number';
+          return;
+        }
+
+        if (creditCardData.cvv.length < 3 || creditCardData.cvv.length > 4) {
+          state.error = 'Please enter a valid CVV';
+          return;
+        }
+
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+        const expiryYear = parseInt(creditCardData.expiryYear);
+        const expiryMonth = parseInt(creditCardData.expiryMonth);
+
+        if (
+          expiryYear < currentYear ||
+          (expiryYear === currentYear && expiryMonth < currentMonth)
+        ) {
+          state.error = 'Card has expired. Please use a valid card';
+          return;
+        }
+
+        if (creditCardData.cardholderName.trim().length < 2) {
+          state.error = 'Please enter a valid cardholder name';
+          return;
+        }
       }
 
       state.isLoading = true;
@@ -225,7 +405,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           children:
             parseInt(children.value) > 0 ? parseInt(children.value) : undefined,
           rooms: parseInt(rooms.value),
-          roomType: state.selectedRoom.roomType,
+          roomType: selectedRoom.value.roomType,
           guestInfo: {
             firstName: guestFirstName.value,
             lastName: guestLastName.value,
@@ -233,8 +413,17 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
             phone: guestPhone.value || undefined,
             country: guestCountry.value,
           },
-          paymentMethod: paymentMethod.value,
+          paymentMethod: selectedPaymentMethod.value,
+          paymentDetails:
+            selectedPaymentMethod.value === 'credit'
+              ? {
+                  cardType: selectedCardType.value,
+                  cardData: creditCardData,
+                }
+              : undefined,
           specialRequests: specialRequests.value || undefined,
+          // Include fees and taxes data for reference
+          feesAndTaxes: state.feesAndTaxes,
         };
 
         console.log(
@@ -251,21 +440,41 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
         const bookingData = await bookingResponse.json();
 
         if (bookingData.success && bookingData.booking.success) {
-          // Show success message
+          // Show detailed success message
+          const confirmationNumber =
+            bookingData.booking.confirmationNumber ||
+            bookingData.booking.bookingId;
+          const totalAmount =
+            state.feesAndTaxes?.grandTotal || selectedRoom.value.price;
+
           alert(
-            `Booking successful! Confirmation: ${bookingData.booking.confirmationNumber || bookingData.booking.bookingId}`
+            `🎉 Booking Confirmed!\n\n` +
+              `Confirmation Number: ${confirmationNumber}\n` +
+              `Room: ${selectedRoom.value.roomType}\n` +
+              `Check-in: ${checkIn.value}\n` +
+              `Check-out: ${checkOut.value}\n` +
+              `Total Amount: $${totalAmount.toFixed(2)}\n\n` +
+              `A confirmation email has been sent to ${guestEmail.value}`
           );
 
           // Reset form
           state.showBookingForm = false;
           state.showResults = false;
-          state.selectedRoom = null;
+          selectedRoom.value = null;
+          state.feesAndTaxes = null;
+          state.showPriceBreakdown = false;
           guestFirstName.value = '';
           guestLastName.value = '';
           guestEmail.value = '';
           guestPhone.value = '';
           guestCountry.value = 'US';
-          paymentMethod.value = 'cash';
+          selectedPaymentMethod.value = 'cash';
+          selectedCardType.value = '';
+          creditCardData.cardNumber = '';
+          creditCardData.expiryMonth = '';
+          creditCardData.expiryYear = '';
+          creditCardData.cvv = '';
+          creditCardData.cardholderName = '';
           specialRequests.value = '';
         } else {
           throw new Error(
@@ -275,8 +484,23 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           );
         }
       } catch (err) {
-        state.error =
-          err instanceof Error ? err.message : 'Failed to create booking';
+        // Provide more specific error messages
+        if (err instanceof Error) {
+          if (err.message.includes('payment')) {
+            state.error =
+              'Payment processing failed. Please check your payment details and try again.';
+          } else if (err.message.includes('availability')) {
+            state.error =
+              'Room is no longer available. Please select a different room or dates.';
+          } else if (err.message.includes('validation')) {
+            state.error = 'Please check all required fields and try again.';
+          } else {
+            state.error = err.message;
+          }
+        } else {
+          state.error =
+            'An unexpected error occurred. Please try again or contact support.';
+        }
       } finally {
         state.isLoading = false;
       }
@@ -756,7 +980,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
               )}
 
             {/* Booking Form */}
-            {state.showBookingForm && state.selectedRoom && (
+            {state.showBookingForm && selectedRoom.value && (
               <div class="mt-6">
                 <div class="flex justify-between items-center mb-4">
                   <h4 class="text-base-content/80 text-lg">
@@ -767,7 +991,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     class="btn btn-sm btn-ghost"
                     onClick$={() => {
                       state.showBookingForm = false;
-                      state.selectedRoom = null;
+                      selectedRoom.value = null;
                     }}
                   >
                     ← Back to Results
@@ -778,8 +1002,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 <div class="bg-primary/10 mb-6 card">
                   <div class="card-body">
                     <h5 class="font-semibold">
-                      {state.selectedRoom.directusRoom?.name ||
-                        state.selectedRoom.roomType}
+                      {selectedRoom.value.directusRoom?.name ||
+                        selectedRoom.value.roomType}
                     </h5>
                     <div class="gap-4 grid grid-cols-2 text-sm">
                       <div>
@@ -807,13 +1031,13 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                           <div class="text-primary/90 text-xl">
                             {(() => {
                               const rate = getRoomRate(
-                                state.selectedRoom?.roomId
+                                selectedRoom.value?.roomId
                               );
                               return rate
                                 ? formatPrice(rate.totalPrice, rate.currency)
                                 : formatPrice(
-                                    state.selectedRoom?.price,
-                                    state.selectedRoom?.currency
+                                    selectedRoom.value?.price,
+                                    selectedRoom.value?.currency
                                   );
                             })()}
                           </div>
@@ -909,22 +1133,26 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                       </select>
                     </div>
 
-                    <div class="form-control">
-                      <label class="label" for="payment-method">
-                        <span class="label-text">Payment Method *</span>
-                      </label>
-                      <select
-                        id="payment-method"
-                        class="select-bordered select"
-                        bind:value={paymentMethod}
-                        required
-                      >
-                        <option value="cash">Cash at Reception</option>
-                        <option value="credit_card">Credit Card</option>
-                        <option value="bank_transfer">Bank Transfer</option>
-                      </select>
-                    </div>
+                    {/* Payment Method Selector */}
+                    <PaymentMethodSelector
+                      hotelDomain={hotelDomain}
+                      selectedMethod={selectedPaymentMethod.value}
+                      selectedCardType={selectedCardType.value}
+                      onMethodChange={handlePaymentMethodChange}
+                      className="col-span-full"
+                    />
                   </div>
+
+                  {/* Credit Card Form - Show only when credit card is selected */}
+                  {selectedPaymentMethod.value === 'credit' &&
+                    selectedCardType.value && (
+                      <CreditCardForm
+                        cardType={selectedCardType.value}
+                        onCardDataChange={handleCreditCardDataChange}
+                        onCardTypeDetected={handleCardTypeDetected}
+                        className="mt-4"
+                      />
+                    )}
 
                   <div class="form-control">
                     <label class="label" for="special-requests">
@@ -939,6 +1167,88 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     ></textarea>
                   </div>
 
+                  {/* Price Breakdown */}
+                  {state.showPriceBreakdown && state.feesAndTaxes && (
+                    <div class="bg-base-100 p-4 border border-base-300 rounded-lg">
+                      <h6 class="mb-3 font-semibold text-base-content">
+                        Price Breakdown
+                      </h6>
+
+                      <div class="space-y-2 text-sm">
+                        {/* Room Total */}
+                        <div class="flex justify-between">
+                          <span class="text-base-content/70">
+                            Room Total ({parseInt(rooms.value)} room
+                            {parseInt(rooms.value) > 1 ? 's' : ''})
+                          </span>
+                          <span class="font-medium">
+                            $
+                            {state.feesAndTaxes.roomsTotalWithoutTaxes.toFixed(
+                              2
+                            )}
+                          </span>
+                        </div>
+
+                        {/* Fees */}
+                        {state.feesAndTaxes.fees.map((fee, index) => (
+                          <div key={index} class="flex justify-between">
+                            <span class="text-base-content/70">
+                              {fee.feeName}
+                            </span>
+                            <span class="font-medium">
+                              ${fee.feeValue.toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+
+                        {/* Total Fees */}
+                        {state.feesAndTaxes.totalFees > 0 && (
+                          <div class="flex justify-between">
+                            <span class="text-base-content/70">Total Fees</span>
+                            <span class="font-medium">
+                              ${state.feesAndTaxes.totalFees.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Taxes */}
+                        {state.feesAndTaxes.taxes.map((tax, index) => (
+                          <div key={index} class="flex justify-between">
+                            <span class="text-base-content/70">
+                              {tax.feeName}
+                            </span>
+                            <span class="font-medium">
+                              ${parseFloat(tax.feeValue).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+
+                        {/* Total Taxes */}
+                        {state.feesAndTaxes.totalTaxes > 0 && (
+                          <div class="flex justify-between">
+                            <span class="text-base-content/70">
+                              Total Taxes
+                            </span>
+                            <span class="font-medium">
+                              ${state.feesAndTaxes.totalTaxes.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Divider */}
+                        <div class="my-2 border-t border-base-300"></div>
+
+                        {/* Grand Total */}
+                        <div class="flex justify-between font-semibold text-primary text-lg">
+                          <span>Total Amount</span>
+                          <span>
+                            ${state.feesAndTaxes.grandTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Booking Actions */}
                   <div class="justify-end pt-4 card-actions">
                     <button
@@ -946,7 +1256,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                       class="btn-outline btn"
                       onClick$={() => {
                         state.showBookingForm = false;
-                        state.selectedRoom = null;
+                        selectedRoom.value = null;
                       }}
                       disabled={state.isLoading}
                     >

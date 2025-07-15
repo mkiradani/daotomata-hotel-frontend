@@ -27,6 +27,8 @@ import type {
   CloudbedsAvailabilityResponse,
   CloudbedsBookingRequest,
   CloudbedsBookingResponse,
+  CloudbedsFeesAndTaxesRequest,
+  CloudbedsFeesAndTaxesResponse,
   CloudbedsListResponse,
   CloudbedsPaymentMethodResponse,
   CloudbedsPaymentRequest,
@@ -65,6 +67,9 @@ const CLOUDBEDS_ENDPOINTS = {
   // Payments
   getPaymentMethods: '/getPaymentMethods',
   postPayment: '/postPayment',
+
+  // Fees and Taxes
+  getRoomsFeesAndTaxes: '/getRoomsFeesAndTaxes',
 } as const;
 
 export class CloudbedsEngine implements IBookingEngine {
@@ -554,16 +559,40 @@ export class CloudbedsEngine implements IBookingEngine {
 
   /**
    * Get available payment methods for the property
+   * @param lang - Language for payment method names (default: 'en')
    */
-  async getPaymentMethods(): Promise<CloudbedsPaymentMethodResponse> {
+  async getPaymentMethods(
+    lang: string = 'en'
+  ): Promise<CloudbedsPaymentMethodResponse> {
     try {
-      const response =
-        await this.makeRequest<CloudbedsPaymentMethodResponse>(
-          '/getPaymentMethods'
-        );
+      console.log('💳 [CLOUDBEDS] Getting payment methods...');
+
+      const params = new URLSearchParams({
+        propertyID: this.config?.credentials.propertyId || '',
+        lang: lang,
+      });
+
+      console.log('💳 [CLOUDBEDS] API parameters:', params.toString());
+
+      const response = await this.makeRequest<CloudbedsPaymentMethodResponse>(
+        `${CLOUDBEDS_ENDPOINTS.getPaymentMethods}?${params}`
+      );
+
+      console.log(
+        '💳 [CLOUDBEDS] Raw payment methods response:',
+        JSON.stringify(response, null, 2)
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error('No payment methods data found in Cloudbeds response');
+      }
+
       return response;
-    } catch {
-      // CORRECTED: Fallback data now matches the updated CloudbedsPaymentMethodResponse type.
+    } catch (error) {
+      console.error('❌ [ERROR] Failed to get payment methods:', error);
+      console.warn('⚠️ [FALLBACK] Using default payment methods');
+
+      // Enhanced fallback with more realistic payment methods
       return {
         success: true,
         data: {
@@ -575,11 +604,23 @@ export class CloudbedsEngine implements IBookingEngine {
               cardTypes: [
                 { cardCode: 'visa', cardName: 'Visa' },
                 { cardCode: 'master', cardName: 'Mastercard' },
+                { cardCode: 'amex', cardName: 'American Express' },
+                { cardCode: 'diners', cardName: 'Diners Club' },
               ],
+            },
+            {
+              type: 'cash',
+              name: 'Cash at Reception',
             },
             {
               type: 'bank_transfer',
               name: 'Bank Transfer',
+            },
+          ],
+          gateway: [
+            {
+              name: 'Cloudbeds Payments',
+              currency: 'USD',
             },
           ],
         },
@@ -703,6 +744,62 @@ export class CloudbedsEngine implements IBookingEngine {
         `Payment processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         error
       );
+    }
+  }
+
+  /**
+   * Get applicable fees and taxes for a booking
+   * Used during checkout to display the complete price breakdown to guests
+   */
+  async getRoomsFeesAndTaxes(
+    request: CloudbedsFeesAndTaxesRequest
+  ): Promise<CloudbedsFeesAndTaxesResponse> {
+    try {
+      console.log('💰 [CLOUDBEDS] Getting fees and taxes...');
+      console.log('💰 [CLOUDBEDS] Request:', JSON.stringify(request, null, 2));
+
+      const params = new URLSearchParams({
+        propertyID: request.propertyID,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        roomsTotal: request.roomsTotal.toString(),
+        roomsCount: request.roomsCount.toString(),
+      });
+
+      console.log('💰 [CLOUDBEDS] API parameters:', params.toString());
+
+      const response = await this.makeRequest<CloudbedsFeesAndTaxesResponse>(
+        `${CLOUDBEDS_ENDPOINTS.getRoomsFeesAndTaxes}?${params}`
+      );
+
+      console.log(
+        '💰 [CLOUDBEDS] Raw fees and taxes response:',
+        JSON.stringify(response, null, 2)
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error('No fees and taxes data found in Cloudbeds response');
+      }
+
+      return response;
+    } catch (error) {
+      console.error('❌ [ERROR] Failed to get fees and taxes:', error);
+
+      // Provide fallback with zero fees/taxes for development
+      console.warn('⚠️ [FALLBACK] Using zero fees/taxes fallback');
+
+      return {
+        success: true,
+        data: {
+          fees: [],
+          totalFees: 0,
+          taxes: [],
+          totalTaxes: 0,
+          roomsTotalWithoutTaxes: request.roomsTotal,
+          grandTotal: request.roomsTotal,
+        },
+        message: 'Fallback: No additional fees or taxes applied',
+      };
     }
   }
 

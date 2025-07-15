@@ -313,6 +313,38 @@ export interface CloudbedsPaymentResponse extends CloudbedsBaseResponse {
   processed_at?: string;
 }
 
+// Fees and Taxes API Types
+export interface CloudbedsFee {
+  feeName: string;
+  feeValue: number;
+}
+
+export interface CloudbedsTax {
+  feeName: string;
+  feeValue: string; // API returns string for tax values
+}
+
+export interface CloudbedsFeesAndTaxesRequest {
+  propertyID: string;
+  startDate: string; // Format: YYYY-MM-DD
+  endDate: string; // Format: YYYY-MM-DD
+  roomsTotal: number; // Total value of rooms to be booked, with included taxes
+  roomsCount: number; // Number of rooms to be booked
+}
+
+export interface CloudbedsFeesAndTaxesResponse extends CloudbedsBaseResponse {
+  success: boolean;
+  data: {
+    fees: CloudbedsFee[];
+    totalFees: number;
+    taxes: CloudbedsTax[];
+    totalTaxes: number;
+    roomsTotalWithoutTaxes: number;
+    grandTotal: number;
+  };
+  message?: string; // Present if success = false
+}
+
 export interface CloudbedsChargeRequest {
   reservation_id: string | number;
   item_id?: string;
