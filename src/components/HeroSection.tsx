@@ -1,5 +1,6 @@
 /** @jsxImportSource @builder.io/qwik */
 import { component$ } from "@builder.io/qwik";
+import { HeroBookingWidget } from "./HeroBookingWidget";
 
 interface HeroSectionProps {
   hotelName: string;
@@ -51,39 +52,57 @@ export const HeroSection = component$<HeroSectionProps>(
         <div class="absolute inset-0 bg-neutral/40"></div>
 
         {/* Content */}
-        <div class="z-10 relative mx-auto px-4 max-w-4xl text-neutral-content text-center">
+        <div class="z-10 relative mx-auto px-4 max-w-6xl text-neutral-content text-center">
           <h1 class="mb-6 font-primary text-neutral-content/95 text-6xl">{hotelName}</h1>
           <p class="opacity-90 mb-8 font-secondary text-xl">
             Welcome to an extraordinary experience
           </p>
 
-          {/* Language & Currency Selector */}
+          {/* Hero Booking Widget */}
+          <div class="mb-8">
+            <HeroBookingWidget hotelName={hotelName} />
+          </div>
+
+          {/* Language and Currency Selectors */}
           <div class="flex justify-center gap-4 mb-8">
-            <select class="bg-base-100/20 backdrop-blur-sm px-4 py-2 border border-base-content/20 rounded-lg text-neutral-content">
+            <select class="select select-bordered bg-base-100/80 backdrop-blur-sm border-base-300/50">
+              <option disabled selected>
+                Language
+              </option>
               {availableLanguages.map((lang) => (
-                <option value={lang} selected={lang === currentLanguage}>
-                  {lang.split("-")[0].toUpperCase()}
+                <option
+                  key={lang}
+                  value={lang}
+                  selected={lang === currentLanguage}
+                >
+                  {lang.toUpperCase()}
                 </option>
               ))}
             </select>
-            <select class="bg-base-100/20 backdrop-blur-sm px-4 py-2 border border-base-content/20 rounded-lg text-neutral-content">
+
+            <select class="select select-bordered bg-base-100/80 backdrop-blur-sm border-base-300/50">
+              <option disabled selected>
+                Currency
+              </option>
               {availableCurrencies.map((currency) => (
                 <option
+                  key={currency}
                   value={currency}
                   selected={currency === defaultCurrency}
                 >
-                  {currency}
+                  {currency.toUpperCase()}
                 </option>
               ))}
             </select>
           </div>
 
+          {/* Secondary Actions */}
           <div class="flex justify-center gap-4">
-            <button type="button" class="text-lg btn btn-primary">
-              Book Now
+            <button type="button" class="btn-outline btn btn-secondary">
+              Explore Rooms
             </button>
-            <button type="button" class="btn btn-secondary">
-              Explore
+            <button type="button" class="btn-outline btn btn-secondary">
+              View Facilities
             </button>
           </div>
         </div>
