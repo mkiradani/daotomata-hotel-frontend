@@ -1,6 +1,14 @@
 import type { APIRoute } from 'astro';
 import { getCurrentHotel } from '../../../lib/directus.js';
 
+// Define hotel type to avoid TypeScript errors
+interface Hotel {
+  id: number;
+  name: string;
+  domain: string;
+  cloudbeds_booking_url_id?: string;
+}
+
 export const POST: APIRoute = async ({ request }) => {
   console.log('🔗 [API] Redirect URL request received');
 
@@ -26,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Get hotel configuration
     console.log('🏨 Loading current hotel...');
-    const hotel = await getCurrentHotel();
+    const hotel = (await getCurrentHotel()) as Hotel | null;
 
     if (!hotel) {
       return new Response(
