@@ -1,11 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import {
-  $,
-  component$,
-  useSignal,
-  useStore,
-  useTask$,
-} from '@builder.io/qwik';
+import { $, component$, useSignal, useStore, useTask$ } from '@builder.io/qwik';
 
 interface HeroBookingWidgetProps {
   hotelName: string;
@@ -78,7 +72,10 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
           );
         }
 
-        console.log('🔗 [HERO-WIDGET] Redirecting to:', redirectData.redirectUrl);
+        console.log(
+          '🔗 [HERO-WIDGET] Redirecting to:',
+          redirectData.redirectUrl
+        );
 
         // Redirect to Cloudbeds
         window.location.href = redirectData.redirectUrl;
@@ -137,9 +134,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                   type="date"
                   class="input input-bordered bg-base-100/90 focus:border-primary focus:outline-none w-full transition-colors"
                   bind:value={checkOut}
-                  min={
-                    checkIn.value || new Date().toISOString().split('T')[0]
-                  }
+                  min={checkIn.value || new Date().toISOString().split('T')[0]}
                 />
               </div>
 
@@ -245,5 +240,5 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
         </div>
       </div>
     );
-  },
+  }
 );

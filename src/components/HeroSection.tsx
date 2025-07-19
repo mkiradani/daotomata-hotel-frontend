@@ -1,6 +1,6 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$ } from "@builder.io/qwik";
-import { HeroBookingWidget } from "./HeroBookingWidget";
+import { component$ } from '@builder.io/qwik';
+import { HeroBookingWidget } from './HeroBookingWidget';
 
 interface HeroSectionProps {
   hotelName: string;
@@ -53,7 +53,9 @@ export const HeroSection = component$<HeroSectionProps>(
 
         {/* Content */}
         <div class="z-10 relative mx-auto px-4 max-w-6xl text-neutral-content text-center">
-          <h1 class="mb-6 font-primary text-neutral-content/95 text-6xl">{hotelName}</h1>
+          <h1 class="mb-6 font-primary text-neutral-content/95 text-6xl">
+            {hotelName}
+          </h1>
           <p class="opacity-90 mb-8 font-secondary text-xl">
             Welcome to an extraordinary experience
           </p>
@@ -65,7 +67,7 @@ export const HeroSection = component$<HeroSectionProps>(
 
           {/* Language and Currency Selectors */}
           <div class="flex justify-center gap-4 mb-8">
-            <select class="select select-bordered bg-base-100/80 backdrop-blur-sm border-base-300/50">
+            <select class="bg-base-100/80 backdrop-blur-sm border-base-300/50 select-bordered select">
               <option disabled selected>
                 Language
               </option>
@@ -80,7 +82,7 @@ export const HeroSection = component$<HeroSectionProps>(
               ))}
             </select>
 
-            <select class="select select-bordered bg-base-100/80 backdrop-blur-sm border-base-300/50">
+            <select class="bg-base-100/80 backdrop-blur-sm border-base-300/50 select-bordered select">
               <option disabled selected>
                 Currency
               </option>
@@ -126,5 +128,5 @@ export const HeroSection = component$<HeroSectionProps>(
         </div>
       </section>
     );
-  },
+  }
 );
