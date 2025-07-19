@@ -293,4 +293,5 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
         </div>
       </div>
     );
+  }
 );
