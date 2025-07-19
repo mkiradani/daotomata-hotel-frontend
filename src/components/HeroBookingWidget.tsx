@@ -90,14 +90,17 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
 
     return (
       <div class={`hero-booking-widget ${className}`}>
-        {/* Glass-morphism card */}
-        <div class="bg-base-100/80 backdrop-blur-sm border border-base-300/50 rounded-lg p-6 shadow-xl">
+        {/* Glass-morphism card with theme-aware styling */}
+        <div
+          class="bg-base-100 shadow-xl backdrop-blur-sm p-6 border border-base-300 rounded-lg"
+          style="background-color: color-mix(in srgb, var(--color-base-100) 85%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 60%, transparent)"
+        >
           {/* Header */}
           <div class="mb-4 text-center">
-            <h3 class="font-primary text-base-content text-lg font-semibold">
+            <h3 class="font-primary font-semibold text-base-content text-lg">
               Book Your Stay at {hotelName}
             </h3>
-            <p class="font-secondary text-base-content/70 text-sm">
+            <p class="font-secondary text-sm text-base-content/70">
               Select your dates and preferences
             </p>
           </div>
@@ -105,18 +108,18 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
           {/* Booking Form */}
           <div class="space-y-4">
             {/* Form Grid - Responsive Layout */}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {/* Check-in Date */}
               <div class="form-control">
                 <label class="label" for="hero-checkin-date">
-                  <span class="font-secondary font-medium text-base-content text-sm label-text">
+                  <span class="font-secondary font-medium text-sm text-base-content label-text">
                     Check-in
                   </span>
                 </label>
                 <input
                   id="hero-checkin-date"
                   type="date"
-                  class="input input-bordered bg-base-100/90 focus:border-primary focus:outline-none w-full transition-colors"
+                  class="bg-base-100 input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
                   bind:value={checkIn}
                   min={new Date().toISOString().split('T')[0]}
                 />
@@ -125,14 +128,14 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
               {/* Check-out Date */}
               <div class="form-control">
                 <label class="label" for="hero-checkout-date">
-                  <span class="font-secondary font-medium text-base-content text-sm label-text">
+                  <span class="font-secondary font-medium text-sm text-base-content label-text">
                     Check-out
                   </span>
                 </label>
                 <input
                   id="hero-checkout-date"
                   type="date"
-                  class="input input-bordered bg-base-100/90 focus:border-primary focus:outline-none w-full transition-colors"
+                  class="bg-base-100 input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
                   bind:value={checkOut}
                   min={checkIn.value || new Date().toISOString().split('T')[0]}
                 />
@@ -141,14 +144,14 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
               {/* Guests Selection */}
               <div class="form-control">
                 <label class="label" for="hero-guests">
-                  <span class="font-secondary font-medium text-base-content text-sm label-text">
+                  <span class="font-secondary font-medium text-sm text-base-content label-text">
                     Guests
                   </span>
                 </label>
                 <div class="flex gap-2">
                   <select
                     id="hero-guests"
-                    class="select select-bordered bg-base-100/90 focus:border-primary focus:outline-none flex-1 transition-colors"
+                    class="flex-1 bg-base-100 focus:border-primary focus:outline-none transition-colors select-bordered select"
                     bind:value={adults}
                   >
                     <option value="1">1 Adult</option>
@@ -159,7 +162,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                     <option value="6">6 Adults</option>
                   </select>
                   <select
-                    class="select select-bordered bg-base-100/90 focus:border-primary focus:outline-none flex-1 transition-colors"
+                    class="flex-1 bg-base-100 focus:border-primary focus:outline-none transition-colors select-bordered select"
                     bind:value={children}
                   >
                     <option value="0">0 Kids</option>
@@ -194,7 +197,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                   ) : (
                     <>
                       <svg
-                        class="w-5 h-5 mr-2"
+                        class="mr-2 w-5 h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -216,7 +219,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
 
             {/* Error Message */}
             {state.error && (
-              <div class="bg-error/10 border border-error/20 rounded-lg p-3">
+              <div class="alert alert-error">
                 <div class="flex items-center">
                   <svg
                     class="flex-shrink-0 mr-2 w-4 h-4 text-error"
