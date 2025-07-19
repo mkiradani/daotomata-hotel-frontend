@@ -92,16 +92,16 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
       <div class={`hero-booking-widget ${className}`}>
         {/* Glass-morphism card with theme-aware styling */}
         <div
-          class="bg-base-100 shadow-xl backdrop-blur-sm p-6 border border-base-300 rounded-lg"
-          style="background-color: color-mix(in srgb, var(--color-base-100) 85%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 60%, transparent)"
+          class="bg-base-100 shadow-xl backdrop-blur-sm p-6 border border-base-300"
+          style="background-color: color-mix(in srgb, var(--color-base-100) 90%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 70%, transparent); border-radius: var(--radius-box, 0rem);"
         >
           {/* Header */}
-          <div class="mb-4 text-center">
-            <h3 class="font-primary font-semibold text-base-content text-lg">
-              Book Your Stay at {hotelName}
+          <div class="mb-6 text-center">
+            <h3 class="mb-2 font-primary font-bold text-primary text-xl">
+              Book Your Stay
             </h3>
-            <p class="font-secondary text-sm text-base-content/70">
-              Select your dates and preferences
+            <p class="font-secondary text-sm text-base-content/80">
+              Select your dates and preferences for {hotelName}
             </p>
           </div>
 
@@ -120,6 +120,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                   id="hero-checkin-date"
                   type="date"
                   class="bg-base-100 input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
+                  style="border-radius: var(--radius-field, 0rem);"
                   bind:value={checkIn}
                   min={new Date().toISOString().split('T')[0]}
                 />
@@ -136,6 +137,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                   id="hero-checkout-date"
                   type="date"
                   class="bg-base-100 input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
+                  style="border-radius: var(--radius-field, 0rem);"
                   bind:value={checkOut}
                   min={checkIn.value || new Date().toISOString().split('T')[0]}
                 />
@@ -152,6 +154,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                   <select
                     id="hero-guests"
                     class="flex-1 bg-base-100 focus:border-primary focus:outline-none transition-colors select-bordered select"
+                    style="border-radius: var(--radius-selector, 0rem);"
                     bind:value={adults}
                   >
                     <option value="1">1 Adult</option>
@@ -163,6 +166,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                   </select>
                   <select
                     class="flex-1 bg-base-100 focus:border-primary focus:outline-none transition-colors select-bordered select"
+                    style="border-radius: var(--radius-selector, 0rem);"
                     bind:value={children}
                   >
                     <option value="0">0 Kids</option>
@@ -184,6 +188,7 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
                 <button
                   type="button"
                   class={`btn btn-primary btn-lg w-full ${state.isLoading ? 'loading' : ''} transition-all duration-200 hover:scale-105`}
+                  style="border-radius: var(--radius-box, 0rem);"
                   onClick$={searchAvailability}
                   disabled={
                     state.isLoading || !checkIn.value || !checkOut.value
