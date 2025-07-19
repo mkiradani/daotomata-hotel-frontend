@@ -220,17 +220,18 @@ export const CreditCardForm = component$<CreditCardFormProps>(
                 }
               >
                 <option value="">Month</option>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                  <option
-                    key={month.toString()}
-                    value={month.toString().padStart(2, '0')}
-                  >
-                    {month.toString().padStart(2, '0')} -{' '}
-                    {new Date(0, month - 1).toLocaleString('default', {
-                      month: 'long',
-                    })}
-                  </option>
-                ))}
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
+                  const monthStr = month.toString().padStart(2, '0');
+                  const monthName = new Date(0, month - 1).toLocaleString(
+                    'default',
+                    { month: 'long' }
+                  );
+                  return (
+                    <option key={month.toString()} value={monthStr}>
+                      {`${monthStr} - ${monthName}`}
+                    </option>
+                  );
+                })}
               </select>
               {errors.expiryMonth && (
                 <div class="mt-1 text-error text-sm">{errors.expiryMonth}</div>

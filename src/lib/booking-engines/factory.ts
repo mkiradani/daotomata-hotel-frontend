@@ -101,6 +101,17 @@ export class BookingEngineFactory implements IBookingEngineFactory {
             currency: String(hotelData.default_currency || 'USD'),
             language: String(hotelData.default_language || 'en-US'),
           },
+          redirect: {
+            enabled: !!hotelData.cloudbeds_booking_url_id,
+            propertyUrlId: String(hotelData.cloudbeds_booking_url_id || ''),
+            baseUrl: 'https://hotels.cloudbeds.com',
+            defaultLanguage: String(hotelData.default_language || 'en').split(
+              '-'
+            )[0], // Extract language code
+            defaultCurrency: String(
+              hotelData.default_currency || 'eur'
+            ).toLowerCase(),
+          },
         };
 
       default:

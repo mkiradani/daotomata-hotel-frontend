@@ -115,10 +115,12 @@ Each hotel in Directus should have:
 
 Currently implemented:
 - ✅ **Cloudbeds**: Full API integration with OAuth and API key support
+  - **API Mode**: Direct integration with Cloudbeds API for booking creation
+  - **Redirect Mode**: URL generation for Cloudbeds booking engine redirect
 
 Planned:
 - 🔄 **Booking.com**: Partner API integration
-- 🔄 **Expedia**: Partner API integration  
+- 🔄 **Expedia**: Partner API integration
 - 🔄 **Airbnb**: Host API integration
 - 🔄 **Custom**: Generic webhook/API interface
 
@@ -250,11 +252,44 @@ class MockEngine implements IBookingEngine {
 - **Connection Pooling**: Reuse HTTP connections for external APIs
 - **Lazy Loading**: Engines initialized only when needed
 
+## Cloudbeds Booking Modes
+
+The Cloudbeds engine supports two operational modes:
+
+### API Mode (Default)
+- Direct integration with Cloudbeds API
+- Full booking creation via `postReservation` endpoint
+- Payment processing through Cloudbeds Payments/Stripe
+- Complete control over booking flow
+- Analytics tracking on completion
+
+### Redirect Mode (Fallback)
+- URL generation for Cloudbeds booking engine
+- Redirect to `https://hotels.cloudbeds.com/en/reservas/{propertyUrlId}`
+- Handles payment processing limitations (e.g., Morocco)
+- Analytics tracking before redirect
+- Maintains booking intent tracking
+
+### Configuration
+
+Add to hotel configuration in Directus:
+```json
+{
+  "cloudbeds_booking_url_id": "lmKzDQ", // Property URL ID for redirect mode
+  "cloudbeds_redirect_mode": true       // Optional: force redirect mode
+}
+```
+
+### Mode Selection Logic
+1. If `cloudbeds_booking_url_id` is present → Redirect Mode
+2. If API credentials are available → API Mode
+3. Redirect mode takes precedence when both are configured
+
 ## Future Enhancements
 
 1. **Real-time Updates**: WebSocket integration for live availability
 2. **Advanced Caching**: Redis-based caching for frequently accessed data
-3. **Analytics**: Booking conversion tracking and analytics
-4. **Multi-language**: Localized booking flows
-5. **Payment Integration**: Stripe/PayPal integration for direct payments
-6. **Inventory Management**: Real-time inventory synchronization
+3. **Multi-language**: Localized booking flows
+4. **Payment Integration**: Additional payment gateways (CMI, Mews Payments)
+5. **Inventory Management**: Real-time inventory synchronization
+6. **Webhook Integration**: Server-side conversion tracking for redirect mode

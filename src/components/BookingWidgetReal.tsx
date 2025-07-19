@@ -9,6 +9,11 @@ import {
 } from '@builder.io/qwik';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { CreditCardForm } from './CreditCardForm';
+import {
+  trackBookingInitiated,
+  trackBookingCompleted,
+  type BookingEventData,
+} from '../lib/analytics';
 
 interface BookingWidgetRealProps {
   hotelDomain: string;
@@ -158,7 +163,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       track(() => renderTrigger.value);
     });
 
-    // Search for availability and rates
+    // Redirect to Cloudbeds booking page
     const searchAvailability = $(async () => {
       if (!checkIn.value || !checkOut.value) {
         state.error = 'Please select check-in and check-out dates';
@@ -169,8 +174,10 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       state.error = '';
 
       try {
-        // Call availability API
-        const availabilityResponse = await fetch('/api/booking/availability', {
+        console.log('🔗 [FRONTEND] Generating Cloudbeds redirect URL...');
+
+        // Call redirect URL generation API
+        const redirectResponse = await fetch('/api/booking/redirect-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -185,49 +192,24 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           }),
         });
 
-        const availabilityData = await availabilityResponse.json();
+        const redirectData = await redirectResponse.json();
 
-        if (!availabilityData.success) {
+        console.log('🔗 [FRONTEND] Redirect response:', redirectData);
+
+        if (!redirectData.success || !redirectData.redirectUrl) {
           throw new Error(
-            availabilityData.error || 'Failed to check availability'
+            redirectData.error || 'Failed to generate booking URL'
           );
         }
 
-        // Call rates API
-        const ratesResponse = await fetch('/api/booking/rates', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            checkIn: checkIn.value,
-            checkOut: checkOut.value,
-            adults: parseInt(adults.value),
-            children:
-              parseInt(children.value) > 0
-                ? parseInt(children.value)
-                : undefined,
-            rooms: parseInt(rooms.value),
-          }),
-        });
+        console.log('🔗 [FRONTEND] Redirecting to:', redirectData.redirectUrl);
 
-        const ratesData = await ratesResponse.json();
-
-        if (!ratesData.success) {
-          throw new Error(ratesData.error || 'Failed to get rates');
-        }
-
-        // Update store properties directly - useStore handles reactivity properly
-        state.availability = availabilityData.availability || [];
-        state.rates = ratesData.rates || [];
-        state.showResults = true;
-
-        // Force re-render by updating render trigger
-        renderTrigger.value++;
+        // Redirect to Cloudbeds
+        window.location.href = redirectData.redirectUrl;
       } catch (err) {
         state.error =
-          err instanceof Error ? err.message : 'Failed to search availability';
-        state.availability = [];
-        state.rates = [];
-        state.showResults = false;
+          err instanceof Error ? err.message : 'Failed to generate booking URL';
+        console.error('🚨 [FRONTEND] Redirect error:', err);
       } finally {
         state.isLoading = false;
       }
@@ -439,13 +421,101 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
         const bookingData = await bookingResponse.json();
 
+        console.log(
+          '📝 [FRONTEND] Booking response received:',
+          JSON.stringify(bookingData, null, 2)
+        );
+
+        // Enhanced debugging
+        console.log('📝 [FRONTEND] Debug conditions:');
+        console.log('  - bookingData.success:', bookingData.success);
+        console.log('  - bookingData.booking:', bookingData.booking);
+        console.log(
+          '  - bookingData.booking.success:',
+          bookingData.booking?.success
+        );
+        console.log('  - bookingData.booking.mode:', bookingData.booking?.mode);
+        console.log(
+          '  - bookingData.booking.redirectUrl:',
+          bookingData.booking?.redirectUrl
+        );
+
         if (bookingData.success && bookingData.booking.success) {
-          // Show detailed success message
+          // Check if this is a redirect mode booking
+          if (
+            bookingData.booking.mode === 'redirect' &&
+            bookingData.booking.redirectUrl
+          ) {
+            console.log(
+              '🔗 [FRONTEND] Redirect mode booking, redirecting to:',
+              bookingData.booking.redirectUrl
+            );
+
+            // Track booking_initiated event for Meta/GA4 before redirect
+            const eventData: BookingEventData = {
+              checkIn: checkIn.value,
+              checkOut: checkOut.value,
+              adults: parseInt(adults.value),
+              children:
+                parseInt(children.value) > 0
+                  ? parseInt(children.value)
+                  : undefined,
+              rooms: parseInt(rooms.value),
+              roomType: selectedRoom.value.roomType,
+              totalAmount:
+                state.feesAndTaxes?.grandTotal || selectedRoom.value.price,
+              currency: 'EUR', // TODO: Get from hotel configuration
+              hotelName: hotelName,
+              guestEmail: guestEmail.value,
+            };
+
+            trackBookingInitiated(eventData);
+
+            // Small delay to ensure analytics events are sent before redirect
+            setTimeout(() => {
+              window.location.href = bookingData.booking.redirectUrl;
+            }, 100);
+
+            return; // Exit early, no need to process further
+          } else {
+            console.log(
+              '🔍 [FRONTEND] NOT redirect mode - continuing with API mode booking'
+            );
+            console.log(
+              '  - Condition failed: mode is not redirect OR redirectUrl is missing'
+            );
+          }
+
+          // API mode booking - track completion and show success message
           const confirmationNumber =
             bookingData.booking.confirmationNumber ||
             bookingData.booking.bookingId;
           const totalAmount =
             state.feesAndTaxes?.grandTotal || selectedRoom.value.price;
+
+          // Track booking completion for API mode
+          const completionEventData: BookingEventData & {
+            bookingId: string;
+            confirmationNumber: string;
+          } = {
+            checkIn: checkIn.value,
+            checkOut: checkOut.value,
+            adults: parseInt(adults.value),
+            children:
+              parseInt(children.value) > 0
+                ? parseInt(children.value)
+                : undefined,
+            rooms: parseInt(rooms.value),
+            roomType: selectedRoom.value.roomType,
+            totalAmount,
+            currency: 'EUR', // TODO: Get from hotel configuration
+            hotelName: hotelName,
+            guestEmail: guestEmail.value,
+            bookingId: bookingData.booking.bookingId || '',
+            confirmationNumber,
+          };
+
+          trackBookingCompleted(completionEventData);
 
           alert(
             `🎉 Booking Confirmed!\n\n` +
@@ -477,6 +547,12 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
           creditCardData.cardholderName = '';
           specialRequests.value = '';
         } else {
+          console.log('🚨 [FRONTEND] Booking failed - outer condition not met');
+          console.log('  - bookingData.success:', bookingData.success);
+          console.log(
+            '  - bookingData.booking?.success:',
+            bookingData.booking?.success
+          );
           throw new Error(
             bookingData.error ||
               bookingData.booking?.error ||
@@ -644,7 +720,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                     {state.isLoading ? (
                       <>
                         <span class="mr-2 loading loading-spinner loading-sm"></span>
-                        Searching Rooms...
+                        Redirecting to Booking...
                       </>
                     ) : (
                       <>
@@ -654,15 +730,15 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
-                          <title>Search icon</title>
+                          <title>Book icon</title>
                           <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        Search Available Rooms
+                        Book Now
                       </>
                     )}
                   </button>
@@ -706,208 +782,214 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 <div class="text-center">
                   <span class="text-primary loading loading-spinner loading-lg"></span>
                   <p class="mt-4 text-base-content/70">
-                    Searching for available rooms...
+                    Redirecting to booking page...
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Results */}
-            {(() => {
-              // Include render trigger to force reactivity
-              const _trigger = renderTrigger.value;
+            {/* Results - DISABLED FOR REDIRECT MODE */}
+            {false &&
+              (() => {
+                // Include render trigger to force reactivity
+                const _trigger = renderTrigger.value;
 
-              const shouldRender =
-                state.showResults &&
-                state.availability.length > 0 &&
-                !state.showBookingForm;
+                const shouldRender =
+                  state.showResults &&
+                  state.availability.length > 0 &&
+                  !state.showBookingForm;
 
-              return shouldRender;
-            })() && (
-              <div class="mt-6">
-                <h4 class="mb-4 text-base-content/80 text-lg">
-                  Available Rooms ({calculateNights()} nights)
-                </h4>
+                return shouldRender;
+              })() && (
+                <div class="mt-6">
+                  <h4 class="mb-4 text-base-content/80 text-lg">
+                    Available Rooms ({calculateNights()} nights)
+                  </h4>
 
-                <div class="gap-6 grid grid-cols-1 lg:grid-cols-2">
-                  {state.availability.map((room) => {
-                    const rate = getRoomRate(room.roomId);
-                    const displayName =
-                      room.directusRoom?.name || room.roomType;
-                    const description = room.directusRoom?.description;
+                  <div class="gap-6 grid grid-cols-1 lg:grid-cols-2">
+                    {state.availability.map((room) => {
+                      const rate = getRoomRate(room.roomId);
+                      const displayName =
+                        room.directusRoom?.name || room.roomType;
+                      const description = room.directusRoom?.description;
 
-                    const imageUrl = room.directusRoom?.main_photo?.id
-                      ? getImageUrl(room.directusRoom.main_photo.id)
-                      : null;
+                      const imageUrl = room.directusRoom?.main_photo?.id
+                        ? getImageUrl(room.directusRoom.main_photo.id)
+                        : null;
 
-                    return (
-                      <div
-                        key={room.roomId}
-                        class="bg-base-100 border hover:border-primary border-base-300 rounded-lg overflow-hidden transition-all duration-300"
-                      >
-                        {/* Room Image */}
-                        {imageUrl && (
-                          <figure class="relative overflow-hidden">
-                            <img
-                              src={imageUrl}
-                              alt={displayName}
-                              class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                            {room.directusRoom?.is_accesible && (
-                              <div class="top-3 right-3 absolute bg-primary px-3 py-1 rounded-full font-medium text-primary-content text-xs">
-                                ♿ Accessible
-                              </div>
-                            )}
-                          </figure>
-                        )}
+                      return (
+                        <div
+                          key={room.roomId}
+                          class="bg-base-100 border hover:border-primary border-base-300 rounded-lg overflow-hidden transition-all duration-300"
+                        >
+                          {/* Room Image */}
+                          {imageUrl && (
+                            <figure class="relative overflow-hidden">
+                              <img
+                                src={imageUrl}
+                                alt={displayName}
+                                class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                              />
+                              {room.directusRoom?.is_accesible && (
+                                <div class="top-3 right-3 absolute bg-primary px-3 py-1 rounded-full font-medium text-primary-content text-xs">
+                                  ♿ Accessible
+                                </div>
+                              )}
+                            </figure>
+                          )}
 
-                        <div class="p-6">
-                          <div class="mb-4">
-                            <h5 class="mb-2 font-primary font-semibold text-primary text-xl">
-                              {displayName}
-                            </h5>
-                            {description && (
-                              <p class="text-sm text-base-content/70 line-clamp-2 leading-relaxed">
-                                {description}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Room Features */}
-                          <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="badge-outline badge badge-sm">
-                              <svg
-                                class="mr-1 w-3 h-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <title>WiFi icon</title>
-                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                              </svg>
-                              Free WiFi
-                            </span>
-                            <span class="badge-outline badge badge-sm">
-                              <svg
-                                class="mr-1 w-3 h-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <title>Cancel icon</title>
-                                <path
-                                  fill-rule="evenodd"
-                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                  clip-rule="evenodd"
-                                />
-                              </svg>
-                              Free Cancellation
-                            </span>
-                            {room.directusRoom?.bed_configuration && (
-                              <span class="badge-outline badge badge-sm">
-                                🛏️ {room.directusRoom.bed_configuration}
-                              </span>
-                            )}
-                          </div>
-
-                          <div class="flex flex-wrap gap-4 mb-4 text-sm text-base-content/70">
-                            <div class="flex items-center">
-                              <svg
-                                class="mr-1 w-4 h-4"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <title>Occupancy icon</title>
-                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                              </svg>
-                              {room.maxOccupancy} guests
+                          <div class="p-6">
+                            <div class="mb-4">
+                              <h5 class="mb-2 font-primary font-semibold text-primary text-xl">
+                                {displayName}
+                              </h5>
+                              {description && (
+                                <p class="text-sm text-base-content/70 line-clamp-2 leading-relaxed">
+                                  {description}
+                                </p>
+                              )}
                             </div>
-                            {room.directusRoom?.size_sqm && (
+
+                            {/* Room Features */}
+                            <div class="flex flex-wrap gap-2 mb-4">
+                              <span class="badge-outline badge badge-sm">
+                                <svg
+                                  class="mr-1 w-3 h-3"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <title>WiFi icon</title>
+                                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                </svg>
+                                Free WiFi
+                              </span>
+                              <span class="badge-outline badge badge-sm">
+                                <svg
+                                  class="mr-1 w-3 h-3"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <title>Cancel icon</title>
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"
+                                  />
+                                </svg>
+                                Free Cancellation
+                              </span>
+                              {room.directusRoom?.bed_configuration && (
+                                <span class="badge-outline badge badge-sm">
+                                  🛏️ {room.directusRoom.bed_configuration}
+                                </span>
+                              )}
+                            </div>
+
+                            <div class="flex flex-wrap gap-4 mb-4 text-sm text-base-content/70">
                               <div class="flex items-center">
                                 <svg
                                   class="mr-1 w-4 h-4"
                                   fill="currentColor"
                                   viewBox="0 0 20 20"
                                 >
-                                  <title>Size icon</title>
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z"
-                                    clip-rule="evenodd"
-                                  />
+                                  <title>Occupancy icon</title>
+                                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                                 </svg>
-                                {room.directusRoom.size_sqm}m²
+                                {room.maxOccupancy} guests
                               </div>
-                            )}
-                          </div>
-
-                          {/* Pricing Section */}
-                          <div class="flex justify-between items-end pt-4 border-t border-base-200">
-                            <div class="text-left">
-                              {rate && rate.taxes && rate.taxes > 0 && (
-                                <div class="mb-1 text-xs text-base-content/50">
-                                  Base:{' '}
-                                  {formatPrice(rate.basePrice, rate.currency)} +
-                                  Tax: {formatPrice(rate.taxes, rate.currency)}
+                              {room.directusRoom?.size_sqm && (
+                                <div class="flex items-center">
+                                  <svg
+                                    class="mr-1 w-4 h-4"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <title>Size icon</title>
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                  {room.directusRoom.size_sqm}m²
                                 </div>
                               )}
-                              <div class="text-xs text-base-content/50 uppercase tracking-wide">
-                                Total per night
-                              </div>
-                              <div class="font-bold text-primary text-3xl">
-                                {rate
-                                  ? formatPrice(rate.totalPrice, rate.currency)
-                                  : formatPrice(room.price, room.currency)}
-                              </div>
-                              <div class="mt-1 text-xs text-base-content/60">
-                                {calculateNights()} nights • Total:{' '}
-                                {rate
-                                  ? formatPrice(
-                                      rate.totalPrice * calculateNights(),
-                                      rate.currency
-                                    )
-                                  : formatPrice(
-                                      room.price * calculateNights(),
-                                      room.currency
-                                    )}
-                              </div>
                             </div>
-                            <div class="text-right">
-                              <button
-                                type="button"
-                                class="px-6 hover:scale-105 transition-transform btn btn-primary btn-lg"
-                                onClick$={() => selectRoom(room)}
-                                disabled={state.isLoading}
-                              >
-                                <svg
-                                  class="mr-2 w-5 h-5"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
+
+                            {/* Pricing Section */}
+                            <div class="flex justify-between items-end pt-4 border-t border-base-200">
+                              <div class="text-left">
+                                {rate && rate.taxes && rate.taxes > 0 && (
+                                  <div class="mb-1 text-xs text-base-content/50">
+                                    Base:{' '}
+                                    {formatPrice(rate.basePrice, rate.currency)}{' '}
+                                    + Tax:{' '}
+                                    {formatPrice(rate.taxes, rate.currency)}
+                                  </div>
+                                )}
+                                <div class="text-xs text-base-content/50 uppercase tracking-wide">
+                                  Total per night
+                                </div>
+                                <div class="font-bold text-primary text-3xl">
+                                  {rate
+                                    ? formatPrice(
+                                        rate.totalPrice,
+                                        rate.currency
+                                      )
+                                    : formatPrice(room.price, room.currency)}
+                                </div>
+                                <div class="mt-1 text-xs text-base-content/60">
+                                  {calculateNights()} nights • Total:{' '}
+                                  {rate
+                                    ? formatPrice(
+                                        rate.totalPrice * calculateNights(),
+                                        rate.currency
+                                      )
+                                    : formatPrice(
+                                        room.price * calculateNights(),
+                                        room.currency
+                                      )}
+                                </div>
+                              </div>
+                              <div class="text-right">
+                                <button
+                                  type="button"
+                                  class="px-6 hover:scale-105 transition-transform btn btn-primary btn-lg"
+                                  onClick$={() => selectRoom(room)}
+                                  disabled={state.isLoading}
                                 >
-                                  <title>Calendar icon</title>
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                  />
-                                </svg>
-                                Book Now
-                              </button>
-                              <div class="mt-2 text-xs text-base-content/60">
-                                Free cancellation until 24h before
+                                  <svg
+                                    class="mr-2 w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <title>Calendar icon</title>
+                                    <path
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                  Book Now
+                                </button>
+                                <div class="mt-2 text-xs text-base-content/60">
+                                  Free cancellation until 24h before
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {state.showResults &&
+            {false &&
+              state.showResults &&
               state.availability.length === 0 &&
               !state.showBookingForm && (
                 <div class="mt-6 py-12 text-center">
@@ -979,8 +1061,8 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 </div>
               )}
 
-            {/* Booking Form */}
-            {state.showBookingForm && selectedRoom.value && (
+            {/* Booking Form - DISABLED FOR REDIRECT MODE */}
+            {false && state.showBookingForm && selectedRoom.value && (
               <div class="mt-6">
                 <div class="flex justify-between items-center mb-4">
                   <h4 class="text-base-content/80 text-lg">

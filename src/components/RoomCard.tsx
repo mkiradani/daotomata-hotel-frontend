@@ -135,7 +135,7 @@ export const RoomCard = component$<RoomCardProps>(
     return (
       <div
         ref={cardRef}
-        class={`bg-base-100 border border-base-300 hover:border-primary transition-all duration-300 rounded-lg overflow-hidden ${
+        class={`bg-base-100 border border-base-300 hover:border-primary transition-all duration-300 card overflow-hidden ${
           isOdd && isLast ? 'md:col-span-2 lg:col-span-2' : ''
         }`}
       >

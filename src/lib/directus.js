@@ -1,12 +1,11 @@
-import { createDirectus, readItems, rest, staticToken } from "@directus/sdk";
-import fetch from "node-fetch";
+import { createDirectus, readItems, rest, staticToken } from '@directus/sdk';
+import fetch from 'node-fetch';
 import { DEFAULT_SERVICES } from './constants.js';
 
 // Create Directus client with admin token for build-time access
 const directusUrl =
   import.meta.env.DIRECTUS_URL || DEFAULT_SERVICES.directusUrl;
-const directusToken =
-  import.meta.env.DIRECTUS_ADMIN_TOKEN;
+const directusToken = import.meta.env.DIRECTUS_ADMIN_TOKEN;
 
 // Create Directus client with proper configuration for Node.js/Astro using node-fetch polyfill
 const directus = createDirectus(directusUrl, {
@@ -17,21 +16,21 @@ const directus = createDirectus(directusUrl, {
   .with(
     rest({
       // Configure for Node.js compatibility and CORS
-      credentials: "include",
+      credentials: 'include',
       onRequest: (options) => {
         // Ensure proper headers and configuration for Node.js requests
         return {
           ...options,
           headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "Daotomata-Hotel-Frontend/1.0",
+            'Content-Type': 'application/json',
+            'User-Agent': 'Daotomata-Hotel-Frontend/1.0',
             ...options.headers,
           },
           // Disable cache for fresh data
-          cache: "no-store",
+          cache: 'no-store',
         };
       },
-    }),
+    })
   )
   .with(staticToken(directusToken));
 
@@ -49,38 +48,41 @@ export function getCurrentHotelId() {
  * Get all hotels for static path generation (DEPRECATED - not needed for single-tenant)
  */
 export async function getAllHotels() {
-  console.warn("⚠️ getAllHotels() is deprecated in single-tenant mode. Use getCurrentHotel() instead.");
+  console.warn(
+    '⚠️ getAllHotels() is deprecated in single-tenant mode. Use getCurrentHotel() instead.'
+  );
   try {
     const hotels = await directus.request(
-      readItems("hotels", {
+      readItems('hotels', {
         fields: [
-          "id",
-          "name",
-          "domain",
-          "status",
-          "avaliable_currencies",
-          "avaliable_lenguages",
-          "pms_type",
-          "cloudbeds_client_id",
-          "cloudbeds_client_secret",
-          "cloudbeds_api_key",
-          "cloudbeds_property_id",
+          'id',
+          'name',
+          'domain',
+          'status',
+          'avaliable_currencies',
+          'avaliable_lenguages',
+          'pms_type',
+          'cloudbeds_client_id',
+          'cloudbeds_client_secret',
+          'cloudbeds_api_key',
+          'cloudbeds_property_id',
+          'cloudbeds_booking_url_id',
         ],
         filter: {
           status: {
-            _in: ["published", "draft"], // Include both published and draft hotels
+            _in: ['published', 'draft'], // Include both published and draft hotels
           },
         },
-      }),
+      })
     );
 
     console.log(
       `✅ Found ${hotels.length} hotels:`,
-      hotels.map((h) => h.domain),
+      hotels.map((h) => h.domain)
     );
     return hotels;
   } catch (error) {
-    console.error("❌ Error fetching hotels:", error);
+    console.error('❌ Error fetching hotels:', error);
     return [];
   }
 }
@@ -92,35 +94,36 @@ export async function getHotelById(hotelId) {
   try {
     // First get the hotel
     const hotels = await directus.request(
-      readItems("hotels", {
+      readItems('hotels', {
         filter: {
           id: {
             _eq: hotelId,
           },
         },
         fields: [
-          "id",
-          "name",
-          "domain",
-          "status",
-          "pms_type",
-          "avaliable_currencies",
-          "avaliable_lenguages",
-          "cloudbeds_client_id",
-          "cloudbeds_client_secret",
-          "cloudbeds_api_key",
-          "cloudbeds_property_id",
-          "chatwoot_website_token",
-          "ga4_token",
-          "meta_pixel_token",
-          "location",
-          "theme",
-          "logo.id",
-          "logo.filename_disk",
-          "logo.title",
+          'id',
+          'name',
+          'domain',
+          'status',
+          'pms_type',
+          'avaliable_currencies',
+          'avaliable_lenguages',
+          'cloudbeds_client_id',
+          'cloudbeds_client_secret',
+          'cloudbeds_api_key',
+          'cloudbeds_property_id',
+          'cloudbeds_booking_url_id',
+          'chatwoot_website_token',
+          'ga4_token',
+          'meta_pixel_token',
+          'location',
+          'theme',
+          'logo.id',
+          'logo.filename_disk',
+          'logo.title',
         ],
         limit: 1,
-      }),
+      })
     );
 
     if (!hotels || hotels.length === 0) {
@@ -141,153 +144,153 @@ export async function getHotelById(hotelId) {
     ] = await Promise.all([
       // Rooms - Updated fields for new structure
       directus.request(
-        readItems("rooms", {
+        readItems('rooms', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "id",
-            "name",
-            "description",
-            "cloudbeds_room_id", // Changed from pms_room_id
-            "bed_configuration",
-            "size_sqm",
-            "amenities",
-            "is_accesible", // Note: typo in new schema (accesible vs accessible)
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
-            "main_video.id",
-            "main_video.filename_disk",
-            "main_video.title",
-            "media_gallery.directus_files_id.id",
-            "media_gallery.directus_files_id.filename_disk",
-            "media_gallery.directus_files_id.title",
-            "media_gallery.directus_files_id.type",
+            'id',
+            'name',
+            'description',
+            'cloudbeds_room_id', // Changed from pms_room_id
+            'bed_configuration',
+            'size_sqm',
+            'amenities',
+            'is_accesible', // Note: typo in new schema (accesible vs accessible)
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+            'main_video.id',
+            'main_video.filename_disk',
+            'main_video.title',
+            'media_gallery.directus_files_id.id',
+            'media_gallery.directus_files_id.filename_disk',
+            'media_gallery.directus_files_id.title',
+            'media_gallery.directus_files_id.type',
           ],
-        }),
+        })
       ),
       // Activities - Updated fields for new structure
       directus.request(
-        readItems("activities", {
+        readItems('activities', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "id",
-            "name",
-            "description",
-            "max_participants",
-            "age_restriction",
-            "equipment_provided",
-            "booking_requiered", // Note: typo in new schema (requiered vs required)
-            "operating_hours",
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
-            "main_video.id",
-            "main_video.filename_disk",
-            "main_video.title",
-            "media_gallery.directus_files_id.id",
-            "media_gallery.directus_files_id.filename_disk",
-            "media_gallery.directus_files_id.title",
-            "media_gallery.directus_files_id.type",
+            'id',
+            'name',
+            'description',
+            'max_participants',
+            'age_restriction',
+            'equipment_provided',
+            'booking_requiered', // Note: typo in new schema (requiered vs required)
+            'operating_hours',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+            'main_video.id',
+            'main_video.filename_disk',
+            'main_video.title',
+            'media_gallery.directus_files_id.id',
+            'media_gallery.directus_files_id.filename_disk',
+            'media_gallery.directus_files_id.title',
+            'media_gallery.directus_files_id.type',
           ],
-        }),
+        })
       ),
       // Facilities - Updated fields for new structure
       directus.request(
-        readItems("facilities", {
+        readItems('facilities', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "id",
-            "name",
-            "description",
-            "capacity",
-            "operating_hours",
-            "booking_requiered", // Note: typo in new schema (requiered vs required)
-            "price", // Changed from price_per_hour
-            "amenities",
-            "age_restriction",
-            "is_accessible",
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
-            "main_video.id",
-            "main_video.filename_disk",
-            "main_video.title",
-            "media_gallery.directus_files_id.id",
-            "media_gallery.directus_files_id.filename_disk",
-            "media_gallery.directus_files_id.title",
-            "media_gallery.directus_files_id.type",
+            'id',
+            'name',
+            'description',
+            'capacity',
+            'operating_hours',
+            'booking_requiered', // Note: typo in new schema (requiered vs required)
+            'price', // Changed from price_per_hour
+            'amenities',
+            'age_restriction',
+            'is_accessible',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+            'main_video.id',
+            'main_video.filename_disk',
+            'main_video.title',
+            'media_gallery.directus_files_id.id',
+            'media_gallery.directus_files_id.filename_disk',
+            'media_gallery.directus_files_id.title',
+            'media_gallery.directus_files_id.type',
           ],
-        }),
+        })
       ),
       // Galleries - Updated fields for new structure
       directus.request(
-        readItems("galleries", {
+        readItems('galleries', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "id",
-            "name", // Changed from title to name
-            "description",
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
-            "media_gallery.directus_files_id.id",
-            "media_gallery.directus_files_id.filename_disk",
-            "media_gallery.directus_files_id.title",
-            "media_gallery.directus_files_id.type",
+            'id',
+            'name', // Changed from title to name
+            'description',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+            'media_gallery.directus_files_id.id',
+            'media_gallery.directus_files_id.filename_disk',
+            'media_gallery.directus_files_id.title',
+            'media_gallery.directus_files_id.type',
           ],
-        }),
+        })
       ),
       // Hero Media
       directus.request(
-        readItems("hero_media", {
+        readItems('hero_media', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
-            "main_video.id",
-            "main_video.filename_disk",
-            "main_video.title",
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+            'main_video.id',
+            'main_video.filename_disk',
+            'main_video.title',
           ],
-        }),
+        })
       ),
       // Restaurant - New collection
       directus.request(
-        readItems("restaurant", {
+        readItems('restaurant', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "id",
-            "name",
-            "description",
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
-            "main_video.id",
-            "main_video.filename_disk",
-            "main_video.title",
+            'id',
+            'name',
+            'description',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+            'main_video.id',
+            'main_video.filename_disk',
+            'main_video.title',
           ],
-        }),
+        })
       ),
       // Dishes - New collection
       directus.request(
-        readItems("dishes", {
+        readItems('dishes', {
           filter: { hotel_id: { _eq: hotel.id } },
           fields: [
-            "id",
-            "name",
-            "description",
-            "ingredients",
-            "dietary_options",
-            "calories",
-            "allergens",
-            "is_available",
-            "price",
-            "is_featured",
-            "main_photo.id",
-            "main_photo.filename_disk",
-            "main_photo.title",
+            'id',
+            'name',
+            'description',
+            'ingredients',
+            'dietary_options',
+            'calories',
+            'allergens',
+            'is_available',
+            'price',
+            'is_featured',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
           ],
-        }),
+        })
       ),
     ]);
 
@@ -303,7 +306,7 @@ export async function getHotelById(hotelId) {
       dishes: dishes || [],
     };
   } catch (error) {
-    console.error("❌ Error fetching hotel by ID:", error);
+    console.error('❌ Error fetching hotel by ID:', error);
     return null;
   }
 }
@@ -312,14 +315,16 @@ export async function getHotelById(hotelId) {
  * Get complete hotel data with all related content (DEPRECATED - use getHotelById)
  */
 export async function getHotelByDomain(domain) {
-  console.warn("⚠️ getHotelByDomain() is deprecated in single-tenant mode. Use getCurrentHotel() instead.");
+  console.warn(
+    '⚠️ getHotelByDomain() is deprecated in single-tenant mode. Use getCurrentHotel() instead.'
+  );
 
   // For backward compatibility, try to find hotel by domain
   try {
     const hotels = await directus.request(
-      readItems("hotels", {
+      readItems('hotels', {
         filter: { domain: { _eq: domain } },
-        fields: ["id"],
+        fields: ['id'],
         limit: 1,
       })
     );
@@ -330,7 +335,7 @@ export async function getHotelByDomain(domain) {
 
     return null;
   } catch (error) {
-    console.error("❌ Error fetching hotel by domain:", error);
+    console.error('❌ Error fetching hotel by domain:', error);
     return null;
   }
 }
@@ -358,13 +363,13 @@ export async function getMediaGallery(collection, itemId) {
           },
         },
         fields: [
-          "directus_files_id.id",
-          "directus_files_id.filename_disk",
-          "directus_files_id.title",
-          "directus_files_id.type",
-          "directus_files_id.filesize",
+          'directus_files_id.id',
+          'directus_files_id.filename_disk',
+          'directus_files_id.title',
+          'directus_files_id.type',
+          'directus_files_id.filesize',
         ],
-      }),
+      })
     );
 
     return files?.map((file) => file.directus_files_id) || [];
@@ -380,24 +385,24 @@ export async function getMediaGallery(collection, itemId) {
 export async function getRestaurantByHotelId(hotelId) {
   try {
     const restaurants = await directus.request(
-      readItems("restaurant", {
+      readItems('restaurant', {
         filter: { hotel_id: { _eq: hotelId } },
         fields: [
-          "id",
-          "name",
-          "description",
-          "main_photo.id",
-          "main_photo.filename_disk",
-          "main_photo.title",
-          "main_video.id",
-          "main_video.filename_disk",
-          "main_video.title",
+          'id',
+          'name',
+          'description',
+          'main_photo.id',
+          'main_photo.filename_disk',
+          'main_photo.title',
+          'main_video.id',
+          'main_video.filename_disk',
+          'main_video.title',
         ],
-      }),
+      })
     );
     return restaurants?.[0] || null;
   } catch (error) {
-    console.error("❌ Error fetching restaurant:", error);
+    console.error('❌ Error fetching restaurant:', error);
     return null;
   }
 }
@@ -408,29 +413,29 @@ export async function getRestaurantByHotelId(hotelId) {
 export async function getDishesByHotelId(hotelId) {
   try {
     const dishes = await directus.request(
-      readItems("dishes", {
+      readItems('dishes', {
         filter: {
           hotel_id: { _eq: hotelId },
           is_available: { _eq: true },
         },
         fields: [
-          "id",
-          "name",
-          "description",
-          "ingredients",
-          "dietary_options",
-          "calories",
-          "allergens",
-          "is_available",
-          "main_photo.id",
-          "main_photo.filename_disk",
-          "main_photo.title",
+          'id',
+          'name',
+          'description',
+          'ingredients',
+          'dietary_options',
+          'calories',
+          'allergens',
+          'is_available',
+          'main_photo.id',
+          'main_photo.filename_disk',
+          'main_photo.title',
         ],
-      }),
+      })
     );
     return dishes || [];
   } catch (error) {
-    console.error("❌ Error fetching dishes:", error);
+    console.error('❌ Error fetching dishes:', error);
     return [];
   }
 }
@@ -441,14 +446,14 @@ export async function getDishesByHotelId(hotelId) {
 export async function getAIKnowledgeByHotelId(hotelId) {
   try {
     const knowledge = await directus.request(
-      readItems("ai_knowledge", {
+      readItems('ai_knowledge', {
         filter: { hotel_id: { _eq: hotelId } },
-        fields: ["id", "title", "content"],
-      }),
+        fields: ['id', 'title', 'content'],
+      })
     );
     return knowledge || [];
   } catch (error) {
-    console.error("❌ Error fetching AI knowledge:", error);
+    console.error('❌ Error fetching AI knowledge:', error);
     return [];
   }
 }
@@ -475,7 +480,7 @@ export function getMediaUrl(fileId, options = {}) {
   if (quality !== 80) params.push(`quality=${quality}`);
   if (format) params.push(`format=${format}`);
 
-  const queryString = params.join("&");
+  const queryString = params.join('&');
   const finalUrl = `${url}?${queryString}`;
 
   return finalUrl;
@@ -485,39 +490,42 @@ export function getMediaUrl(fileId, options = {}) {
  * Process media gallery from Directus with automatic type detection
  * DRY utility function to avoid code duplication across detail pages
  */
-export function processMediaGallery(mediaGallery, fallbackTitle = 'Gallery Item') {
+export function processMediaGallery(
+  mediaGallery,
+  fallbackTitle = 'Gallery Item'
+) {
   if (!mediaGallery || !Array.isArray(mediaGallery)) {
     return [];
   }
 
-  return mediaGallery.map((media) => {
-    // Handle the structure from Directus: media_gallery.directus_files_id
-    const fileData = media.directus_files_id;
-    if (!fileData) {
-      return null;
-    }
+  return mediaGallery
+    .map((media) => {
+      // Handle the structure from Directus: media_gallery.directus_files_id
+      const fileData = media.directus_files_id;
+      if (!fileData) {
+        return null;
+      }
 
-    const fileId = fileData.id;
-    const fileTitle = fileData.title || fallbackTitle;
-    const mimeType = fileData.type || '';
+      const fileId = fileData.id;
+      const fileTitle = fileData.title || fallbackTitle;
+      const mimeType = fileData.type || '';
 
-    // Automatically detect type based on MIME type
-    const isVideo = mimeType.startsWith('video/');
+      // Automatically detect type based on MIME type
+      const isVideo = mimeType.startsWith('video/');
 
-    // Generate URL with appropriate options
-    const urlOptions = isVideo
-      ? {} // Videos don't need resize options
-      : { width: 1200, height: 675, quality: 95 }; // Images get optimized
+      // Generate URL with appropriate options
+      const urlOptions = isVideo
+        ? {} // Videos don't need resize options
+        : { width: 1200, height: 675, quality: 95 }; // Images get optimized
 
-
-
-    return {
-      id: fileId,
-      url: getMediaUrl(fileId, urlOptions) || '',
-      title: fileTitle,
-      type: isVideo ? 'video' : 'image', // Ensure correct literal type
-    };
-  }).filter(Boolean); // Remove any null entries
+      return {
+        id: fileId,
+        url: getMediaUrl(fileId, urlOptions) || '',
+        title: fileTitle,
+        type: isVideo ? 'video' : 'image', // Ensure correct literal type
+      };
+    })
+    .filter(Boolean); // Remove any null entries
 }
 
 /**
@@ -525,14 +533,14 @@ export function processMediaGallery(mediaGallery, fallbackTitle = 'Gallery Item'
  */
 export function getTranslatedContent(
   item,
-  language = "en-US",
-  fallbackLanguage = "en-US",
+  language = 'en-US',
+  fallbackLanguage = 'en-US'
 ) {
   if (!item || !item.translations) return item;
 
   // Find translation for preferred language
   const translation = item.translations.find(
-    (t) => t.languages_id === language,
+    (t) => t.languages_id === language
   );
 
   // If not found, try fallback language
@@ -559,14 +567,14 @@ export function getTranslatedContent(
 export async function getContactMethodsByHotelId(hotelId) {
   try {
     const contactMethods = await directus.request(
-      readItems("contact_methods", {
+      readItems('contact_methods', {
         filter: { hotel_id: { _eq: hotelId } },
-        fields: ["id", "contact_type", "contact_identifier", "name"],
-      }),
+        fields: ['id', 'contact_type', 'contact_identifier', 'name'],
+      })
     );
     return contactMethods || [];
   } catch (error) {
-    console.error("❌ Error fetching contact methods:", error);
+    console.error('❌ Error fetching contact methods:', error);
     return [];
   }
 }
@@ -577,20 +585,20 @@ export async function getContactMethodsByHotelId(hotelId) {
 export async function getHotelInfoByHotelId(hotelId) {
   try {
     const hotelInfo = await directus.request(
-      readItems("hotel_info", {
+      readItems('hotel_info', {
         filter: { hotel_id: { _eq: hotelId } },
         fields: [
-          "id",
-          "location",
-          "logo.id",
-          "logo.filename_disk",
-          "logo.title",
+          'id',
+          'location',
+          'logo.id',
+          'logo.filename_disk',
+          'logo.title',
         ],
-      }),
+      })
     );
     return hotelInfo?.[0] || null;
   } catch (error) {
-    console.error("❌ Error fetching hotel info:", error);
+    console.error('❌ Error fetching hotel info:', error);
     return null;
   }
 }
@@ -601,14 +609,14 @@ export async function getHotelInfoByHotelId(hotelId) {
 export async function getSocialProfilesByHotelId(hotelId) {
   try {
     const socialProfiles = await directus.request(
-      readItems("social_profiles", {
+      readItems('social_profiles', {
         filter: { hotel_id: { _eq: hotelId } },
-        fields: ["id", "social_platform", "social_url"],
-      }),
+        fields: ['id', 'social_platform', 'social_url'],
+      })
     );
     return socialProfiles || [];
   } catch (error) {
-    console.error("❌ Error fetching social profiles:", error);
+    console.error('❌ Error fetching social profiles:', error);
     return [];
   }
 }

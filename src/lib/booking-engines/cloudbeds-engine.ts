@@ -39,6 +39,11 @@ import type {
   CloudbedsRequestOptions,
   CloudbedsRoomsListResponse,
 } from '../../types/cloudbeds-api';
+import {
+  buildCloudbedsUrl,
+  bookingRequestToUrlParams,
+  type CloudbedsUrlConfig,
+} from './cloudbeds-utils';
 
 /**
  * Centralized mapping of Cloudbeds API endpoints
@@ -78,6 +83,7 @@ export class CloudbedsEngine implements IBookingEngine {
   private accessToken: string | null = null;
   private cloudbedsRooms: CloudbedsRoom[] = [];
   private directusRooms: DirectusRoom[] = [];
+  private hotelData: Record<string, unknown> | null = null;
 
   async initialize(config: BookingEngineConfig): Promise<void> {
     if (!this.validateConfig(config)) {
@@ -351,6 +357,22 @@ export class CloudbedsEngine implements IBookingEngine {
         '📝 [CLOUDBEDS] Booking request:',
         JSON.stringify(request, null, 2)
       );
+
+      // Check if redirect mode is enabled
+      if (this.supportsRedirectMode() && this.config?.redirect?.enabled) {
+        console.log('🔗 [CLOUDBEDS] Using redirect mode for booking');
+        const redirectUrl = await this.generateBookingUrl(request);
+
+        return {
+          success: true,
+          mode: 'redirect',
+          redirectUrl,
+          bookingId: undefined, // No booking ID in redirect mode
+          confirmationNumber: undefined, // No confirmation in redirect mode
+        };
+      }
+
+      console.log('🌐 [CLOUDBEDS] Using API mode for booking');
 
       const bookingData = this.transformBookingRequest(request);
       console.log(
@@ -1191,6 +1213,47 @@ export class CloudbedsEngine implements IBookingEngine {
       totalAmount: Number(response.grandTotal) || undefined,
       currency: String('USD'), // Default currency - could be made configurable
       details: response,
+      mode: 'api', // Indicate this was an API booking
     };
+  }
+
+  /**
+   * Check if engine supports redirect mode
+   */
+  supportsRedirectMode(): boolean {
+    return true; // Cloudbeds supports redirect mode
+  }
+
+  /**
+   * Generate booking URL for redirect mode
+   */
+  async generateBookingUrl(request: BookingRequest): Promise<string> {
+    if (
+      !this.config?.redirect?.enabled ||
+      !this.config.redirect.propertyUrlId
+    ) {
+      throw new ConfigurationError('Redirect mode not properly configured');
+    }
+
+    const urlConfig: CloudbedsUrlConfig = {
+      propertyUrlId: this.config.redirect.propertyUrlId,
+      baseUrl: this.config.redirect.baseUrl,
+      defaultLanguage: this.config.redirect.defaultLanguage,
+      defaultCurrency: this.config.redirect.defaultCurrency,
+    };
+
+    const urlParams = bookingRequestToUrlParams(request);
+
+    // Use currency from settings if not specified in request
+    if (!urlParams.currency && this.config.settings?.currency) {
+      urlParams.currency = this.config.settings.currency.toLowerCase();
+    }
+
+    // Use language from settings if not specified
+    if (!urlParams.language && this.config.settings?.language) {
+      urlParams.language = this.config.settings.language.split('-')[0]; // Extract language code
+    }
+
+    return buildCloudbedsUrl(urlConfig, urlParams);
   }
 }

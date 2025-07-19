@@ -1,5 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
 
 interface RestaurantCardProps {
   name: string;
@@ -19,16 +19,16 @@ export const RestaurantCard = component$<RestaurantCardProps>(
 
       if (!cardRef.value) return;
 
-      const video = cardRef.value.querySelector("video");
+      const video = cardRef.value.querySelector('video');
       if (!video) return;
 
       if (isHovered.value) {
-        video.style.opacity = "1";
+        video.style.opacity = '1';
         video.play().catch(() => {
           // Video play failed, ignore
         });
       } else {
-        video.style.opacity = "0";
+        video.style.opacity = '0';
         video.pause();
         video.currentTime = 0;
       }
@@ -37,7 +37,7 @@ export const RestaurantCard = component$<RestaurantCardProps>(
     return (
       <div
         ref={cardRef}
-        class="bg-base-100 border-2 hover:border-accent border-base-300 overflow-hidden transition-all duration-300 card"
+        class="bg-base-100 border border-base-300 hover:border-accent transition-all duration-300 card overflow-hidden"
         onMouseEnter$={() => {
           isHovered.value = true;
         }}
@@ -105,5 +105,5 @@ export const RestaurantCard = component$<RestaurantCardProps>(
         </div>
       </div>
     );
-  },
+  }
 );

@@ -17,6 +17,14 @@ export interface BookingEngineConfig {
     timezone?: string;
     [key: string]: unknown;
   };
+  // Redirect mode configuration
+  redirect?: {
+    enabled?: boolean; // Whether to use redirect mode
+    propertyUrlId?: string; // Property ID for URL construction (e.g., 'lmKzDQ')
+    baseUrl?: string; // Base URL for booking engine
+    defaultLanguage?: string; // Default language for URLs
+    defaultCurrency?: string; // Default currency for URLs
+  };
 }
 
 export interface RoomAvailability {
@@ -69,6 +77,9 @@ export interface BookingResponse {
   currency?: string;
   error?: string;
   details?: unknown;
+  // Redirect mode support
+  redirectUrl?: string; // URL for redirect mode booking
+  mode?: 'api' | 'redirect'; // Indicates which mode was used
 }
 
 export interface RateQuery {
@@ -156,6 +167,17 @@ export interface IBookingEngine {
    * Get supported features for this booking engine
    */
   getSupportedFeatures(): string[];
+
+  /**
+   * Generate booking URL for redirect mode (optional)
+   * Only implemented by engines that support redirect mode
+   */
+  generateBookingUrl?(request: BookingRequest): Promise<string>;
+
+  /**
+   * Check if engine supports redirect mode
+   */
+  supportsRedirectMode?(): boolean;
 }
 
 /**
