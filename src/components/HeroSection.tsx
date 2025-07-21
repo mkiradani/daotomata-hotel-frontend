@@ -1,9 +1,17 @@
 /** @jsxImportSource @builder.io/qwik */
 import { component$ } from '@builder.io/qwik';
 import { HeroBookingWidget } from './HeroBookingWidget';
+import { getMediaUrl } from '../lib/directus.js';
+
+interface LogoInfo {
+  id: string;
+  filename_disk: string;
+  title?: string;
+}
 
 interface HeroSectionProps {
   hotelName: string;
+  hotelLogo?: LogoInfo | null;
   heroImageUrl?: string;
   heroVideoUrl?: string;
   availableLanguages: string[];
@@ -15,6 +23,7 @@ interface HeroSectionProps {
 export const HeroSection = component$<HeroSectionProps>(
   ({
     hotelName,
+    hotelLogo,
     heroImageUrl,
     heroVideoUrl,
     availableLanguages,
@@ -48,83 +57,33 @@ export const HeroSection = component$<HeroSectionProps>(
           />
         )}
 
-        {/* Overlay */}
-        <div class="absolute inset-0 bg-neutral opacity-40"></div>
+        {/* Enhanced Gradient Overlay */}
+        <div class="absolute inset-0 bg-gradient-to-b from-neutral/20 via-neutral/40 to-neutral/60"></div>
 
-        {/* Content */}
-        <div class="z-10 relative mx-auto px-4 max-w-6xl text-neutral-content text-center">
-          <h1 class="opacity-95 mb-6 font-primary text-neutral-content text-6xl">
-            {hotelName}
-          </h1>
-          <p class="opacity-90 mb-8 font-secondary text-xl">
-            Welcome to an extraordinary experience
-          </p>
+        {/* Content with Enhanced Background */}
+        <div class="z-10 relative flex flex-col justify-center items-center mx-auto px-4 max-w-6xl min-h-screen text-center">
+          {/* Hero Title and Subtitle - Independent */}
+          <div class="mb-8">
+            {/* Hotel Logo */}
+            {hotelLogo && hotelLogo.id && (
+              <div class="flex justify-center mb-6">
+                <img
+                  src={getMediaUrl(hotelLogo.id, { height: 80, quality: 90 })}
+                  alt={hotelLogo.title || hotelName}
+                  class="drop-shadow-lg w-auto h-20"
+                />
+              </div>
+            )}
+            <h1 class="drop-shadow-lg mb-6 font-primary text-white text-6xl">
+              {hotelName}
+            </h1>
+            <p class="drop-shadow-md mb-8 font-secondary text-white text-lg">
+              Welcome to an extraordinary experience
+            </p>
+          </div>
 
           {/* Hero Booking Widget */}
-          <div class="mb-8">
-            <HeroBookingWidget hotelName={hotelName} />
-          </div>
-
-          {/* Language and Currency Selectors */}
-          <div class="flex justify-center gap-4 mb-8">
-            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
-              <option disabled selected>
-                Language
-              </option>
-              {availableLanguages.map((lang) => (
-                <option
-                  key={lang}
-                  value={lang}
-                  selected={lang === currentLanguage}
-                >
-                  {lang.toUpperCase()}
-                </option>
-              ))}
-            </select>
-
-            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
-              <option disabled selected>
-                Currency
-              </option>
-              {availableCurrencies.map((currency) => (
-                <option
-                  key={currency}
-                  value={currency}
-                  selected={currency === defaultCurrency}
-                >
-                  {currency.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Secondary Actions */}
-          <div class="flex justify-center gap-4">
-            <button type="button" class="btn-outline btn btn-secondary">
-              Explore Rooms
-            </button>
-            <button type="button" class="btn-outline btn btn-secondary">
-              View Facilities
-            </button>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div class="bottom-8 left-1/2 absolute text-neutral-content -translate-x-1/2 animate-bounce transform">
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <title>Scroll down arrow</title>
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
+          <HeroBookingWidget hotelName={hotelName} />
         </div>
       </section>
     );
