@@ -282,7 +282,7 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
               <div class="flex justify-center items-center py-8">
                 <div class="text-center">
                   <span class="text-primary loading loading-spinner loading-lg"></span>
-                  <p class="mt-4 text-base-content/70">
+                  <p class="opacity-70 mt-4 text-base-content">
                     Redirecting to booking page...
                   </p>
                 </div>
