@@ -49,78 +49,59 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
         // Call redirect URL generation API
         const redirectResponse = await fetch('/api/booking/redirect-url', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            checkIn: checkIn.value,
-            checkOut: checkOut.value,
+            startDate: checkIn.value,
+            endDate: checkOut.value,
             adults: parseInt(adults.value),
-            children:
-              parseInt(children.value) > 0
-                ? parseInt(children.value)
-                : undefined,
+            children: parseInt(children.value),
             rooms: parseInt(rooms.value),
           }),
         });
 
         const redirectData = await redirectResponse.json();
 
-        console.log('🔗 [HERO-WIDGET] Redirect response:', redirectData);
-
-        if (!redirectData.success || !redirectData.redirectUrl) {
-          throw new Error(
-            redirectData.error || 'Failed to generate booking URL'
-          );
+        if (!redirectData.success) {
+          throw new Error(redirectData.error || 'Failed to generate booking URL');
         }
 
-        console.log(
-          '🔗 [HERO-WIDGET] Redirecting to:',
-          redirectData.redirectUrl
-        );
+        console.log('✅ [HERO-WIDGET] Redirect URL generated:', redirectData.data.url);
 
         // Redirect to Cloudbeds
-        window.location.href = redirectData.redirectUrl;
-      } catch (err) {
-        state.error =
-          err instanceof Error ? err.message : 'Failed to generate booking URL';
-        console.error('🚨 [HERO-WIDGET] Redirect error:', err);
+        window.location.href = redirectData.data.url;
+      } catch (error) {
+        console.error('❌ [HERO-WIDGET] Search failed:', error);
+        state.error = error instanceof Error ? error.message : 'Search failed. Please try again.';
       } finally {
         state.isLoading = false;
       }
     });
 
     return (
-      <div class={`hero-booking-widget ${className}`}>
-        {/* Glass-morphism card with theme-aware styling */}
+      <div class={`w-full max-w-4xl mx-auto ${className}`}>
         <div
-          class="bg-base-100 shadow-xl backdrop-blur-sm p-6 border border-base-300"
-          style="background-color: color-mix(in srgb, var(--color-base-100) 90%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 70%, transparent); border-radius: var(--radius-box, 0rem);"
+          class="backdrop-blur-md p-6 border"
+          style="background: linear-gradient(to bottom, color-mix(in srgb, var(--color-base-100) 15%, transparent) 0%, color-mix(in srgb, var(--color-base-100) 25%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--color-base-100) 30%, transparent); border-radius: var(--radius-box, 0rem); box-shadow: 0 4px 16px color-mix(in srgb, var(--color-base-100) 15%, transparent);"
         >
-          {/* Header */}
-          <div class="mb-6 text-center">
-            <h3 class="mb-2 font-primary font-bold text-primary text-xl">
-              Book Your Stay
-            </h3>
-            <p class="font-secondary text-sm text-base-content/80">
-              Select your dates and preferences for {hotelName}
-            </p>
-          </div>
 
           {/* Booking Form */}
           <div class="space-y-4">
-            {/* Form Grid - Responsive Layout */}
-            <div class="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Form Grid - 2x2 Layout */}
+            <div class="gap-4 grid grid-cols-2">
               {/* Check-in Date */}
               <div class="form-control">
                 <label class="label" for="hero-checkin-date">
-                  <span class="font-secondary font-medium text-sm text-base-content label-text">
+                  <span class="font-secondary font-medium text-white/90 text-sm label-text">
                     Check-in
                   </span>
                 </label>
                 <input
                   id="hero-checkin-date"
                   type="date"
-                  class="bg-base-100 input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
-                  style="border-radius: var(--radius-field, 0rem);"
+                  class="bg-transparent input-bordered focus:border-primary focus:outline-none w-full text-white transition-colors input placeholder-white/70"
+                  style="border-radius: var(--radius-field, 0rem); border-color: color-mix(in srgb, var(--color-base-100) 40%, transparent);"
                   bind:value={checkIn}
                   min={new Date().toISOString().split('T')[0]}
                 />
@@ -129,66 +110,69 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
               {/* Check-out Date */}
               <div class="form-control">
                 <label class="label" for="hero-checkout-date">
-                  <span class="font-secondary font-medium text-sm text-base-content label-text">
+                  <span class="font-secondary font-medium text-white/90 text-sm label-text">
                     Check-out
                   </span>
                 </label>
                 <input
                   id="hero-checkout-date"
                   type="date"
-                  class="bg-base-100 input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
-                  style="border-radius: var(--radius-field, 0rem);"
+                  class="bg-transparent input-bordered focus:border-primary focus:outline-none w-full text-white transition-colors input placeholder-white/70"
+                  style="border-radius: var(--radius-field, 0rem); border-color: color-mix(in srgb, var(--color-base-100) 40%, transparent);"
                   bind:value={checkOut}
                   min={checkIn.value || new Date().toISOString().split('T')[0]}
                 />
               </div>
 
-              {/* Guests Selection */}
+              {/* Adults Selection */}
               <div class="form-control">
-                <label class="label" for="hero-guests">
-                  <span class="font-secondary font-medium text-sm text-base-content label-text">
-                    Guests
+                <label class="label" for="hero-adults">
+                  <span class="font-secondary font-medium text-white/90 text-sm label-text">
+                    Adults
                   </span>
                 </label>
-                <div class="flex gap-2">
-                  <select
-                    id="hero-guests"
-                    class="flex-1 bg-base-100 focus:border-primary focus:outline-none transition-colors select-bordered select"
-                    style="border-radius: var(--radius-selector, 0rem);"
-                    bind:value={adults}
-                  >
-                    <option value="1">1 Adult</option>
-                    <option value="2">2 Adults</option>
-                    <option value="3">3 Adults</option>
-                    <option value="4">4 Adults</option>
-                    <option value="5">5 Adults</option>
-                    <option value="6">6 Adults</option>
-                  </select>
-                  <select
-                    class="flex-1 bg-base-100 focus:border-primary focus:outline-none transition-colors select-bordered select"
-                    style="border-radius: var(--radius-selector, 0rem);"
-                    bind:value={children}
-                  >
-                    <option value="0">0 Kids</option>
-                    <option value="1">1 Kid</option>
-                    <option value="2">2 Kids</option>
-                    <option value="3">3 Kids</option>
-                    <option value="4">4 Kids</option>
-                  </select>
-                </div>
+                <select
+                  id="hero-adults"
+                  class="bg-transparent focus:border-primary focus:outline-none w-full text-white transition-colors select-bordered select"
+                  style="border-radius: var(--radius-selector, 0rem); border-color: color-mix(in srgb, var(--color-base-100) 40%, transparent);"
+                  bind:value={adults}
+                >
+                  <option value="1">1 Adult</option>
+                  <option value="2">2 Adults</option>
+                  <option value="3">3 Adults</option>
+                  <option value="4">4 Adults</option>
+                  <option value="5">5 Adults</option>
+                  <option value="6">6 Adults</option>
+                </select>
               </div>
 
-              {/* Search Button */}
+              {/* Children Selection */}
               <div class="form-control">
-                <label class="label">
-                  <span class="font-secondary font-medium text-transparent text-sm label-text">
-                    Action
+                <label class="label" for="hero-children">
+                  <span class="font-secondary font-medium text-white/90 text-sm label-text">
+                    Kids
                   </span>
                 </label>
+                <select
+                  id="hero-children"
+                  class="bg-transparent focus:border-primary focus:outline-none w-full text-white transition-colors select-bordered select"
+                  style="border-radius: var(--radius-selector, 0rem); border-color: color-mix(in srgb, var(--color-base-100) 40%, transparent);"
+                  bind:value={children}
+                >
+                  <option value="0">0 Kids</option>
+                  <option value="1">1 Kid</option>
+                  <option value="2">2 Kids</option>
+                  <option value="3">3 Kids</option>
+                  <option value="4">4 Kids</option>
+                </select>
+              </div>
+
+              {/* Search Button - Spans 2 columns */}
+              <div class="col-span-2 form-control">
                 <button
                   type="button"
-                  class={`btn btn-primary btn-lg w-full ${state.isLoading ? 'loading' : ''} transition-all duration-200 hover:scale-105`}
-                  style="border-radius: var(--radius-box, 0rem);"
+                  class={`btn btn-md w-full font-normal ${state.isLoading ? 'loading' : ''} transition-all duration-200 hover:scale-105`}
+                  style="background: var(--color-primary); color: var(--color-primary-content); border: 1px solid var(--color-primary); border-radius: var(--radius-box, 0rem); box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);"
                   onClick$={searchAvailability}
                   disabled={
                     state.isLoading || !checkIn.value || !checkOut.value
@@ -227,20 +211,20 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
               <div class="alert alert-error">
                 <div class="flex items-center">
                   <svg
-                    class="flex-shrink-0 mr-2 w-4 h-4 text-error"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    class="mr-2 w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <title>Error icon</title>
                     <path
-                      fill-rule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                      clip-rule="evenodd"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span class="font-secondary text-error text-sm">
-                    {state.error}
-                  </span>
+                  <span class="text-sm">{state.error}</span>
                 </div>
               </div>
             )}
