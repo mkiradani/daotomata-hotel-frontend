@@ -19,6 +19,7 @@
     "generate:themes": "node scripts/generate-themes.js"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/node": "^9.3.0",
     "@builder.io/qwik": "^1.14.1",
     "@directus/sdk": "^17.0.0",
@@ -48,7 +49,7 @@
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "tailwindcss": "4.0.0",
-    "typescript": "^5.0.0",
+    "typescript": "^5.8.3",
     "vitest": "^1.0.0"
   }
 }

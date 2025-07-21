@@ -48,83 +48,101 @@ export const HeroSection = component$<HeroSectionProps>(
           />
         )}
 
-        {/* Overlay */}
-        <div class="absolute inset-0 bg-neutral opacity-40"></div>
+        {/* Enhanced Gradient Overlay */}
+        <div class="absolute inset-0 bg-gradient-to-b from-neutral/20 via-neutral/40 to-neutral/60"></div>
 
-        {/* Content */}
-        <div class="z-10 relative mx-auto px-4 max-w-6xl text-neutral-content text-center">
-          <h1 class="opacity-95 mb-6 font-primary text-neutral-content text-6xl">
-            {hotelName}
-          </h1>
-          <p class="opacity-90 mb-8 font-secondary text-xl">
-            Welcome to an extraordinary experience
-          </p>
+        {/* Content with Enhanced Background */}
+        <div class="z-10 relative mx-auto px-4 max-w-6xl text-center">
+          <div class="backdrop-blur-sm bg-gradient-to-b from-base-100/10 via-base-100/5 to-transparent p-8 rounded-3xl border border-base-content/10">
+            <h1 class="mb-6 font-primary text-base-content text-6xl drop-shadow-lg">
+              {hotelName}
+            </h1>
+            <p class="mb-8 font-secondary text-lg text-base-content/90 drop-shadow-md">
+              Welcome to an extraordinary experience
+            </p>
 
-          {/* Hero Booking Widget */}
-          <div class="mb-8">
-            <HeroBookingWidget hotelName={hotelName} />
-          </div>
+            {/* Hero Booking Widget */}
+            <div class="mb-8">
+              <HeroBookingWidget hotelName={hotelName} />
+            </div>
 
-          {/* Language and Currency Selectors */}
-          <div class="flex justify-center gap-4 mb-8">
-            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
-              <option disabled selected>
-                Language
-              </option>
-              {availableLanguages.map((lang) => (
-                <option
-                  key={lang}
-                  value={lang}
-                  selected={lang === currentLanguage}
-                >
-                  {lang.toUpperCase()}
+            {/* Language and Currency Selectors */}
+            <div class="flex justify-center gap-4 mb-8">
+              <select
+                class="backdrop-blur-md bg-base-100/90 border border-base-content/20 select-bordered select h-12 min-h-12"
+                style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-base-100) 90%, transparent) 0%, color-mix(in srgb, var(--color-base-100) 85%, transparent) 100%); border-color: color-mix(in srgb, var(--color-base-content) 20%, transparent); border-radius: var(--radius-box, 0.5rem);"
+              >
+                <option disabled selected>
+                  Language
                 </option>
-              ))}
-            </select>
+                {availableLanguages.map((lang) => (
+                  <option
+                    key={lang}
+                    value={lang}
+                    selected={lang === currentLanguage}
+                  >
+                    {lang.toUpperCase()}
+                  </option>
+                ))}
+              </select>
 
-            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
-              <option disabled selected>
-                Currency
-              </option>
-              {availableCurrencies.map((currency) => (
-                <option
-                  key={currency}
-                  value={currency}
-                  selected={currency === defaultCurrency}
-                >
-                  {currency.toUpperCase()}
+              <select
+                class="backdrop-blur-md bg-base-100/90 border border-base-content/20 select-bordered select h-12 min-h-12"
+                style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-base-100) 90%, transparent) 0%, color-mix(in srgb, var(--color-base-100) 85%, transparent) 100%); border-color: color-mix(in srgb, var(--color-base-content) 20%, transparent); border-radius: var(--radius-box, 0.5rem);"
+              >
+                <option disabled selected>
+                  Currency
                 </option>
-              ))}
-            </select>
-          </div>
+                {availableCurrencies.map((currency) => (
+                  <option
+                    key={currency}
+                    value={currency}
+                    selected={currency === defaultCurrency}
+                  >
+                    {currency.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Secondary Actions */}
-          <div class="flex justify-center gap-4">
-            <button type="button" class="btn-outline btn btn-secondary">
-              Explore Rooms
-            </button>
-            <button type="button" class="btn-outline btn btn-secondary">
-              View Facilities
-            </button>
+            {/* Secondary Actions */}
+            <div class="flex justify-center gap-4">
+              <button
+                type="button"
+                class="backdrop-blur-md bg-secondary/10 border border-secondary/30 hover:bg-secondary/20 btn btn-outline h-12 min-h-12 transition-all duration-300"
+                style="border-radius: var(--radius-box, 0.5rem);"
+              >
+                Explore Rooms
+              </button>
+              <button
+                type="button"
+                class="backdrop-blur-md bg-secondary/10 border border-secondary/30 hover:bg-secondary/20 btn btn-outline h-12 min-h-12 transition-all duration-300"
+                style="border-radius: var(--radius-box, 0.5rem);"
+              >
+                View Facilities
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div class="bottom-8 left-1/2 absolute text-neutral-content -translate-x-1/2 animate-bounce transform">
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <title>Scroll down arrow</title>
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
+        {/* Enhanced Scroll indicator */}
+        <div class="bottom-8 left-1/2 absolute -translate-x-1/2 animate-bounce transform">
+          <div class="backdrop-blur-sm bg-base-100/20 border border-base-content/20 p-3 rounded-full">
+            <svg
+              class="w-6 h-6 text-base-content drop-shadow-md"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>Scroll down arrow</title>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </div>
         </div>
       </section>
     );
