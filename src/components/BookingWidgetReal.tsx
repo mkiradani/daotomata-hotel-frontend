@@ -1,11 +1,5 @@
 /** @jsxImportSource @builder.io/qwik */
-import {
-  $,
-  component$,
-  useSignal,
-  useStore,
-  useTask$,
-} from '@builder.io/qwik';
+import { $, component$, useSignal, useStore, useTask$ } from '@builder.io/qwik';
 
 interface BookingWidgetRealProps {
   hotelName: string;
@@ -13,7 +7,6 @@ interface BookingWidgetRealProps {
   className?: string;
   compact?: boolean;
 }
-
 
 export const BookingWidgetReal = component$<BookingWidgetRealProps>(
   ({
@@ -48,7 +41,6 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       checkIn.value = tomorrow.toISOString().split('T')[0];
       checkOut.value = dayAfter.toISOString().split('T')[0];
     });
-
 
     // Redirect to Cloudbeds booking page
     const searchAvailability = $(async () => {
@@ -102,7 +94,6 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
       }
     });
 
-
     return (
       <div class={`booking-widget-real ${className}`}>
         <div class="bg-base-100 border border-base-300 rounded-lg">
@@ -113,137 +104,136 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
 
             {/* Search Form */}
             <div class="space-y-6">
-                {/* Dates Section */}
-                <div class="gap-4 grid grid-cols-1 sm:grid-cols-2">
-                  <div class="form-control">
-                    <label class="label" for="checkin-date">
-                      <span class="font-medium text-base-content label-text">
-                        Check-in Date
-                      </span>
-                    </label>
-                    <input
-                      id="checkin-date"
-                      type="date"
-                      class="input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
-                      bind:value={checkIn}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label" for="checkout-date">
-                      <span class="font-medium text-base-content label-text">
-                        Check-out Date
-                      </span>
-                    </label>
-                    <input
-                      id="checkout-date"
-                      type="date"
-                      class="input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
-                      bind:value={checkOut}
-                      min={
-                        checkIn.value || new Date().toISOString().split('T')[0]
-                      }
-                    />
-                  </div>
+              {/* Dates Section */}
+              <div class="gap-4 grid grid-cols-1 sm:grid-cols-2">
+                <div class="form-control">
+                  <label class="label" for="checkin-date">
+                    <span class="font-medium text-base-content label-text">
+                      Check-in Date
+                    </span>
+                  </label>
+                  <input
+                    id="checkin-date"
+                    type="date"
+                    class="input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
+                    bind:value={checkIn}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
 
-                {/* Guests and Rooms Section */}
-                <div class="gap-4 grid grid-cols-1 sm:grid-cols-3">
-                  <div class="form-control">
-                    <label class="label" for="adults-select">
-                      <span class="font-medium text-base-content label-text">
-                        Adults
-                      </span>
-                    </label>
-                    <select
-                      id="adults-select"
-                      class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
-                      bind:value={adults}
-                    >
-                      <option value={1}>1 Adult</option>
-                      <option value={2}>2 Adults</option>
-                      <option value={3}>3 Adults</option>
-                      <option value={4}>4 Adults</option>
-                      <option value={5}>5 Adults</option>
-                      <option value={6}>6 Adults</option>
-                    </select>
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label" for="children-select">
-                      <span class="font-medium text-base-content label-text">
-                        Children
-                      </span>
-                    </label>
-                    <select
-                      id="children-select"
-                      class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
-                      bind:value={children}
-                    >
-                      <option value={0}>0 Children</option>
-                      <option value={1}>1 Child</option>
-                      <option value={2}>2 Children</option>
-                      <option value={3}>3 Children</option>
-                      <option value={4}>4 Children</option>
-                    </select>
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label" for="rooms-select">
-                      <span class="font-medium text-base-content label-text">
-                        Rooms
-                      </span>
-                    </label>
-                    <select
-                      id="rooms-select"
-                      class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
-                      bind:value={rooms}
-                    >
-                      <option value={1}>1 Room</option>
-                      <option value={2}>2 Rooms</option>
-                      <option value={3}>3 Rooms</option>
-                      <option value={4}>4 Rooms</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Search Button */}
-                <div class="flex justify-center pt-2">
-                  <button
-                    type="button"
-                    class={`btn btn-primary btn-lg px-8 ${state.isLoading ? 'loading' : ''} transition-all duration-200 hover:scale-105`}
-                    onClick$={searchAvailability}
-                    disabled={
-                      state.isLoading || !checkIn.value || !checkOut.value
+                <div class="form-control">
+                  <label class="label" for="checkout-date">
+                    <span class="font-medium text-base-content label-text">
+                      Check-out Date
+                    </span>
+                  </label>
+                  <input
+                    id="checkout-date"
+                    type="date"
+                    class="input-bordered focus:border-primary focus:outline-none w-full transition-colors input"
+                    bind:value={checkOut}
+                    min={
+                      checkIn.value || new Date().toISOString().split('T')[0]
                     }
-                  >
-                    {state.isLoading ? (
-                      <>
-                        <span class="mr-2 loading loading-spinner loading-sm"></span>
-                        Redirecting to Booking...
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          class="mr-2 w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <title>Book icon</title>
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        Book Now
-                      </>
-                    )}
-                  </button>
+                  />
                 </div>
+              </div>
+
+              {/* Guests and Rooms Section */}
+              <div class="gap-4 grid grid-cols-1 sm:grid-cols-3">
+                <div class="form-control">
+                  <label class="label" for="adults-select">
+                    <span class="font-medium text-base-content label-text">
+                      Adults
+                    </span>
+                  </label>
+                  <select
+                    id="adults-select"
+                    class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
+                    bind:value={adults}
+                  >
+                    <option value={1}>1 Adult</option>
+                    <option value={2}>2 Adults</option>
+                    <option value={3}>3 Adults</option>
+                    <option value={4}>4 Adults</option>
+                    <option value={5}>5 Adults</option>
+                    <option value={6}>6 Adults</option>
+                  </select>
+                </div>
+
+                <div class="form-control">
+                  <label class="label" for="children-select">
+                    <span class="font-medium text-base-content label-text">
+                      Children
+                    </span>
+                  </label>
+                  <select
+                    id="children-select"
+                    class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
+                    bind:value={children}
+                  >
+                    <option value={0}>0 Children</option>
+                    <option value={1}>1 Child</option>
+                    <option value={2}>2 Children</option>
+                    <option value={3}>3 Children</option>
+                    <option value={4}>4 Children</option>
+                  </select>
+                </div>
+
+                <div class="form-control">
+                  <label class="label" for="rooms-select">
+                    <span class="font-medium text-base-content label-text">
+                      Rooms
+                    </span>
+                  </label>
+                  <select
+                    id="rooms-select"
+                    class="focus:border-primary focus:outline-none w-full transition-colors select-bordered select"
+                    bind:value={rooms}
+                  >
+                    <option value={1}>1 Room</option>
+                    <option value={2}>2 Rooms</option>
+                    <option value={3}>3 Rooms</option>
+                    <option value={4}>4 Rooms</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Search Button */}
+              <div class="flex justify-center pt-2">
+                <button
+                  type="button"
+                  class={`btn btn-primary btn-lg px-8 ${state.isLoading ? 'loading' : ''} transition-all duration-200 hover:scale-105`}
+                  onClick$={searchAvailability}
+                  disabled={
+                    state.isLoading || !checkIn.value || !checkOut.value
+                  }
+                >
+                  {state.isLoading ? (
+                    <>
+                      <span class="mr-2 loading loading-spinner loading-sm"></span>
+                      Redirecting to Booking...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        class="mr-2 w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <title>Book icon</title>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Book Now
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -288,7 +278,6 @@ export const BookingWidgetReal = component$<BookingWidgetRealProps>(
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </div>
