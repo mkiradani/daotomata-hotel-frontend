@@ -48,83 +48,88 @@ export const HeroSection = component$<HeroSectionProps>(
           />
         )}
 
-        {/* Overlay */}
-        <div class="absolute inset-0 bg-neutral opacity-40"></div>
+        {/* Enhanced Gradient Overlay */}
+        <div class="absolute inset-0 bg-gradient-to-b from-neutral/20 via-neutral/40 to-neutral/60"></div>
 
-        {/* Content */}
-        <div class="z-10 relative mx-auto px-4 max-w-6xl text-neutral-content text-center">
-          <h1 class="opacity-95 mb-6 font-primary text-neutral-content text-6xl">
-            {hotelName}
-          </h1>
-          <p class="opacity-90 mb-8 font-secondary text-xl">
-            Welcome to an extraordinary experience
-          </p>
-
-          {/* Hero Booking Widget */}
-          <div class="mb-8">
-            <HeroBookingWidget hotelName={hotelName} />
-          </div>
-
-          {/* Language and Currency Selectors */}
-          <div class="flex justify-center gap-4 mb-8">
-            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
-              <option disabled selected>
-                Language
-              </option>
-              {availableLanguages.map((lang) => (
-                <option
-                  key={lang}
-                  value={lang}
-                  selected={lang === currentLanguage}
-                >
-                  {lang.toUpperCase()}
-                </option>
-              ))}
-            </select>
-
-            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
-              <option disabled selected>
-                Currency
-              </option>
-              {availableCurrencies.map((currency) => (
-                <option
-                  key={currency}
-                  value={currency}
-                  selected={currency === defaultCurrency}
-                >
-                  {currency.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Secondary Actions */}
-          <div class="flex justify-center gap-4">
-            <button type="button" class="btn-outline btn btn-secondary">
-              Explore Rooms
-            </button>
-            <button type="button" class="btn-outline btn btn-secondary">
-              View Facilities
-            </button>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div class="bottom-8 left-1/2 absolute text-neutral-content -translate-x-1/2 animate-bounce transform">
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {/* Content with Enhanced Background */}
+        <div class="z-10 relative mx-auto px-4 max-w-6xl text-center">
+          <div 
+            class="backdrop-blur-sm p-8 border"
+            style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-base-100) 15%, transparent) 0%, transparent 100%); border: 1px solid color-mix(in srgb, var(--color-base-100) 20%, transparent); border-radius: var(--radius-box);"
           >
-            <title>Scroll down arrow</title>
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
+            <h1 class="mb-6 font-primary text-6xl drop-shadow-lg text-white">
+              {hotelName}
+            </h1>
+            <p class="mb-8 font-secondary text-lg drop-shadow-md text-white">
+              Welcome to an extraordinary experience
+            </p>
+
+            {/* Hero Booking Widget */}
+            <div class="mb-8">
+              <HeroBookingWidget hotelName={hotelName} />
+            </div>
+
+            {/* Language and Currency Selectors */}
+            <div class="flex flex-wrap justify-center gap-4 mt-8">
+              {/* Language Selector */}
+              <div class="form-control">
+                <select
+                  class="select select-bordered w-full max-w-xs"
+                  style="background: color-mix(in srgb, var(--color-base-100) 90%, transparent); border: 1px solid color-mix(in srgb, var(--color-base-100) 40%, transparent); border-radius: var(--radius-field); color: var(--color-base-content);"
+                >
+                  <option disabled selected>
+                    Language
+                  </option>
+                  {availableLanguages.map((lang) => (
+                    <option
+                      key={lang}
+                      value={lang}
+                      selected={lang === currentLanguage}
+                    >
+                      {lang.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Currency Selector */}
+              <div class="form-control">
+                <select
+                  class="select select-bordered w-full max-w-xs"
+                  style="background: color-mix(in srgb, var(--color-base-100) 90%, transparent); border: 1px solid color-mix(in srgb, var(--color-base-100) 40%, transparent); border-radius: var(--radius-field); color: var(--color-base-content);"
+                >
+                  <option disabled selected>
+                    {defaultCurrency}
+                  </option>
+                  {availableCurrencies.map((currency) => (
+                    <option
+                      key={currency}
+                      value={currency}
+                      selected={currency === defaultCurrency}
+                    >
+                      {currency}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div class="flex flex-wrap justify-center gap-4 mt-8">
+              <button
+                class="btn btn-outline"
+                style="border: 1px solid color-mix(in srgb, var(--color-base-100) 60%, transparent); color: var(--color-base-100); border-radius: var(--radius-box);"
+              >
+                Explore Rooms
+              </button>
+              <button
+                class="btn btn-outline"
+                style="border: 1px solid color-mix(in srgb, var(--color-base-100) 60%, transparent); color: var(--color-base-100); border-radius: var(--radius-box);"
+              >
+                View Facilities
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     );
