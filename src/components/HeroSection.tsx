@@ -49,11 +49,11 @@ export const HeroSection = component$<HeroSectionProps>(
         )}
 
         {/* Overlay */}
-        <div class="absolute inset-0 bg-neutral/40"></div>
+        <div class="absolute inset-0 bg-neutral opacity-40"></div>
 
         {/* Content */}
         <div class="z-10 relative mx-auto px-4 max-w-6xl text-neutral-content text-center">
-          <h1 class="mb-6 font-primary text-neutral-content/95 text-6xl">
+          <h1 class="opacity-95 mb-6 font-primary text-neutral-content text-6xl">
             {hotelName}
           </h1>
           <p class="opacity-90 mb-8 font-secondary text-xl">
@@ -67,7 +67,7 @@ export const HeroSection = component$<HeroSectionProps>(
 
           {/* Language and Currency Selectors */}
           <div class="flex justify-center gap-4 mb-8">
-            <select class="bg-base-100/80 backdrop-blur-sm border-base-300/50 select-bordered select">
+            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
               <option disabled selected>
                 Language
               </option>
@@ -82,7 +82,7 @@ export const HeroSection = component$<HeroSectionProps>(
               ))}
             </select>
 
-            <select class="bg-base-100/80 backdrop-blur-sm border-base-300/50 select-bordered select">
+            <select class="bg-base-100 backdrop-blur-sm border-base-300 select-bordered select" style="background-color: color-mix(in srgb, var(--color-base-100) 80%, transparent); border-color: color-mix(in srgb, var(--color-base-300) 50%, transparent);">
               <option disabled selected>
                 Currency
               </option>
