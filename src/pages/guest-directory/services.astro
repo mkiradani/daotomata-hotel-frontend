@@ -72,68 +72,72 @@ console.log(
   ctaSecondaryHref="tel:+1234567890"
   gridId="guest-services-grid"
 >
-  {
-    allServices.map((service) => (
-      <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
-        {service.main_photo?.id && (
-          <figure class="aspect-video overflow-hidden">
-            <img
-              src={getMediaUrl(service.main_photo.id, {
-                width: 400,
-                height: 250,
-              })}
-              alt={service.name}
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          </figure>
-        )}
-
-        <div class="card-body">
-          <h3 class="card-title text-lg font-semibold text-base-content">
-            {service.name}
-          </h3>
-
-          {service.description && (
-            <p class="text-base-content/70 text-sm line-clamp-2 mb-3">
-              {service.description}
-            </p>
+  <Fragment slot="items">
+    {
+      allServices.map((service) => (
+        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
+          {service.main_photo?.id && (
+            <figure class="aspect-video overflow-hidden">
+              <img
+                src={getMediaUrl(service.main_photo.id, {
+                  width: 400,
+                  height: 250,
+                })}
+                alt={service.name}
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </figure>
           )}
 
-          <div class="flex flex-wrap gap-2 mb-4">
-            {service.operating_hours && (
-              <div class="badge badge-outline badge-sm">🕐 Hours Available</div>
+          <div class="card-body">
+            <h3 class="card-title text-lg font-semibold text-base-content">
+              {service.name}
+            </h3>
+
+            {service.description && (
+              <p class="text-base-content/70 text-sm line-clamp-2 mb-3">
+                {service.description}
+              </p>
             )}
 
-            {(service.booking_required || service.booking_requiered) && (
-              <div class="badge badge-secondary badge-sm">
-                📅 Reservation required
-              </div>
-            )}
+            <div class="flex flex-wrap gap-2 mb-4">
+              {service.operating_hours && (
+                <div class="badge badge-outline badge-sm">
+                  🕐 Hours Available
+                </div>
+              )}
 
-            {(service.service_category || service.type) && (
-              <div class="badge badge-accent badge-sm">
-                {(service.service_category || service.type).replace('_', ' ')}
-              </div>
-            )}
-          </div>
+              {(service.booking_required || service.booking_requiered) && (
+                <div class="badge badge-secondary badge-sm">
+                  📅 Reservation required
+                </div>
+              )}
 
-          <div class="card-actions justify-end">
-            <a
-              href={
-                service.type === 'facility'
-                  ? `/facilities/${service.id}`
-                  : service.type === 'activity'
-                    ? `/activities/${service.id}`
-                    : `/guest-directory/services/${service.id}`
-              }
-              class="btn btn-primary btn-sm"
-            >
-              View Details
-            </a>
+              {(service.service_category || service.type) && (
+                <div class="badge badge-accent badge-sm">
+                  {(service.service_category || service.type).replace('_', ' ')}
+                </div>
+              )}
+            </div>
+
+            <div class="card-actions justify-end">
+              <a
+                href={
+                  service.type === 'facility'
+                    ? `/facilities/${service.id}`
+                    : service.type === 'activity'
+                      ? `/activities/${service.id}`
+                      : `/guest-directory/services/${service.id}`
+                }
+                class="btn btn-primary btn-sm"
+              >
+                View Details
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    ))
-  }
+      ))
+    }
+  </Fragment>
 </CollectionPageLayout>

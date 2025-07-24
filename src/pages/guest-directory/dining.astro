@@ -85,82 +85,86 @@ console.log(
   ctaSecondaryHref="/menu"
   gridId="dining-guide-grid"
 >
-  {
-    allDiningOptions.map((option) => (
-      <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
-        {option.main_photo?.id && (
-          <figure class="aspect-video overflow-hidden">
-            <img
-              src={getMediaUrl(option.main_photo.id, {
-                width: 400,
-                height: 250,
-              })}
-              alt={option.name}
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          </figure>
-        )}
-
-        <div class="card-body">
-          <h3 class="card-title text-lg font-semibold text-base-content">
-            {option.name}
-          </h3>
-
-          {option.description && (
-            <p class="text-base-content/70 text-sm line-clamp-2 mb-3">
-              {option.description}
-            </p>
+  <Fragment slot="items">
+    {
+      allDiningOptions.map((option) => (
+        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
+          {option.main_photo?.id && (
+            <figure class="aspect-video overflow-hidden">
+              <img
+                src={getMediaUrl(option.main_photo.id, {
+                  width: 400,
+                  height: 250,
+                })}
+                alt={option.name}
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </figure>
           )}
 
-          <div class="flex flex-wrap gap-2 mb-4">
-            {option.operating_hours && (
-              <div class="badge badge-outline badge-sm">🕐 Hours Available</div>
+          <div class="card-body">
+            <h3 class="card-title text-lg font-semibold text-base-content">
+              {option.name}
+            </h3>
+
+            {option.description && (
+              <p class="text-base-content/70 text-sm line-clamp-2 mb-3">
+                {option.description}
+              </p>
             )}
 
-            {option.price_range && (
+            <div class="flex flex-wrap gap-2 mb-4">
+              {option.operating_hours && (
+                <div class="badge badge-outline badge-sm">
+                  🕐 Hours Available
+                </div>
+              )}
+
+              {option.price_range && (
+                <div class="badge badge-outline badge-sm">
+                  💰{' '}
+                  {option.price_range === 'free'
+                    ? 'Free'
+                    : option.price_range === 'budget'
+                      ? '$'
+                      : option.price_range === 'moderate'
+                        ? '$$'
+                        : '$$$'}
+                </div>
+              )}
+
               <div class="badge badge-outline badge-sm">
-                💰{' '}
-                {option.price_range === 'free'
-                  ? 'Free'
-                  : option.price_range === 'budget'
-                    ? '$'
-                    : option.price_range === 'moderate'
-                      ? '$$'
-                      : '$$$'}
+                📍{' '}
+                {option.type === 'hotel_restaurant'
+                  ? 'Hotel Restaurant'
+                  : `${option.distance_from_hotel}m away`}
               </div>
-            )}
 
-            <div class="badge badge-outline badge-sm">
-              📍{' '}
-              {option.type === 'hotel_restaurant'
-                ? 'Hotel Restaurant'
-                : `${option.distance_from_hotel}m away`}
+              <div class="badge badge-accent badge-sm">
+                {option.type === 'hotel_restaurant'
+                  ? 'hotel restaurant'
+                  : 'local dining'}
+              </div>
             </div>
 
-            <div class="badge badge-accent badge-sm">
-              {option.type === 'hotel_restaurant'
-                ? 'hotel restaurant'
-                : 'local dining'}
+            <div class="card-actions justify-end">
+              <a
+                href={
+                  option.type === 'hotel_restaurant'
+                    ? '/restaurant'
+                    : `/guest-directory/local-places/${option.id}`
+                }
+                class="btn btn-primary btn-sm"
+              >
+                View Details
+              </a>
             </div>
-          </div>
-
-          <div class="card-actions justify-end">
-            <a
-              href={
-                option.type === 'hotel_restaurant'
-                  ? '/restaurant'
-                  : `/guest-directory/local-places/${option.id}`
-              }
-              class="btn btn-primary btn-sm"
-            >
-              View Details
-            </a>
           </div>
         </div>
-      </div>
-    ))
-  }
+      ))
+    }
+  </Fragment>
 
   {/* Featured Dishes Section */}
   {
