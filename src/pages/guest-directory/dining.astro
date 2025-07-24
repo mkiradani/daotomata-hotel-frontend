@@ -88,7 +88,7 @@ console.log(
   <Fragment slot="items">
     {
       allDiningOptions.map((option) => (
-        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
+        <div class="card bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300">
           {option.main_photo?.id && (
             <figure class="aspect-video overflow-hidden">
               <img
@@ -153,7 +153,7 @@ console.log(
                 href={
                   option.type === 'hotel_restaurant'
                     ? '/restaurant'
-                    : `/guest-directory/local-places/${option.id}`
+                    : `/guest-directory/dining/${option.name.toLowerCase().replace(/\s+/g, '-')}`
                 }
                 class="btn btn-primary btn-sm"
               >
@@ -176,7 +176,7 @@ console.log(
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {dishes.slice(0, 6).map((dish) => (
-            <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card bg-base-100 border border-base-300">
               {dish.main_photo?.id && (
                 <figure class="aspect-video overflow-hidden">
                   <img

@@ -3,6 +3,7 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
 import { GuestDirectoryCard } from '../../components/GuestDirectoryCard.tsx';
+import OperatingHours from '../../components/OperatingHours.astro';
 import {
   getCurrentHotel,
   getLocalPlacesByHotelId,
@@ -64,7 +65,7 @@ console.log(`✅ Attractions data loaded: ${attractions.length} attractions`);
   <Fragment slot="items">
     {
       attractions.map((attraction) => (
-        <div class="card bg-base-100 shadow-lg border border-base-200">
+        <div class="card bg-base-100 border-2 border-base-300">
           {attraction.main_photo?.id && (
             <figure class="aspect-video overflow-hidden">
               <img
@@ -94,63 +95,84 @@ console.log(`✅ Attractions data loaded: ${attractions.length} attractions`);
             )}
 
             {/* Attraction Details */}
-            <div class="space-y-2 mb-4">
-              <div class="flex items-center gap-2 text-sm">
-                <span class="font-medium">Distance:</span>
-                <div class="badge badge-outline badge-sm">
-                  {attraction.distance_from_hotel}m away
-                </div>
-              </div>
-
-              {attraction.price_range && (
-                <div class="flex items-center gap-2 text-sm">
-                  <span class="font-medium">Price:</span>
-                  <div class="badge badge-outline badge-sm">
-                    {attraction.price_range === 'free' && 'Free'}
-                    {attraction.price_range === 'budget' && '$'}
-                    {attraction.price_range === 'moderate' && '$$'}
-                    {attraction.price_range === 'expensive' && '$$$'}
+            <div class="mb-4">
+              <h4 class="font-medium text-sm mb-3 text-primary">Details</h4>
+              <div class="grid grid-cols-1 gap-2">
+                <div class="flex items-center justify-between p-2 bg-base-200/30 rounded border border-base-300/50">
+                  <span class="text-sm font-medium">Distance from Hotel</span>
+                  <div class="badge badge-secondary badge-sm">
+                    {attraction.distance_from_hotel}m away
                   </div>
                 </div>
-              )}
 
-              {attraction.address && (
-                <div class="flex items-start gap-2 text-sm">
-                  <span class="font-medium">Address:</span>
-                  <span class="text-base-content/70 text-xs leading-relaxed">
-                    {attraction.address.length > 40
-                      ? attraction.address.substring(0, 40) + '...'
-                      : attraction.address}
-                  </span>
-                </div>
-              )}
+                {attraction.price_range && (
+                  <div class="flex items-center justify-between p-2 bg-base-200/30 rounded border border-base-300/50">
+                    <span class="text-sm font-medium">Price Range</span>
+                    <div class="badge badge-accent badge-sm">
+                      {attraction.price_range === 'free' && 'Free'}
+                      {attraction.price_range === 'budget' && '$ Budget'}
+                      {attraction.price_range === 'moderate' && '$$ Moderate'}
+                      {attraction.price_range === 'expensive' && '$$$ Premium'}
+                    </div>
+                  </div>
+                )}
+
+                {attraction.address && (
+                  <div class="p-2 bg-base-200/30 rounded border border-base-300/50">
+                    <div class="text-sm font-medium mb-1">Address</div>
+                    <div class="text-xs text-base-content/70 leading-relaxed">
+                      {attraction.address}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Contact Information */}
-            <div class="mb-4">
-              {attraction.contact_phone && (
-                <div class="text-sm mb-1">
-                  <span class="font-medium">Phone:</span>
-                  <span class="text-base-content/70 ml-2">
-                    {attraction.contact_phone}
-                  </span>
-                </div>
-              )}
+            {(attraction.contact_phone || attraction.contact_website) && (
+              <div class="mb-4">
+                <h4 class="font-medium text-sm mb-3 text-primary">
+                  Contact Information
+                </h4>
+                <div class="space-y-2">
+                  {attraction.contact_phone && (
+                    <div class="flex items-center gap-3 p-2 bg-base-200/30 rounded border border-base-300/50">
+                      <div class="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                        <span class="text-xs">📞</span>
+                      </div>
+                      <div class="flex-1">
+                        <div class="text-xs text-base-content/60">Phone</div>
+                        <a
+                          href={`tel:${attraction.contact_phone}`}
+                          class="text-sm font-medium link link-primary"
+                        >
+                          {attraction.contact_phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
 
-              {attraction.contact_website && (
-                <div class="text-sm">
-                  <span class="font-medium">Website:</span>
-                  <a
-                    href={attraction.contact_website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="link link-primary ml-2 text-xs"
-                  >
-                    Visit Website
-                  </a>
+                  {attraction.contact_website && (
+                    <div class="flex items-center gap-3 p-2 bg-base-200/30 rounded border border-base-300/50">
+                      <div class="w-5 h-5 rounded-full bg-info/20 flex items-center justify-center">
+                        <span class="text-xs">🌐</span>
+                      </div>
+                      <div class="flex-1">
+                        <div class="text-xs text-base-content/60">Website</div>
+                        <a
+                          href={attraction.contact_website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="text-sm font-medium link link-primary"
+                        >
+                          Visit Website
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Tags */}
             {attraction.tags && attraction.tags.length > 0 && (
@@ -169,35 +191,17 @@ console.log(`✅ Attractions data loaded: ${attractions.length} attractions`);
             {/* Operating Hours */}
             {attraction.opening_hours && (
               <div class="mb-4">
-                <h4 class="font-medium text-sm mb-2">Hours:</h4>
-                <div class="text-xs text-base-content/70 bg-base-200 p-2 rounded">
-                  {typeof attraction.opening_hours === 'object' ? (
-                    Object.entries(attraction.opening_hours)
-                      .slice(0, 3)
-                      .map(([day, hours]) => (
-                        <div class="flex justify-between">
-                          <span class="capitalize">{day}:</span>
-                          <span>
-                            {hours?.open && hours?.close
-                              ? `${hours.open} - ${hours.close}`
-                              : 'Closed'}
-                          </span>
-                        </div>
-                      ))
-                  ) : (
-                    <span>{attraction.opening_hours}</span>
-                  )}
-                  {typeof attraction.opening_hours === 'object' &&
-                    Object.keys(attraction.opening_hours).length > 3 && (
-                      <div class="text-center mt-1 text-xs opacity-60">...</div>
-                    )}
-                </div>
+                <OperatingHours
+                  operatingHours={attraction.opening_hours}
+                  showTitle={true}
+                  compact={true}
+                />
               </div>
             )}
 
             <div class="card-actions justify-end">
               <a
-                href={`/guest-directory/local-places/${attraction.id}`}
+                href={`/guest-directory/attractions/${attraction.name.toLowerCase().replace(/\s+/g, '-')}`}
                 class="btn btn-primary btn-sm"
               >
                 Learn More

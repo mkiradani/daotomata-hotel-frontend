@@ -1,0 +1,245 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import Layout from '../../../layouts/Layout.astro';
+import { Breadcrumb } from '../../../components/Breadcrumb.tsx';
+import OperatingHours from '../../../components/OperatingHours.astro';
+import {
+  getCurrentHotel,
+  getTransportationByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+  getTransportationByName,
+} from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering individual transportation page...`);
+
+// Generate static paths for all transportation items
+export async function getStaticPaths() {
+  const hotelId = getCurrentHotelId();
+  const transportation = await getTransportationByHotelId(hotelId);
+
+  return transportation.map((transport) => ({
+    params: { name: transport.name.toLowerCase().replace(/\s+/g, '-') },
+    props: { transport },
+  }));
+}
+
+const { transport } = Astro.props;
+const { name } = Astro.params;
+
+// Get hotel data
+const hotelData = await getCurrentHotel();
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(`✅ [BUILD] Individual transportation page: ${transport.name}`);
+---
+
+<Layout
+  title={`${transport.name} - Transportation - ${hotel.name}`}
+  description={transport.description ||
+    `Transportation option: ${transport.name}`}
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+>
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    items={[
+      { label: hotel.name, href: '/' },
+      { label: 'Guest Directory', href: '/guest-directory' },
+      { label: 'Transportation', href: '/guest-directory/transportation' },
+      { label: transport.name },
+    ]}
+  />
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+          <h1 class="text-3xl font-bold">{transport.name}</h1>
+          <div class="badge badge-secondary">
+            {transport.transport_type.replace('_', ' ')}
+          </div>
+        </div>
+
+        {
+          transport.description && (
+            <p class="text-lg text-base-content/70 leading-relaxed">
+              {transport.description}
+            </p>
+          )
+        }
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Main Photo -->
+          {
+            transport.main_photo?.id && (
+              <div class="aspect-video overflow-hidden rounded-lg border border-base-200">
+                <img
+                  src={getMediaUrl(transport.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                  })}
+                  alt={transport.name}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            )
+          }
+
+          <!-- Transportation Details -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h2 class="card-title text-xl mb-4">Transportation Details</h2>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                {
+                  transport.estimated_cost && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Estimated Cost</div>
+                      <div class="stat-value text-lg text-primary">
+                        {transport.estimated_cost}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  transport.travel_time_to_airport && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">To Airport</div>
+                      <div class="stat-value text-lg text-secondary">
+                        {transport.travel_time_to_airport} min
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  transport.travel_time_to_downtown && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">To Downtown</div>
+                      <div class="stat-value text-lg text-secondary">
+                        {transport.travel_time_to_downtown} min
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  transport.pickup_location && (
+                    <div class="stat md:col-span-2">
+                      <div class="stat-title text-sm">Pickup Location</div>
+                      <div class="stat-value text-base">
+                        {transport.pickup_location}
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+
+              {
+                transport.booking_required && (
+                  <div class="alert alert-warning mt-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="stroke-current shrink-0 h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                    <span>
+                      Reservation required for this transportation option
+                    </span>
+                  </div>
+                )
+              }
+            </div>
+          </div>
+
+          <!-- Operating Hours -->
+          {
+            transport.operating_hours && (
+              <div class="card bg-base-100 border-2 border-base-300">
+                <div class="card-body">
+                  <OperatingHours
+                    operatingHours={transport.operating_hours}
+                    showTitle={true}
+                    compact={false}
+                  />
+                </div>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Contact Information -->
+          {
+            transport.contact_method && transport.contact_method.length > 0 && (
+              <div class="card bg-base-100 border-2 border-base-300">
+                <div class="card-body">
+                  <h3 class="card-title text-lg mb-4">Contact Information</h3>
+
+                  <div class="space-y-3">
+                    {transport.contact_method.map((contact) => (
+                      <div class="flex flex-col gap-1">
+                        <span class="text-sm font-medium capitalize text-base-content/70">
+                          {contact.contact_methods_id.contact_type}
+                        </span>
+                        <span class="font-medium">
+                          {contact.contact_methods_id.contact_identifier}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          <!-- Actions -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-lg mb-4">Need Assistance?</h3>
+
+              <div class="space-y-3">
+                <a href="/contact" class="btn btn-primary w-full">
+                  Contact Concierge
+                </a>
+                <a href="tel:+1234567890" class="btn btn-outline w-full">
+                  Call Front Desk
+                </a>
+                <a
+                  href="/guest-directory/transportation"
+                  class="btn btn-ghost w-full"
+                >
+                  ← Back to Transportation
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
