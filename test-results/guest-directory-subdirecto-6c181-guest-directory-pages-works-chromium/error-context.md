@@ -1,0 +1,94 @@
+# Page snapshot
+
+```yaml
+- link "Baberrih Logo":
+    - /url: /
+    - img "Baberrih Logo"
+- list:
+    - listitem:
+        - link "Home":
+            - /url: /
+    - listitem:
+        - link "Accommodation":
+            - /url: /accommodation
+    - listitem:
+        - link "Facilities":
+            - /url: /facilities
+    - listitem:
+        - link "Experiences":
+            - /url: /experiences
+    - listitem:
+        - link "Restaurant":
+            - /url: /restaurant
+    - listitem:
+        - link "Contact":
+            - /url: /contact
+- link "Book Now":
+    - /url: /book
+- main:
+    - navigation:
+        - link "Baberrih Hotel":
+            - /url: /
+        - text: /
+        - link "Guest Directory":
+            - /url: /guest-directory
+        - text: / Dining
+    - heading "Dining Guide" [level=1]
+    - paragraph: Explore our restaurant and discover the best local dining options
+    - figure:
+        - img "Tissa Restaurant"
+    - heading "Tissa Restaurant" [level=3]
+    - paragraph: At Baberrih, our culinary offering is a tribute to local products. We collaborate with nearby farmers, shepherds, and fishermen to offer fresh and sustainable ingredients. Enjoy our carefully selected vegan options and the best quality halal meats, in a gastronomic experience that connects with the region's roots. Our restaurant features authentic local flavors with a focus on sustainability and quality.
+    - text: 📍 Hotel Restaurant hotel restaurant
+    - link "View Details":
+        - /url: /restaurant
+    - heading "Restaurant Dinarjat" [level=3]
+    - paragraph: Authentic Moroccan restaurant serving traditional tagines, couscous and local specialties in a beautiful traditional setting.
+    - text: 💰 $$ 📍 1.8m away local dining
+    - link "View Details":
+        - /url: /guest-directory/local-places/5
+    - heading "Make a Reservation" [level=2]
+    - paragraph: Let us help you secure a table at the perfect restaurant for your dining experience
+    - link "Contact Concierge":
+        - /url: /contact
+    - link "View Menu":
+        - /url: /menu
+- contentinfo:
+    - heading "Hotel" [level=3]
+    - paragraph: Experience luxury and comfort at Hotel. We provide exceptional hospitality with modern amenities and thoughtful service.
+    - heading "Quick Links" [level=4]
+    - list:
+        - listitem:
+            - link "Home":
+                - /url: /baberrih/
+        - listitem:
+            - link "Accommodation":
+                - /url: /baberrih/accommodation
+        - listitem:
+            - link "Facilities":
+                - /url: /baberrih/facilities
+        - listitem:
+            - link "Experiences":
+                - /url: /baberrih/experiences
+        - listitem:
+            - link "Restaurant":
+                - /url: /baberrih/restaurant
+        - listitem:
+            - link "Contact":
+                - /url: /baberrih/contact
+        - listitem:
+            - link "Book Now":
+                - /url: /baberrih/book
+    - heading "Contact" [level=4]
+    - img "Location"
+    - text: 31.6894°N, 9.6662°W
+    - img "Email"
+    - text: info@baberrih.com
+    - paragraph: © 2025 Hotel. All rights reserved.
+    - link "Privacy Policy":
+        - /url: /baberrih/privacy
+    - link "Terms of Service":
+        - /url: /baberrih/terms
+    - link "Cookie Policy":
+        - /url: /baberrih/cookies
+```
