@@ -1,0 +1,238 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
+import {
+  getCurrentHotel,
+  getLocalPlacesByHotelId,
+  getRestaurantByHotelId,
+  getDishesByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../lib/directus.js';
+import type { Hotel } from '../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering guest directory dining page...`);
+
+// Get hotel data from environment variable
+const hotelData = await getCurrentHotel();
+
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelId = getCurrentHotelId();
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Get dining data
+const [restaurant, dishes, localDining] = await Promise.all([
+  getRestaurantByHotelId(hotelId),
+  getDishesByHotelId(hotelId),
+  getLocalPlacesByHotelId(hotelId, 'food_and_drink'),
+]);
+
+// Combine all dining options
+const allDiningOptions = [];
+
+// Add hotel restaurant
+if (restaurant) {
+  allDiningOptions.push({
+    ...restaurant,
+    type: 'hotel_restaurant',
+    distance: '0m',
+  });
+}
+
+// Add local dining places
+localDining.forEach((place) => {
+  allDiningOptions.push({
+    ...place,
+    type: 'local_dining',
+  });
+});
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(
+  `✅ Dining data loaded: ${allDiningOptions.length} dining options, ${dishes.length} dishes`
+);
+---
+
+<CollectionPageLayout
+  title={`Dining Guide - ${hotel.name}`}
+  description={`Discover dining options at ${hotel.name} and nearby local restaurants`}
+  pageTitle="Dining Guide"
+  pageDescription="Explore our restaurant and discover the best local dining options"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={allDiningOptions}
+  itemType="experiences"
+  breadcrumbItems={[
+    { label: hotel.name, href: '/' },
+    { label: 'Guest Directory', href: '/guest-directory' },
+    { label: 'Dining' },
+  ]}
+  ctaTitle="Make a Reservation"
+  ctaDescription="Let us help you secure a table at the perfect restaurant for your dining experience"
+  ctaPrimaryText="Contact Concierge"
+  ctaPrimaryHref="/contact"
+  ctaSecondaryText="View Menu"
+  ctaSecondaryHref="/menu"
+  gridId="dining-guide-grid"
+>
+  <Fragment slot="items">
+    {
+      allDiningOptions.map((option) => (
+        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
+          {option.main_photo?.id && (
+            <figure class="aspect-video overflow-hidden">
+              <img
+                src={getMediaUrl(option.main_photo.id, {
+                  width: 400,
+                  height: 250,
+                })}
+                alt={option.name}
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </figure>
+          )}
+
+          <div class="card-body">
+            <h3 class="card-title text-lg font-semibold text-base-content">
+              {option.name}
+            </h3>
+
+            {option.description && (
+              <p class="text-base-content/70 text-sm line-clamp-2 mb-3">
+                {option.description}
+              </p>
+            )}
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              {option.operating_hours && (
+                <div class="badge badge-outline badge-sm">
+                  🕐 Hours Available
+                </div>
+              )}
+
+              {option.price_range && (
+                <div class="badge badge-outline badge-sm">
+                  💰{' '}
+                  {option.price_range === 'free'
+                    ? 'Free'
+                    : option.price_range === 'budget'
+                      ? '$'
+                      : option.price_range === 'moderate'
+                        ? '$$'
+                        : '$$$'}
+                </div>
+              )}
+
+              <div class="badge badge-outline badge-sm">
+                📍{' '}
+                {option.type === 'hotel_restaurant'
+                  ? 'Hotel Restaurant'
+                  : `${option.distance_from_hotel}m away`}
+              </div>
+
+              <div class="badge badge-accent badge-sm">
+                {option.type === 'hotel_restaurant'
+                  ? 'hotel restaurant'
+                  : 'local dining'}
+              </div>
+            </div>
+
+            <div class="card-actions justify-end">
+              <a
+                href={
+                  option.type === 'hotel_restaurant'
+                    ? '/restaurant'
+                    : `/guest-directory/local-places/${option.id}`
+                }
+                class="btn btn-primary btn-sm"
+              >
+                View Details
+              </a>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </Fragment>
+
+  {/* Featured Dishes Section */}
+  {
+    dishes.length > 0 && (
+      <div class="col-span-full mt-8">
+        <div class="divider">
+          <h2 class="text-2xl font-bold">Featured Dishes</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          {dishes.slice(0, 6).map((dish) => (
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+              {dish.main_photo?.id && (
+                <figure class="aspect-video overflow-hidden">
+                  <img
+                    src={getMediaUrl(dish.main_photo.id, {
+                      width: 300,
+                      height: 200,
+                    })}
+                    alt={dish.name}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </figure>
+              )}
+
+              <div class="card-body p-4">
+                <h3 class="card-title text-base">{dish.name}</h3>
+
+                {dish.description && (
+                  <p class="text-sm text-base-content/70 line-clamp-2">
+                    {dish.description}
+                  </p>
+                )}
+
+                <div class="flex flex-wrap gap-1 mt-2">
+                  {dish.price && (
+                    <div class="badge badge-primary badge-sm">{dish.price}</div>
+                  )}
+                  {dish.calories && (
+                    <div class="badge badge-outline badge-sm">
+                      {dish.calories} cal
+                    </div>
+                  )}
+                  {dish.dietary_options &&
+                    dish.dietary_options
+                      .slice(0, 2)
+                      .map((option) => (
+                        <div class="badge badge-accent badge-sm">{option}</div>
+                      ))}
+                </div>
+
+                {dish.allergens && dish.allergens.length > 0 && (
+                  <div class="text-xs text-base-content/50 mt-1">
+                    Allergens: {dish.allergens.join(', ')}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="text-center mt-6">
+          <a href="/menu" class="btn btn-primary">
+            View Full Menu
+          </a>
+        </div>
+      </div>
+    )
+  }
+</CollectionPageLayout>

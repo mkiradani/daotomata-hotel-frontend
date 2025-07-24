@@ -1,0 +1,185 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import CollectionPageLayout from '../layouts/CollectionPageLayout.astro';
+import {
+  getCurrentHotel,
+  getGuestDirectoryByHotelId,
+  getCurrentHotelId,
+} from '../lib/directus.js';
+import type { Hotel } from '../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering guest directory page...`);
+
+// Get hotel data from environment variable
+const hotelData = await getCurrentHotel();
+
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelId = getCurrentHotelId();
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Get all guest directory data
+const guestDirectoryData = await getGuestDirectoryByHotelId(hotelId);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+// Create directory sections as items for the collection layout
+const directoryItems = [
+  {
+    id: 'dining',
+    name: 'Dining',
+    description: `Discover our restaurant and local dining options`,
+    href: '/guest-directory/dining',
+    icon: '🍽️',
+    count:
+      (guestDirectoryData.dining.restaurant ? 1 : 0) +
+      guestDirectoryData.dining.dishes.length +
+      guestDirectoryData.dining.localDining.length,
+    hasContent:
+      !!guestDirectoryData.dining.restaurant ||
+      guestDirectoryData.dining.dishes.length > 0,
+  },
+  {
+    id: 'services',
+    name: 'Hotel Services',
+    description: 'Facilities, activities and guest services',
+    href: '/guest-directory/services',
+    icon: '🛎️',
+    count:
+      guestDirectoryData.guestServices.length +
+      guestDirectoryData.hotelServices.facilities.length +
+      guestDirectoryData.hotelServices.activities.length,
+    hasContent:
+      guestDirectoryData.guestServices.length > 0 ||
+      guestDirectoryData.hotelServices.facilities.length > 0 ||
+      guestDirectoryData.hotelServices.activities.length > 0,
+  },
+  {
+    id: 'transportation',
+    name: 'Transportation',
+    description: 'Get around the city with ease',
+    href: '/guest-directory/transportation',
+    icon: '🚗',
+    count: guestDirectoryData.transportation.length,
+    hasContent: guestDirectoryData.transportation.length > 0,
+  },
+  {
+    id: 'attractions',
+    name: 'Local Attractions',
+    description: 'Explore nearby points of interest',
+    href: '/guest-directory/attractions',
+    icon: '📍',
+    count: guestDirectoryData.localPlaces.filter(
+      (place) => place.category !== 'food_and_drink'
+    ).length,
+    hasContent:
+      guestDirectoryData.localPlaces.filter(
+        (place) => place.category !== 'food_and_drink'
+      ).length > 0,
+  },
+];
+
+console.log(
+  `🔍 [DEBUG] Raw guest directory data:`,
+  JSON.stringify(
+    {
+      restaurant: !!guestDirectoryData.dining.restaurant,
+      dishesCount: guestDirectoryData.dining.dishes.length,
+      facilitiesCount: guestDirectoryData.hotelServices.facilities.length,
+      activitiesCount: guestDirectoryData.hotelServices.activities.length,
+      guestServicesCount: guestDirectoryData.guestServices.length,
+      localPlacesCount: guestDirectoryData.localPlaces.length,
+      transportationCount: guestDirectoryData.transportation.length,
+    },
+    null,
+    2
+  )
+);
+
+console.log(
+  `🔍 [DEBUG] Directory items before filter:`,
+  JSON.stringify(
+    directoryItems.map((item) => ({
+      name: item.name,
+      count: item.count,
+      hasContent: item.hasContent,
+    })),
+    null,
+    2
+  )
+);
+
+// Filter to show only sections with content
+const availableSections = directoryItems.filter((item) => item.hasContent);
+
+console.log(
+  `🔍 [DEBUG] Available sections after filter:`,
+  availableSections.length
+);
+console.log(
+  `🔍 [DEBUG] Available sections:`,
+  JSON.stringify(
+    availableSections.map((s) => s.name),
+    null,
+    2
+  )
+);
+
+console.log(`✅ Guest directory data loaded`);
+---
+
+<CollectionPageLayout
+  title={`Guest Directory - ${hotel.name}`}
+  description={`Your comprehensive guide to hotel services, local attractions, dining and transportation at ${hotel.name}`}
+  pageTitle="Guest Directory"
+  pageDescription="Your comprehensive guide to everything we offer and the best local experiences"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={availableSections}
+  itemType="experiences"
+  breadcrumbItems={[
+    { label: hotel.name, href: '/' },
+    { label: 'Guest Directory' },
+  ]}
+  ctaTitle="Need Personal Assistance?"
+  ctaDescription="Our concierge team is available 24/7 to help you make the most of your stay"
+  ctaPrimaryText="Contact Concierge"
+  ctaPrimaryHref="/contact"
+  ctaSecondaryText="Call Front Desk"
+  ctaSecondaryHref="tel:+1234567890"
+  gridId="guest-directory-grid"
+>
+  <Fragment slot="items">
+    {
+      availableSections.map((section) => (
+        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <div class="card-body">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-4xl">{section.icon}</span>
+              <div>
+                <h2 class="card-title text-2xl">{section.name}</h2>
+                <div class="badge badge-secondary">{section.count} options</div>
+              </div>
+            </div>
+
+            <p class="text-base-content/70 mb-6">{section.description}</p>
+
+            <div class="card-actions justify-end">
+              <a href={section.href} class="btn btn-primary">
+                Explore {section.name}
+              </a>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </Fragment>
+</CollectionPageLayout>

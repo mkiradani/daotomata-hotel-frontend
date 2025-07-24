@@ -620,3 +620,555 @@ export async function getSocialProfilesByHotelId(hotelId) {
     return [];
   }
 }
+
+/**
+ * Get guest services for a hotel
+ */
+export async function getGuestServicesByHotelId(hotelId) {
+  try {
+    const guestServices = await directus.request(
+      readItems('guest_services', {
+        filter: { hotel_id: { _eq: hotelId } },
+        fields: [
+          'id',
+          'name',
+          'description',
+          'service_category',
+          'operating_hours',
+          'is_available',
+          'price',
+          'booking_required',
+          'main_photo.id',
+          'main_photo.filename_disk',
+          'main_photo.title',
+        ],
+      })
+    );
+    return guestServices || [];
+  } catch (error) {
+    console.error('❌ Error fetching guest services:', error);
+    return [];
+  }
+}
+
+/**
+ * Get local places for a hotel, optionally filtered by category
+ */
+export async function getLocalPlacesByHotelId(hotelId, category = null) {
+  try {
+    const filter = { hotel_id: { _eq: hotelId } };
+    if (category) {
+      filter.category = { _eq: category };
+    }
+
+    const localPlaces = await directus.request(
+      readItems('local_places', {
+        filter,
+        fields: [
+          'id',
+          'name',
+          'description',
+          'category',
+          'address',
+          'coordinates',
+          'distance_from_hotel',
+          'contact_phone',
+          'contact_website',
+          'contact_email',
+          'opening_hours',
+          'price_range',
+          'tags',
+          'main_photo.id',
+          'main_photo.filename_disk',
+          'main_photo.title',
+        ],
+        sort: ['distance_from_hotel', 'name'],
+      })
+    );
+    return localPlaces || [];
+  } catch (error) {
+    console.error('❌ Error fetching local places:', error);
+    return [];
+  }
+}
+
+/**
+ * Get transportation options for a hotel
+ */
+export async function getTransportationByHotelId(hotelId) {
+  try {
+    const transportation = await directus.request(
+      readItems('transportation', {
+        filter: { hotel_id: { _eq: hotelId } },
+        fields: [
+          'id',
+          'name',
+          'description',
+          'transport_type',
+          'estimated_cost',
+          'travel_time_to_downtown',
+          'travel_time_to_airport',
+          'operating_hours',
+          'booking_required',
+          'pickup_location',
+          'main_photo.id',
+          'main_photo.filename_disk',
+          'main_photo.title',
+          'contact_method.contact_methods_id.contact_type',
+          'contact_method.contact_methods_id.contact_identifier',
+          'contact_method.contact_methods_id.name',
+        ],
+      })
+    );
+    return transportation || [];
+  } catch (error) {
+    console.error('❌ Error fetching transportation:', error);
+    return [];
+  }
+}
+
+/**
+ * Mock data for Baberrih Hotel guest directory
+ */
+const getMockGuestDirectoryData = (hotelId) => {
+  // Only provide mock data for Baberrih Hotel (ID: 2)
+  if (hotelId !== '2') {
+    return null;
+  }
+
+  return {
+    guestServices: [
+      {
+        id: 'concierge',
+        name: 'Concierge Service',
+        description:
+          'Our experienced concierge team is available 24/7 to assist with recommendations, reservations, and local arrangements.',
+        service_category: 'concierge',
+        operating_hours: {
+          mon: { open: '00:00', close: '23:59' },
+          tue: { open: '00:00', close: '23:59' },
+          wed: { open: '00:00', close: '23:59' },
+          thu: { open: '00:00', close: '23:59' },
+          fri: { open: '00:00', close: '23:59' },
+          sat: { open: '00:00', close: '23:59' },
+          sun: { open: '00:00', close: '23:59' },
+        },
+        is_available: true,
+        price: 'Complimentary',
+        booking_required: false,
+        main_photo: null,
+      },
+      {
+        id: 'housekeeping',
+        name: 'Housekeeping Service',
+        description:
+          'Daily housekeeping service and special requests to ensure your comfort throughout your stay.',
+        service_category: 'housekeeping',
+        operating_hours: {
+          mon: { open: '09:00', close: '17:00' },
+          tue: { open: '09:00', close: '17:00' },
+          wed: { open: '09:00', close: '17:00' },
+          thu: { open: '09:00', close: '17:00' },
+          fri: { open: '09:00', close: '17:00' },
+          sat: { open: '09:00', close: '17:00' },
+          sun: { open: '09:00', close: '17:00' },
+        },
+        is_available: true,
+        price: 'Included',
+        booking_required: false,
+        main_photo: null,
+      },
+      {
+        id: 'laundry',
+        name: 'Laundry & Dry Cleaning',
+        description:
+          'Professional laundry and dry cleaning services with same-day or next-day delivery.',
+        service_category: 'housekeeping',
+        operating_hours: {
+          mon: { open: '08:00', close: '18:00' },
+          tue: { open: '08:00', close: '18:00' },
+          wed: { open: '08:00', close: '18:00' },
+          thu: { open: '08:00', close: '18:00' },
+          fri: { open: '08:00', close: '18:00' },
+          sat: { open: '08:00', close: '16:00' },
+          sun: { open: '10:00', close: '16:00' },
+        },
+        is_available: true,
+        price: 'Extra charge applies',
+        booking_required: false,
+        main_photo: null,
+      },
+    ],
+    localPlaces: [
+      {
+        id: 'essaouira-medina',
+        name: 'Essaouira Medina',
+        description:
+          'UNESCO World Heritage site featuring traditional Moroccan architecture, souks, and artisan workshops.',
+        category: 'culture',
+        address: 'Medina, Essaouira, Morocco',
+        coordinates: null,
+        distance_from_hotel: 2500,
+        contact_phone: null,
+        contact_website: null,
+        contact_email: null,
+        opening_hours: {
+          mon: { open: '08:00', close: '20:00' },
+          tue: { open: '08:00', close: '20:00' },
+          wed: { open: '08:00', close: '20:00' },
+          thu: { open: '08:00', close: '20:00' },
+          fri: { open: '08:00', close: '20:00' },
+          sat: { open: '08:00', close: '20:00' },
+          sun: { open: '08:00', close: '20:00' },
+        },
+        price_range: 'free',
+        tags: ['historic', 'unesco', 'shopping', 'culture'],
+        main_photo: null,
+      },
+      {
+        id: 'skala-kasbah',
+        name: 'Skala de la Kasbah',
+        description:
+          'Historic sea bastion with cannons and panoramic views of the Atlantic Ocean and city walls.',
+        category: 'viewpoints',
+        address: 'Place Moulay Hassan, Essaouira, Morocco',
+        coordinates: null,
+        distance_from_hotel: 2800,
+        contact_phone: null,
+        contact_website: null,
+        contact_email: null,
+        opening_hours: {
+          mon: { open: '09:00', close: '18:00' },
+          tue: { open: '09:00', close: '18:00' },
+          wed: { open: '09:00', close: '18:00' },
+          thu: { open: '09:00', close: '18:00' },
+          fri: { open: '09:00', close: '18:00' },
+          sat: { open: '09:00', close: '18:00' },
+          sun: { open: '09:00', close: '18:00' },
+        },
+        price_range: 'budget',
+        tags: ['historic', 'views', 'photography', 'sunset'],
+        main_photo: null,
+      },
+      {
+        id: 'essaouira-beach',
+        name: 'Essaouira Beach',
+        description:
+          'Wide sandy beach perfect for walks, water sports, and watching local fishermen and surfers.',
+        category: 'nature',
+        address: 'Essaouira Beach, Morocco',
+        coordinates: null,
+        distance_from_hotel: 1800,
+        contact_phone: null,
+        contact_website: null,
+        contact_email: null,
+        opening_hours: null,
+        price_range: 'free',
+        tags: ['beach', 'surfing', 'walking', 'sunset'],
+        main_photo: null,
+      },
+      {
+        id: 'port-essaouira',
+        name: 'Port of Essaouira',
+        description:
+          'Working fishing port where you can watch the daily catch being brought in and buy fresh seafood.',
+        category: 'culture',
+        address: "Port d'Essaouira, Morocco",
+        coordinates: null,
+        distance_from_hotel: 2200,
+        contact_phone: null,
+        contact_website: null,
+        contact_email: null,
+        opening_hours: {
+          mon: { open: '06:00', close: '19:00' },
+          tue: { open: '06:00', close: '19:00' },
+          wed: { open: '06:00', close: '19:00' },
+          thu: { open: '06:00', close: '19:00' },
+          fri: { open: '06:00', close: '19:00' },
+          sat: { open: '06:00', close: '19:00' },
+          sun: { open: '06:00', close: '19:00' },
+        },
+        price_range: 'free',
+        tags: ['fishing', 'local-life', 'seafood', 'authentic'],
+        main_photo: null,
+      },
+      {
+        id: 'taros-cafe',
+        name: 'Taros Café Restaurant',
+        description:
+          'Popular rooftop restaurant and bar with panoramic views over the medina and ocean.',
+        category: 'food_and_drink',
+        address: '2 Rue de la Skala, Essaouira, Morocco',
+        coordinates: null,
+        distance_from_hotel: 2600,
+        contact_phone: '+212 524-47-64-07',
+        contact_website: 'https://www.taroscafe.com',
+        contact_email: null,
+        opening_hours: {
+          mon: { open: '10:00', close: '01:00' },
+          tue: { open: '10:00', close: '01:00' },
+          wed: { open: '10:00', close: '01:00' },
+          thu: { open: '10:00', close: '01:00' },
+          fri: { open: '10:00', close: '01:00' },
+          sat: { open: '10:00', close: '01:00' },
+          sun: { open: '10:00', close: '01:00' },
+        },
+        price_range: 'moderate',
+        tags: ['rooftop', 'views', 'international', 'bar'],
+        main_photo: null,
+      },
+      {
+        id: 'cooperative-argan',
+        name: 'Cooperative Amal Argan',
+        description:
+          "Women's cooperative producing traditional argan oil. Watch the production process and purchase authentic products.",
+        category: 'shopping',
+        address: "Route d'Agadir, Essaouira, Morocco",
+        coordinates: null,
+        distance_from_hotel: 5000,
+        contact_phone: '+212 524-78-40-46',
+        contact_website: null,
+        contact_email: null,
+        opening_hours: {
+          mon: { open: '08:00', close: '18:00' },
+          tue: { open: '08:00', close: '18:00' },
+          wed: { open: '08:00', close: '18:00' },
+          thu: { open: '08:00', close: '18:00' },
+          fri: { open: '08:00', close: '18:00' },
+          sat: { open: '08:00', close: '17:00' },
+          sun: { open: '09:00', close: '17:00' },
+        },
+        price_range: 'budget',
+        tags: ['cooperative', 'argan-oil', 'women-owned', 'authentic'],
+        main_photo: null,
+      },
+    ],
+    transportation: [
+      {
+        id: 'grand-taxi',
+        name: 'Grand Taxi Service',
+        description:
+          'Shared or private taxi service connecting Essaouira to major cities like Marrakech and Casablanca.',
+        transport_type: 'taxi',
+        estimated_cost: '200-400 MAD to Marrakech',
+        travel_time_to_downtown: 15,
+        travel_time_to_airport: 20,
+        operating_hours: {
+          mon: { open: '06:00', close: '22:00' },
+          tue: { open: '06:00', close: '22:00' },
+          wed: { open: '06:00', close: '22:00' },
+          thu: { open: '06:00', close: '22:00' },
+          fri: { open: '06:00', close: '22:00' },
+          sat: { open: '06:00', close: '22:00' },
+          sun: { open: '07:00', close: '21:00' },
+        },
+        booking_required: false,
+        pickup_location: 'Hotel pickup available',
+        main_photo: null,
+        contact_method: [],
+      },
+      {
+        id: 'local-taxi',
+        name: 'Petit Taxi (Local)',
+        description:
+          'Local taxis for short trips within Essaouira city. Metered service for convenient urban transport.',
+        transport_type: 'taxi',
+        estimated_cost: '10-30 MAD within city',
+        travel_time_to_downtown: 8,
+        travel_time_to_airport: 15,
+        operating_hours: {
+          mon: { open: '06:00', close: '01:00' },
+          tue: { open: '06:00', close: '01:00' },
+          wed: { open: '06:00', close: '01:00' },
+          thu: { open: '06:00', close: '01:00' },
+          fri: { open: '06:00', close: '01:00' },
+          sat: { open: '06:00', close: '01:00' },
+          sun: { open: '06:00', close: '01:00' },
+        },
+        booking_required: false,
+        pickup_location: 'Street hail or hotel call',
+        main_photo: null,
+        contact_method: [],
+      },
+      {
+        id: 'car-rental',
+        name: 'Car Rental Services',
+        description:
+          'Rent a car to explore the region at your own pace. Several agencies available in the city center.',
+        transport_type: 'rental',
+        estimated_cost: '300-600 MAD per day',
+        travel_time_to_downtown: 10,
+        travel_time_to_airport: 18,
+        operating_hours: {
+          mon: { open: '08:00', close: '19:00' },
+          tue: { open: '08:00', close: '19:00' },
+          wed: { open: '08:00', close: '19:00' },
+          thu: { open: '08:00', close: '19:00' },
+          fri: { open: '08:00', close: '19:00' },
+          sat: { open: '08:00', close: '18:00' },
+          sun: { open: '09:00', close: '17:00' },
+        },
+        booking_required: true,
+        pickup_location: 'Hotel delivery available',
+        main_photo: null,
+        contact_method: [],
+      },
+      {
+        id: 'bus-ctm',
+        name: 'CTM Bus Service',
+        description:
+          'Comfortable bus service to major Moroccan cities including Marrakech, Casablanca, and Rabat.',
+        transport_type: 'bus',
+        estimated_cost: '80-150 MAD to Marrakech',
+        travel_time_to_downtown: 20,
+        travel_time_to_airport: 25,
+        operating_hours: {
+          mon: { open: '07:00', close: '20:00' },
+          tue: { open: '07:00', close: '20:00' },
+          wed: { open: '07:00', close: '20:00' },
+          thu: { open: '07:00', close: '20:00' },
+          fri: { open: '07:00', close: '20:00' },
+          sat: { open: '07:00', close: '20:00' },
+          sun: { open: '08:00', close: '19:00' },
+        },
+        booking_required: true,
+        pickup_location: "CTM Bus Station, Avenue de l'Istiqlal",
+        main_photo: null,
+        contact_method: [],
+      },
+      {
+        id: 'bicycle-rental',
+        name: 'Bicycle Rental',
+        description:
+          'Explore Essaouira and the surrounding countryside on two wheels. Perfect for the flat coastal terrain.',
+        transport_type: 'rental',
+        estimated_cost: '80-120 MAD per day',
+        travel_time_to_downtown: 12,
+        travel_time_to_airport: null,
+        operating_hours: {
+          mon: { open: '09:00', close: '18:00' },
+          tue: { open: '09:00', close: '18:00' },
+          wed: { open: '09:00', close: '18:00' },
+          thu: { open: '09:00', close: '18:00' },
+          fri: { open: '09:00', close: '18:00' },
+          sat: { open: '09:00', close: '18:00' },
+          sun: { open: '10:00', close: '17:00' },
+        },
+        booking_required: false,
+        pickup_location: 'Various rental shops in medina',
+        main_photo: null,
+        contact_method: [],
+      },
+    ],
+  };
+};
+
+/**
+ * Get all guest directory data for a hotel in one call
+ */
+export async function getGuestDirectoryByHotelId(hotelId) {
+  try {
+    const [
+      guestServices,
+      localPlaces,
+      transportation,
+      restaurant,
+      dishes,
+      facilities,
+      activities,
+    ] = await Promise.all([
+      getGuestServicesByHotelId(hotelId),
+      getLocalPlacesByHotelId(hotelId),
+      getTransportationByHotelId(hotelId),
+      getRestaurantByHotelId(hotelId),
+      getDishesByHotelId(hotelId),
+      // Get facilities and activities for hotel services section
+      directus.request(
+        readItems('facilities', {
+          filter: { hotel_id: { _eq: hotelId } },
+          fields: [
+            'id',
+            'name',
+            'description',
+            'operating_hours',
+            'booking_requiered',
+            'is_accessible',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+          ],
+        })
+      ),
+      directus.request(
+        readItems('activities', {
+          filter: { hotel_id: { _eq: hotelId } },
+          fields: [
+            'id',
+            'name',
+            'description',
+            'operating_hours',
+            'booking_requiered',
+            'equipment_provided',
+            'main_photo.id',
+            'main_photo.filename_disk',
+            'main_photo.title',
+          ],
+        })
+      ),
+    ]);
+
+    // Get mock data for empty collections (only for Baberrih Hotel)
+    const mockData = getMockGuestDirectoryData(hotelId);
+
+    const result = {
+      guestServices:
+        guestServices.length > 0
+          ? guestServices
+          : mockData?.guestServices || [],
+      localPlaces:
+        localPlaces.length > 0 ? localPlaces : mockData?.localPlaces || [],
+      transportation:
+        transportation.length > 0
+          ? transportation
+          : mockData?.transportation || [],
+      dining: {
+        restaurant: restaurant,
+        dishes: dishes || [],
+        localDining:
+          localPlaces.length > 0
+            ? localPlaces.filter((place) => place.category === 'food_and_drink')
+            : mockData?.localPlaces.filter(
+                (place) => place.category === 'food_and_drink'
+              ) || [],
+      },
+      hotelServices: {
+        facilities: facilities || [],
+        activities: activities || [],
+        guestServices:
+          guestServices.length > 0
+            ? guestServices
+            : mockData?.guestServices || [],
+      },
+    };
+
+    console.log(`🔍 [DEBUG] Mock data applied for hotel ${hotelId}:`, {
+      mockGuestServices: mockData?.guestServices?.length || 0,
+      mockLocalPlaces: mockData?.localPlaces?.length || 0,
+      mockTransportation: mockData?.transportation?.length || 0,
+      resultGuestServices: result.guestServices.length,
+      resultLocalPlaces: result.localPlaces.length,
+      resultTransportation: result.transportation.length,
+    });
+
+    return result;
+  } catch (error) {
+    console.error('❌ Error fetching guest directory data:', error);
+    return {
+      guestServices: [],
+      localPlaces: [],
+      transportation: [],
+      dining: { restaurant: null, dishes: [], localDining: [] },
+      hotelServices: { facilities: [], activities: [], guestServices: [] },
+    };
+  }
+}

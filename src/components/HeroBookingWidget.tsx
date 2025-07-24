@@ -7,7 +7,7 @@ interface HeroBookingWidgetProps {
 }
 
 export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
-  ({ hotelName, className = '' }) => {
+  ({ hotelName: _hotelName, className = '' }) => {
     // Form state
     const checkIn = useSignal('');
     const checkOut = useSignal('');
@@ -64,16 +64,24 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
         const redirectData = await redirectResponse.json();
 
         if (!redirectData.success) {
-          throw new Error(redirectData.error || 'Failed to generate booking URL');
+          throw new Error(
+            redirectData.error || 'Failed to generate booking URL'
+          );
         }
 
-        console.log('✅ [HERO-WIDGET] Redirect URL generated:', redirectData.data.url);
+        console.log(
+          '✅ [HERO-WIDGET] Redirect URL generated:',
+          redirectData.data.url
+        );
 
         // Redirect to Cloudbeds
         window.location.href = redirectData.data.url;
       } catch (error) {
         console.error('❌ [HERO-WIDGET] Search failed:', error);
-        state.error = error instanceof Error ? error.message : 'Search failed. Please try again.';
+        state.error =
+          error instanceof Error
+            ? error.message
+            : 'Search failed. Please try again.';
       } finally {
         state.isLoading = false;
       }
@@ -85,7 +93,6 @@ export const HeroBookingWidget = component$<HeroBookingWidgetProps>(
           class="backdrop-blur-md p-6 border"
           style="background: linear-gradient(to bottom, color-mix(in srgb, var(--color-base-100) 15%, transparent) 0%, color-mix(in srgb, var(--color-base-100) 25%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--color-base-100) 30%, transparent); border-radius: var(--radius-box, 0rem); box-shadow: 0 4px 16px color-mix(in srgb, var(--color-base-100) 15%, transparent);"
         >
-
           {/* Booking Form */}
           <div class="space-y-4">
             {/* Form Grid - 2x2 Layout */}

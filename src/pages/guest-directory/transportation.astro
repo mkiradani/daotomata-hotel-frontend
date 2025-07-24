@@ -1,0 +1,198 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
+import { GuestDirectoryCard } from '../../components/GuestDirectoryCard.tsx';
+import {
+  getCurrentHotel,
+  getTransportationByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../lib/directus.js';
+import type { Hotel } from '../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering guest directory transportation page...`);
+
+// Get hotel data from environment variable
+const hotelData = await getCurrentHotel();
+
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelId = getCurrentHotelId();
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Get transportation data
+const transportation = await getTransportationByHotelId(hotelId);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(`✅ Transportation data loaded: ${transportation.length} options`);
+---
+
+<CollectionPageLayout
+  title={`Transportation Guide - ${hotel.name}`}
+  description={`Discover transportation options to and from ${hotel.name} and around the city`}
+  pageTitle="Transportation Guide"
+  pageDescription="Get around the city with ease using our recommended transportation options"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={transportation}
+  itemType="experiences"
+  breadcrumbItems={[
+    { label: hotel.name, href: '/' },
+    { label: 'Guest Directory', href: '/guest-directory' },
+    { label: 'Transportation' },
+  ]}
+  ctaTitle="Need Transportation Assistance?"
+  ctaDescription="Our concierge can help arrange reliable transportation for your journey"
+  ctaPrimaryText="Contact Concierge"
+  ctaPrimaryHref="/contact"
+  ctaSecondaryText="Call Front Desk"
+  ctaSecondaryHref="tel:+1234567890"
+  gridId="transportation-guide-grid"
+>
+  <Fragment slot="items">
+    {
+      transportation.map((transport) => (
+        <div class="card bg-base-100 shadow-lg border border-base-200">
+          {transport.main_photo?.id && (
+            <figure class="aspect-video overflow-hidden">
+              <img
+                src={getMediaUrl(transport.main_photo.id, {
+                  width: 400,
+                  height: 250,
+                })}
+                alt={transport.name}
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </figure>
+          )}
+
+          <div class="card-body">
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="card-title text-lg">{transport.name}</h3>
+              <div class="badge badge-secondary badge-sm">
+                {transport.transport_type.replace('_', ' ')}
+              </div>
+            </div>
+
+            {transport.description && (
+              <p class="text-base-content/70 text-sm mb-4">
+                {transport.description}
+              </p>
+            )}
+
+            {/* Transportation Details */}
+            <div class="space-y-2 mb-4">
+              {transport.estimated_cost && (
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-medium">Cost:</span>
+                  <div class="badge badge-outline badge-sm">
+                    {transport.estimated_cost}
+                  </div>
+                </div>
+              )}
+
+              {transport.travel_time_to_airport && (
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-medium">To Airport:</span>
+                  <div class="badge badge-outline badge-sm">
+                    {transport.travel_time_to_airport} min
+                  </div>
+                </div>
+              )}
+
+              {transport.travel_time_to_downtown && (
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-medium">To Downtown:</span>
+                  <div class="badge badge-outline badge-sm">
+                    {transport.travel_time_to_downtown} min
+                  </div>
+                </div>
+              )}
+
+              {transport.pickup_location && (
+                <div class="flex items-start gap-2 text-sm">
+                  <span class="font-medium">Pickup:</span>
+                  <span class="text-base-content/70">
+                    {transport.pickup_location}
+                  </span>
+                </div>
+              )}
+
+              {transport.booking_required && (
+                <div class="flex items-center gap-2 text-sm">
+                  <div class="badge badge-warning badge-sm">
+                    Reservation Required
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Operating Hours */}
+            {transport.operating_hours && (
+              <div class="mb-4">
+                <h4 class="font-medium text-sm mb-2">Operating Hours:</h4>
+                <div class="text-xs text-base-content/70 bg-base-200 p-2 rounded">
+                  {typeof transport.operating_hours === 'object' ? (
+                    Object.entries(transport.operating_hours).map(
+                      ([day, hours]) => (
+                        <div class="flex justify-between">
+                          <span class="capitalize">{day}:</span>
+                          <span>
+                            {hours?.open && hours?.close
+                              ? `${hours.open} - ${hours.close}`
+                              : 'Closed'}
+                          </span>
+                        </div>
+                      )
+                    )
+                  ) : (
+                    <span>{transport.operating_hours}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Contact Methods */}
+            {transport.contact_method &&
+              transport.contact_method.length > 0 && (
+                <div class="mb-4">
+                  <h4 class="font-medium text-sm mb-2">Contact:</h4>
+                  <div class="space-y-1">
+                    {transport.contact_method.map((contact) => (
+                      <div class="text-sm flex items-center gap-2">
+                        <span class="font-medium capitalize">
+                          {contact.contact_methods_id.contact_type}:
+                        </span>
+                        <span class="text-base-content/70">
+                          {contact.contact_methods_id.contact_identifier}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            <div class="card-actions justify-end">
+              <a
+                href={`/guest-directory/transportation/${transport.id}`}
+                class="btn btn-primary btn-sm"
+              >
+                View Details
+              </a>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </Fragment>
+</CollectionPageLayout>
