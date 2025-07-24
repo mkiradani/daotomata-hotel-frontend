@@ -26,10 +26,10 @@ export const HeroSection = component$<HeroSectionProps>(
     hotelLogo,
     heroImageUrl,
     heroVideoUrl,
-    availableLanguages,
-    availableCurrencies,
-    currentLanguage,
-    defaultCurrency,
+    availableLanguages: _availableLanguages,
+    availableCurrencies: _availableCurrencies,
+    currentLanguage: _currentLanguage,
+    defaultCurrency: _defaultCurrency,
   }) => {
     // No theme configuration needed - DaisyUI handles themes automatically
 
