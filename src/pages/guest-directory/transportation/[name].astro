@@ -3,6 +3,7 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import Layout from '../../../layouts/Layout.astro';
 import { Breadcrumb } from '../../../components/Breadcrumb.tsx';
+import OperatingHours from '../../../components/OperatingHours.astro';
 import {
   getCurrentHotel,
   getTransportationByHotelId,
@@ -179,32 +180,11 @@ console.log(`✅ [BUILD] Individual transportation page: ${transport.name}`);
             transport.operating_hours && (
               <div class="card bg-base-100 border-2 border-base-300">
                 <div class="card-body">
-                  <h2 class="card-title text-xl mb-4">Operating Hours</h2>
-
-                  <div class="overflow-x-auto">
-                    <table class="table table-zebra">
-                      <tbody>
-                        {typeof transport.operating_hours === 'object' ? (
-                          Object.entries(transport.operating_hours).map(
-                            ([day, hours]) => (
-                              <tr>
-                                <td class="font-medium capitalize">{day}</td>
-                                <td>
-                                  {hours?.open && hours?.close
-                                    ? `${hours.open} - ${hours.close}`
-                                    : 'Closed'}
-                                </td>
-                              </tr>
-                            )
-                          )
-                        ) : (
-                          <tr>
-                            <td colspan="2">{transport.operating_hours}</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <OperatingHours
+                    operatingHours={transport.operating_hours}
+                    showTitle={true}
+                    compact={false}
+                  />
                 </div>
               </div>
             )

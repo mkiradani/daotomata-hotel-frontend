@@ -3,6 +3,7 @@ export const prerender = true; // ✅ SSG - Pre-render at build time
 
 import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
 import { GuestDirectoryCard } from '../../components/GuestDirectoryCard.tsx';
+import OperatingHours from '../../components/OperatingHours.astro';
 import {
   getCurrentHotel,
   getTransportationByHotelId,
@@ -148,31 +149,11 @@ console.log(`✅ Transportation data loaded: ${transportation.length} options`);
             {/* Operating Hours */}
             {transport.operating_hours && (
               <div class="mb-4">
-                <h4 class="font-medium text-sm mb-3 text-primary">
-                  Operating Hours
-                </h4>
-                <div class="bg-base-200/50 border border-base-300 rounded-lg p-3">
-                  {typeof transport.operating_hours === 'object' ? (
-                    <div class="space-y-2">
-                      {Object.entries(transport.operating_hours).map(
-                        ([day, hours]) => (
-                          <div class="flex justify-between items-center py-1 border-b border-base-300/50 last:border-b-0">
-                            <span class="capitalize font-medium text-sm">
-                              {day}
-                            </span>
-                            <span class="text-sm badge badge-outline badge-sm">
-                              {hours?.open && hours?.close
-                                ? `${hours.open} - ${hours.close}`
-                                : 'Closed'}
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <div class="text-sm">{transport.operating_hours}</div>
-                  )}
-                </div>
+                <OperatingHours
+                  operatingHours={transport.operating_hours}
+                  showTitle={true}
+                  compact={true}
+                />
               </div>
             )}
 
