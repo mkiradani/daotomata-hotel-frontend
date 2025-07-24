@@ -75,7 +75,7 @@ console.log(
   <Fragment slot="items">
     {
       allServices.map((service) => (
-        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
+        <div class="card bg-base-100 border-2 border-base-300 hover:border-primary transition-all duration-300">
           {service.main_photo?.id && (
             <figure class="aspect-video overflow-hidden">
               <img
@@ -125,10 +125,10 @@ console.log(
               <a
                 href={
                   service.type === 'facility'
-                    ? `/facilities/${service.id}`
+                    ? `/facilities/${service.name.toLowerCase().replace(/\s+/g, '-')}`
                     : service.type === 'activity'
-                      ? `/activities/${service.id}`
-                      : `/guest-directory/services/${service.id}`
+                      ? `/activities/${service.name.toLowerCase().replace(/\s+/g, '-')}`
+                      : `/guest-directory/services/${service.name.toLowerCase().replace(/\s+/g, '-')}`
                 }
                 class="btn btn-primary btn-sm"
               >

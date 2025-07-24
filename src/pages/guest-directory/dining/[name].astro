@@ -1,0 +1,285 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import Layout from '../../../layouts/Layout.astro';
+import { Breadcrumb } from '../../../components/Breadcrumb.tsx';
+import {
+  getCurrentHotel,
+  getRestaurantByHotelId,
+  getLocalPlacesByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering individual dining page...`);
+
+// Generate static paths for all dining items
+export async function getStaticPaths() {
+  const hotelId = getCurrentHotelId();
+
+  // Get both hotel restaurant and local dining places
+  const [restaurant, localDining] = await Promise.all([
+    getRestaurantByHotelId(hotelId),
+    getLocalPlacesByHotelId(hotelId, 'food_and_drink'),
+  ]);
+
+  const allDiningOptions = [];
+
+  // Add hotel restaurant
+  if (restaurant) {
+    allDiningOptions.push({
+      ...restaurant,
+      type: 'hotel_restaurant',
+    });
+  }
+
+  // Add local dining places
+  localDining.forEach((place) => {
+    allDiningOptions.push({
+      ...place,
+      type: 'local_dining',
+    });
+  });
+
+  return allDiningOptions.map((dining) => ({
+    params: { name: dining.name.toLowerCase().replace(/\s+/g, '-') },
+    props: { restaurant: dining },
+  }));
+}
+
+const { restaurant } = Astro.props;
+const { name } = Astro.params;
+
+// Get hotel data
+const hotelData = await getCurrentHotel();
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(`✅ [BUILD] Individual dining page: ${restaurant.name}`);
+---
+
+<Layout
+  title={`${restaurant.name} - Dining - ${hotel.name}`}
+  description={restaurant.description || `Dining option: ${restaurant.name}`}
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+>
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    items={[
+      { label: hotel.name, href: '/' },
+      { label: 'Guest Directory', href: '/guest-directory' },
+      { label: 'Dining', href: '/guest-directory/dining' },
+      { label: restaurant.name },
+    ]}
+  />
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+          <h1 class="text-3xl font-bold">{restaurant.name}</h1>
+          {
+            restaurant.cuisine_type && (
+              <div class="badge badge-secondary">{restaurant.cuisine_type}</div>
+            )
+          }
+        </div>
+
+        {
+          restaurant.description && (
+            <p class="text-lg text-base-content/70 leading-relaxed">
+              {restaurant.description}
+            </p>
+          )
+        }
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Main Photo -->
+          {
+            restaurant.main_photo?.id && (
+              <div class="aspect-video overflow-hidden rounded-lg border border-base-200">
+                <img
+                  src={getMediaUrl(restaurant.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                  })}
+                  alt={restaurant.name}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            )
+          }
+
+          <!-- Restaurant Details -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h2 class="card-title text-xl mb-4">Restaurant Details</h2>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                {
+                  restaurant.price_range && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Price Range</div>
+                      <div class="stat-value text-lg text-primary">
+                        {restaurant.price_range}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  restaurant.cuisine_type && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Cuisine Type</div>
+                      <div class="stat-value text-base">
+                        {restaurant.cuisine_type}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  restaurant.dress_code && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Dress Code</div>
+                      <div class="stat-value text-base">
+                        {restaurant.dress_code}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  restaurant.location && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Location</div>
+                      <div class="stat-value text-base">
+                        {restaurant.location}
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+
+              {
+                restaurant.reservation_required && (
+                  <div class="alert alert-info mt-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="stroke-current shrink-0 h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>Reservations recommended for this restaurant</span>
+                  </div>
+                )
+              }
+            </div>
+          </div>
+
+          <!-- Operating Hours -->
+          {
+            restaurant.operating_hours && (
+              <div class="card bg-base-100 border-2 border-base-300">
+                <div class="card-body">
+                  <h2 class="card-title text-xl mb-4">Operating Hours</h2>
+
+                  <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                      <tbody>
+                        {typeof restaurant.operating_hours === 'object' ? (
+                          Object.entries(restaurant.operating_hours).map(
+                            ([day, hours]) => (
+                              <tr>
+                                <td class="font-medium capitalize">{day}</td>
+                                <td>
+                                  {hours?.open && hours?.close
+                                    ? `${hours.open} - ${hours.close}`
+                                    : 'Closed'}
+                                </td>
+                              </tr>
+                            )
+                          )
+                        ) : (
+                          <tr>
+                            <td colspan="2">{restaurant.operating_hours}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Contact Information -->
+          {
+            restaurant.contact_method &&
+              restaurant.contact_method.length > 0 && (
+                <div class="card bg-base-100 border-2 border-base-300">
+                  <div class="card-body">
+                    <h3 class="card-title text-lg mb-4">Contact Information</h3>
+
+                    <div class="space-y-3">
+                      {restaurant.contact_method.map((contact) => (
+                        <div class="flex flex-col gap-1">
+                          <span class="text-sm font-medium capitalize text-base-content/70">
+                            {contact.contact_methods_id.contact_type}
+                          </span>
+                          <span class="font-medium">
+                            {contact.contact_methods_id.contact_identifier}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )
+          }
+
+          <!-- Actions -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-lg mb-4">Make a Reservation</h3>
+
+              <div class="space-y-3">
+                <a href="/contact" class="btn btn-primary w-full">
+                  Contact Concierge
+                </a>
+                <a href="tel:+1234567890" class="btn btn-outline w-full">
+                  Call Restaurant
+                </a>
+                <a href="/guest-directory/dining" class="btn btn-ghost w-full">
+                  ← Back to Dining
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

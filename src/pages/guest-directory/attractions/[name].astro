@@ -1,0 +1,269 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import Layout from '../../../layouts/Layout.astro';
+import { Breadcrumb } from '../../../components/Breadcrumb.tsx';
+import {
+  getCurrentHotel,
+  getLocalPlacesByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering individual attractions page...`);
+
+// Generate static paths for all attractions items
+export async function getStaticPaths() {
+  const hotelId = getCurrentHotelId();
+  const attractions = await getLocalPlacesByHotelId(
+    hotelId,
+    'tourist_attractions'
+  );
+
+  return attractions.map((attraction) => ({
+    params: { name: attraction.name.toLowerCase().replace(/\s+/g, '-') },
+    props: { attraction },
+  }));
+}
+
+const { attraction } = Astro.props;
+const { name } = Astro.params;
+
+// Get hotel data
+const hotelData = await getCurrentHotel();
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(`✅ [BUILD] Individual attractions page: ${attraction.name}`);
+---
+
+<Layout
+  title={`${attraction.name} - Attractions - ${hotel.name}`}
+  description={attraction.description || `Attraction: ${attraction.name}`}
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+>
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    items={[
+      { label: hotel.name, href: '/' },
+      { label: 'Guest Directory', href: '/guest-directory' },
+      { label: 'Attractions', href: '/guest-directory/attractions' },
+      { label: attraction.name },
+    ]}
+  />
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+          <h1 class="text-3xl font-bold">{attraction.name}</h1>
+          {
+            attraction.place_type && (
+              <div class="badge badge-secondary">
+                {attraction.place_type.replace('_', ' ')}
+              </div>
+            )
+          }
+        </div>
+
+        {
+          attraction.description && (
+            <p class="text-lg text-base-content/70 leading-relaxed">
+              {attraction.description}
+            </p>
+          )
+        }
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Main Photo -->
+          {
+            attraction.main_photo?.id && (
+              <div class="aspect-video overflow-hidden rounded-lg border border-base-200">
+                <img
+                  src={getMediaUrl(attraction.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                  })}
+                  alt={attraction.name}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            )
+          }
+
+          <!-- Attraction Details -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h2 class="card-title text-xl mb-4">Attraction Details</h2>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                {
+                  attraction.distance_from_hotel && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Distance from Hotel</div>
+                      <div class="stat-value text-lg text-primary">
+                        {attraction.distance_from_hotel}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  attraction.place_type && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Type</div>
+                      <div class="stat-value text-base">
+                        {attraction.place_type.replace('_', ' ')}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  attraction.recommended_duration && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Recommended Duration</div>
+                      <div class="stat-value text-base">
+                        {attraction.recommended_duration}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  attraction.location && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Location</div>
+                      <div class="stat-value text-base">
+                        {attraction.location}
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+
+              {
+                attraction.entry_fee && (
+                  <div class="alert alert-info mt-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="stroke-current shrink-0 h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>Entry fee: {attraction.entry_fee}</span>
+                  </div>
+                )
+              }
+            </div>
+          </div>
+
+          <!-- Operating Hours -->
+          {
+            attraction.operating_hours && (
+              <div class="card bg-base-100 border-2 border-base-300">
+                <div class="card-body">
+                  <h2 class="card-title text-xl mb-4">Operating Hours</h2>
+
+                  <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                      <tbody>
+                        {typeof attraction.operating_hours === 'object' ? (
+                          Object.entries(attraction.operating_hours).map(
+                            ([day, hours]) => (
+                              <tr>
+                                <td class="font-medium capitalize">{day}</td>
+                                <td>
+                                  {hours?.open && hours?.close
+                                    ? `${hours.open} - ${hours.close}`
+                                    : 'Closed'}
+                                </td>
+                              </tr>
+                            )
+                          )
+                        ) : (
+                          <tr>
+                            <td colspan="2">{attraction.operating_hours}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Contact Information -->
+          {
+            attraction.contact_method &&
+              attraction.contact_method.length > 0 && (
+                <div class="card bg-base-100 border-2 border-base-300">
+                  <div class="card-body">
+                    <h3 class="card-title text-lg mb-4">Contact Information</h3>
+
+                    <div class="space-y-3">
+                      {attraction.contact_method.map((contact) => (
+                        <div class="flex flex-col gap-1">
+                          <span class="text-sm font-medium capitalize text-base-content/70">
+                            {contact.contact_methods_id.contact_type}
+                          </span>
+                          <span class="font-medium">
+                            {contact.contact_methods_id.contact_identifier}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )
+          }
+
+          <!-- Actions -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-lg mb-4">Plan Your Visit</h3>
+
+              <div class="space-y-3">
+                <a href="/contact" class="btn btn-primary w-full">
+                  Get Directions
+                </a>
+                <a href="tel:+1234567890" class="btn btn-outline w-full">
+                  Call Concierge
+                </a>
+                <a
+                  href="/guest-directory/attractions"
+                  class="btn btn-ghost w-full"
+                >
+                  ← Back to Attractions
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

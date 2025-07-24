@@ -1,0 +1,261 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import Layout from '../../../layouts/Layout.astro';
+import { Breadcrumb } from '../../../components/Breadcrumb.tsx';
+import {
+  getCurrentHotel,
+  getGuestServicesByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../../lib/directus.js';
+import type { Hotel } from '../../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering individual services page...`);
+
+// Generate static paths for all services items
+export async function getStaticPaths() {
+  const hotelId = getCurrentHotelId();
+  const services = await getGuestServicesByHotelId(hotelId);
+
+  return services.map((service) => ({
+    params: { name: service.name.toLowerCase().replace(/\s+/g, '-') },
+    props: { service },
+  }));
+}
+
+const { service } = Astro.props;
+const { name } = Astro.params;
+
+// Get hotel data
+const hotelData = await getCurrentHotel();
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(`✅ [BUILD] Individual services page: ${service.name}`);
+---
+
+<Layout
+  title={`${service.name} - Services - ${hotel.name}`}
+  description={service.description || `Service: ${service.name}`}
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+>
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    items={[
+      { label: hotel.name, href: '/' },
+      { label: 'Guest Directory', href: '/guest-directory' },
+      { label: 'Services', href: '/guest-directory/services' },
+      { label: service.name },
+    ]}
+  />
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+          <h1 class="text-3xl font-bold">{service.name}</h1>
+          {
+            service.service_type && (
+              <div class="badge badge-secondary">
+                {service.service_type.replace('_', ' ')}
+              </div>
+            )
+          }
+        </div>
+
+        {
+          service.description && (
+            <p class="text-lg text-base-content/70 leading-relaxed">
+              {service.description}
+            </p>
+          )
+        }
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Main Photo -->
+          {
+            service.main_photo?.id && (
+              <div class="aspect-video overflow-hidden rounded-lg border border-base-200">
+                <img
+                  src={getMediaUrl(service.main_photo.id, {
+                    width: 800,
+                    height: 450,
+                  })}
+                  alt={service.name}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            )
+          }
+
+          <!-- Service Details -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h2 class="card-title text-xl mb-4">Service Details</h2>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                {
+                  service.price_range && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Price Range</div>
+                      <div class="stat-value text-lg text-primary">
+                        {service.price_range}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  service.service_type && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Service Type</div>
+                      <div class="stat-value text-base">
+                        {service.service_type.replace('_', ' ')}
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  service.location && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Location</div>
+                      <div class="stat-value text-base">{service.location}</div>
+                    </div>
+                  )
+                }
+
+                {
+                  service.duration && (
+                    <div class="stat">
+                      <div class="stat-title text-sm">Duration</div>
+                      <div class="stat-value text-base">{service.duration}</div>
+                    </div>
+                  )
+                }
+              </div>
+
+              {
+                service.booking_required && (
+                  <div class="alert alert-warning mt-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="stroke-current shrink-0 h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                    <span>Advance booking required for this service</span>
+                  </div>
+                )
+              }
+            </div>
+          </div>
+
+          <!-- Operating Hours -->
+          {
+            service.operating_hours && (
+              <div class="card bg-base-100 border-2 border-base-300">
+                <div class="card-body">
+                  <h2 class="card-title text-xl mb-4">Operating Hours</h2>
+
+                  <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                      <tbody>
+                        {typeof service.operating_hours === 'object' ? (
+                          Object.entries(service.operating_hours).map(
+                            ([day, hours]) => (
+                              <tr>
+                                <td class="font-medium capitalize">{day}</td>
+                                <td>
+                                  {hours?.open && hours?.close
+                                    ? `${hours.open} - ${hours.close}`
+                                    : 'Closed'}
+                                </td>
+                              </tr>
+                            )
+                          )
+                        ) : (
+                          <tr>
+                            <td colspan="2">{service.operating_hours}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Contact Information -->
+          {
+            service.contact_method && service.contact_method.length > 0 && (
+              <div class="card bg-base-100 border-2 border-base-300">
+                <div class="card-body">
+                  <h3 class="card-title text-lg mb-4">Contact Information</h3>
+
+                  <div class="space-y-3">
+                    {service.contact_method.map((contact) => (
+                      <div class="flex flex-col gap-1">
+                        <span class="text-sm font-medium capitalize text-base-content/70">
+                          {contact.contact_methods_id.contact_type}
+                        </span>
+                        <span class="font-medium">
+                          {contact.contact_methods_id.contact_identifier}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          <!-- Actions -->
+          <div class="card bg-base-100 border-2 border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-lg mb-4">Book This Service</h3>
+
+              <div class="space-y-3">
+                <a href="/contact" class="btn btn-primary w-full">
+                  Contact Concierge
+                </a>
+                <a href="tel:+1234567890" class="btn btn-outline w-full">
+                  Call Front Desk
+                </a>
+                <a
+                  href="/guest-directory/services"
+                  class="btn btn-ghost w-full"
+                >
+                  ← Back to Services
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
