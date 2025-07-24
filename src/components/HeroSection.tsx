@@ -68,8 +68,10 @@ export const HeroSection = component$<HeroSectionProps>(
             {hotelLogo && hotelLogo.id && (
               <div class="flex justify-center mb-6">
                 <img
-                  src={getMediaUrl(hotelLogo.id, { height: 80, quality: 90 })}
-                  alt={hotelLogo.title || hotelName}
+                  src={
+                    getMediaUrl(hotelLogo.id, { height: 80, quality: 90 }) || ''
+                  }
+                  alt={hotelLogo.title ?? hotelName}
                   class="drop-shadow-lg w-auto h-20"
                 />
               </div>

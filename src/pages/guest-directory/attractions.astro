@@ -1,0 +1,209 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
+import { GuestDirectoryCard } from '../../components/GuestDirectoryCard.tsx';
+import {
+  getCurrentHotel,
+  getLocalPlacesByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../lib/directus.js';
+import type { Hotel } from '../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering guest directory attractions page...`);
+
+// Get hotel data from environment variable
+const hotelData = await getCurrentHotel();
+
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelId = getCurrentHotelId();
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Get local places (excluding dining)
+const allLocalPlaces = await getLocalPlacesByHotelId(hotelId);
+const attractions = allLocalPlaces.filter(
+  (place) => place.category !== 'food_and_drink'
+);
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(`✅ Attractions data loaded: ${attractions.length} attractions`);
+---
+
+<CollectionPageLayout
+  title={`Local Attractions - ${hotel.name}`}
+  description={`Discover amazing local attractions and points of interest near ${hotel.name}`}
+  pageTitle="Local Attractions"
+  pageDescription="Explore the best that our destination has to offer"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={attractions}
+  itemType="experiences"
+  breadcrumbItems={[
+    { label: hotel.name, href: '/' },
+    { label: 'Guest Directory', href: '/guest-directory' },
+    { label: 'Attractions' },
+  ]}
+  ctaTitle="Plan Your Adventure"
+  ctaDescription="Let our concierge help you discover hidden gems and plan the perfect itinerary"
+  ctaPrimaryText="Contact Concierge"
+  ctaPrimaryHref="/contact"
+  ctaSecondaryText="Get Directions"
+  ctaSecondaryHref="/contact"
+  gridId="attractions-guide-grid"
+>
+  {
+    attractions.map((attraction) => (
+      <div class="card bg-base-100 shadow-lg border border-base-200">
+        {attraction.main_photo?.id && (
+          <figure class="aspect-video overflow-hidden">
+            <img
+              src={getMediaUrl(attraction.main_photo.id, {
+                width: 400,
+                height: 250,
+              })}
+              alt={attraction.name}
+              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          </figure>
+        )}
+
+        <div class="card-body">
+          <div class="flex items-start justify-between mb-2">
+            <h3 class="card-title text-lg">{attraction.name}</h3>
+            <div class="badge badge-secondary badge-sm">
+              {attraction.category.replace('_', ' ')}
+            </div>
+          </div>
+
+          {attraction.description && (
+            <p class="text-base-content/70 text-sm mb-4 line-clamp-3">
+              {attraction.description}
+            </p>
+          )}
+
+          {/* Attraction Details */}
+          <div class="space-y-2 mb-4">
+            <div class="flex items-center gap-2 text-sm">
+              <span class="font-medium">Distance:</span>
+              <div class="badge badge-outline badge-sm">
+                {attraction.distance_from_hotel}m away
+              </div>
+            </div>
+
+            {attraction.price_range && (
+              <div class="flex items-center gap-2 text-sm">
+                <span class="font-medium">Price:</span>
+                <div class="badge badge-outline badge-sm">
+                  {attraction.price_range === 'free' && 'Free'}
+                  {attraction.price_range === 'budget' && '$'}
+                  {attraction.price_range === 'moderate' && '$$'}
+                  {attraction.price_range === 'expensive' && '$$$'}
+                </div>
+              </div>
+            )}
+
+            {attraction.address && (
+              <div class="flex items-start gap-2 text-sm">
+                <span class="font-medium">Address:</span>
+                <span class="text-base-content/70 text-xs leading-relaxed">
+                  {attraction.address.length > 40
+                    ? attraction.address.substring(0, 40) + '...'
+                    : attraction.address}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Contact Information */}
+          <div class="mb-4">
+            {attraction.contact_phone && (
+              <div class="text-sm mb-1">
+                <span class="font-medium">Phone:</span>
+                <span class="text-base-content/70 ml-2">
+                  {attraction.contact_phone}
+                </span>
+              </div>
+            )}
+
+            {attraction.contact_website && (
+              <div class="text-sm">
+                <span class="font-medium">Website:</span>
+                <a
+                  href={attraction.contact_website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link link-primary ml-2 text-xs"
+                >
+                  Visit Website
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Tags */}
+          {attraction.tags && attraction.tags.length > 0 && (
+            <div class="flex flex-wrap gap-1 mb-4">
+              {attraction.tags.slice(0, 3).map((tag) => (
+                <div class="badge badge-ghost badge-xs">{tag}</div>
+              ))}
+              {attraction.tags.length > 3 && (
+                <div class="badge badge-ghost badge-xs">
+                  +{attraction.tags.length - 3} more
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Operating Hours */}
+          {attraction.opening_hours && (
+            <div class="mb-4">
+              <h4 class="font-medium text-sm mb-2">Hours:</h4>
+              <div class="text-xs text-base-content/70 bg-base-200 p-2 rounded">
+                {typeof attraction.opening_hours === 'object' ? (
+                  Object.entries(attraction.opening_hours)
+                    .slice(0, 3)
+                    .map(([day, hours]) => (
+                      <div class="flex justify-between">
+                        <span class="capitalize">{day}:</span>
+                        <span>
+                          {hours?.open && hours?.close
+                            ? `${hours.open} - ${hours.close}`
+                            : 'Closed'}
+                        </span>
+                      </div>
+                    ))
+                ) : (
+                  <span>{attraction.opening_hours}</span>
+                )}
+                {typeof attraction.opening_hours === 'object' &&
+                  Object.keys(attraction.opening_hours).length > 3 && (
+                    <div class="text-center mt-1 text-xs opacity-60">...</div>
+                  )}
+              </div>
+            </div>
+          )}
+
+          <div class="card-actions justify-end">
+            <a
+              href={`/guest-directory/local-places/${attraction.id}`}
+              class="btn btn-primary btn-sm"
+            >
+              Learn More
+            </a>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</CollectionPageLayout>

@@ -1,0 +1,225 @@
+{
+  "guest_services": [
+    {
+      "hotel_id": 2,
+      "name": "24/7 Concierge Service",
+      "description": "Our dedicated concierge team is available around the clock to assist with reservations, local recommendations, transportation arrangements, and any special requests to enhance your stay.",
+      "service_category": "concierge",
+      "operating_hours": "24/7",
+      "is_available": true,
+      "price": 0,
+      "booking_required": false
+    },
+    {
+      "hotel_id": 2,
+      "name": "Laundry & Dry Cleaning",
+      "description": "Professional laundry and dry cleaning services with same-day or next-day delivery. We handle everything from casual wear to delicate fabrics with care.",
+      "service_category": "laundry",
+      "operating_hours": "7:00-19:00",
+      "is_available": true,
+      "price": 25,
+      "booking_required": false
+    },
+    {
+      "hotel_id": 2,
+      "name": "In-Room Dining",
+      "description": "Enjoy our restaurant's exquisite menu from the comfort of your room. Full breakfast, lunch, and dinner service available with dishes prepared fresh by our kitchen team.",
+      "service_category": "room_service",
+      "operating_hours": "6:00-23:00",
+      "is_available": true,
+      "price": 0,
+      "booking_required": false
+    },
+    {
+      "hotel_id": 2,
+      "name": "Spa & Wellness Services",
+      "description": "Relax and rejuvenate with our traditional Moroccan spa treatments, including argan oil massages, hammam sessions, and wellness therapies using local herbs and ingredients.",
+      "service_category": "spa",
+      "operating_hours": "9:00-20:00",
+      "is_available": true,
+      "price": 120,
+      "booking_required": true
+    },
+    {
+      "hotel_id": 2,
+      "name": "Airport Transfer Service",
+      "description": "Comfortable and reliable transfer service to and from Essaouira Airport. Professional drivers familiar with the area ensure a smooth journey to start or end your stay.",
+      "service_category": "transport",
+      "operating_hours": "24/7",
+      "is_available": true,
+      "price": 80,
+      "booking_required": true
+    }
+  ],
+  "local_places": [
+    {
+      "hotel_id": 2,
+      "name": "Essaouira Medina",
+      "description": "UNESCO World Heritage site featuring the historic medina with its distinctive blue and white architecture, bustling souks, art galleries, and traditional crafts workshops.",
+      "category": "cultural_heritage",
+      "address": "Medina, Essaouira, Morocco",
+      "coordinates": {
+        "type": "Point",
+        "coordinates": [-9.7729, 31.5126]
+      },
+      "distance_from_hotel": 800,
+      "contact_website": "https://whc.unesco.org/en/list/753/",
+      "opening_hours": "Daily 24 hours",
+      "price_range": "Free",
+      "tags": ["UNESCO", "Historic", "Shopping", "Architecture"]
+    },
+    {
+      "hotel_id": 2,
+      "name": "Essaouira Beach",
+      "description": "Expansive sandy beach perfect for windsurfing, kitesurfing, and beach walks. Known for consistent trade winds and beautiful sunset views over the Atlantic Ocean.",
+      "category": "nature_outdoor",
+      "address": "Essaouira Beach, Morocco",
+      "coordinates": {
+        "type": "Point",
+        "coordinates": [-9.7801, 31.5089]
+      },
+      "distance_from_hotel": 500,
+      "opening_hours": "Daily 24 hours",
+      "price_range": "Free",
+      "tags": ["Beach", "Windsurfing", "Kitesurfing", "Sunset"]
+    },
+    {
+      "hotel_id": 2,
+      "name": "La Table by Madada",
+      "description": "Upscale restaurant serving modern Moroccan cuisine with French influences. Beautiful rooftop terrace with panoramic views of the medina and ocean.",
+      "category": "food_and_drink",
+      "address": "5 Rue Youssef El Fassi, Essaouira",
+      "coordinates": {
+        "type": "Point",
+        "coordinates": [-9.7698, 31.5135]
+      },
+      "distance_from_hotel": 650,
+      "contact_phone": "+212 524-47-55-12",
+      "contact_website": "https://madada.com",
+      "opening_hours": "12:00-15:00, 19:00-23:00",
+      "price_range": "€€€",
+      "tags": ["Fine Dining", "Rooftop", "Moroccan Cuisine", "Ocean View"]
+    },
+    {
+      "hotel_id": 2,
+      "name": "Galerie Damgaard",
+      "description": "Renowned art gallery showcasing works by local Essaouira artists, including paintings, sculptures, and traditional crafts. A cultural hub for contemporary Moroccan art.",
+      "category": "cultural_heritage",
+      "address": "Avenue Oqba Ibn Nafiaa, Essaouira",
+      "coordinates": {
+        "type": "Point",
+        "coordinates": [-9.7715, 31.5118]
+      },
+      "distance_from_hotel": 750,
+      "contact_phone": "+212 524-78-44-46",
+      "opening_hours": "9:00-12:30, 15:00-19:00",
+      "price_range": "Free",
+      "tags": ["Art Gallery", "Local Artists", "Paintings", "Culture"]
+    },
+    {
+      "hotel_id": 2,
+      "name": "Taros Café",
+      "description": "Popular café and restaurant with live music, serving international and Moroccan dishes. Great atmosphere for evening drinks with regular live performances.",
+      "category": "food_and_drink",
+      "address": "Place Moulay Hassan, Essaouira",
+      "coordinates": {
+        "type": "Point",
+        "coordinates": [-9.772, 31.513]
+      },
+      "distance_from_hotel": 700,
+      "contact_phone": "+212 524-47-64-07",
+      "opening_hours": "8:00-24:00",
+      "price_range": "€€",
+      "tags": ["Live Music", "International Cuisine", "Terrace", "Nightlife"]
+    },
+    {
+      "hotel_id": 2,
+      "name": "Skala de la Ville",
+      "description": "Historic fortress ramparts with bronze cannons and stunning ocean views. Perfect for sunset photography and understanding Essaouira's maritime defensive history.",
+      "category": "cultural_heritage",
+      "address": "Skala de la Ville, Essaouira",
+      "coordinates": {
+        "type": "Point",
+        "coordinates": [-9.7751, 31.514]
+      },
+      "distance_from_hotel": 900,
+      "opening_hours": "8:00-18:00",
+      "price_range": "10 MAD",
+      "tags": ["Historic Fort", "Ocean Views", "Photography", "Sunset"]
+    }
+  ],
+  "transportation": [
+    {
+      "hotel_id": 2,
+      "name": "Grand Taxi Service",
+      "description": "Shared taxi service connecting Essaouira to major cities like Marrakech and Casablanca. Economical option for longer distances with local atmosphere.",
+      "transport_type": "taxi",
+      "estimated_cost": "150-250",
+      "travel_time_to_downtown": "5 minutes",
+      "travel_time_to_airport": "20 minutes",
+      "operating_hours": "6:00-22:00",
+      "booking_required": false,
+      "pickup_location": "Place Moulay Hassan"
+    },
+    {
+      "hotel_id": 2,
+      "name": "Private Taxi",
+      "description": "Comfortable private taxi service for airport transfers, city tours, and day trips. Professional drivers with knowledge of local attractions and routes.",
+      "transport_type": "taxi",
+      "estimated_cost": "80-120",
+      "travel_time_to_downtown": "3 minutes",
+      "travel_time_to_airport": "15 minutes",
+      "operating_hours": "24/7",
+      "booking_required": true,
+      "pickup_location": "Hotel lobby"
+    },
+    {
+      "hotel_id": 2,
+      "name": "Car Rental - Hertz",
+      "description": "International car rental service with a variety of vehicles from compact cars to SUVs. Perfect for exploring the region at your own pace.",
+      "transport_type": "car_rental",
+      "estimated_cost": "300-600",
+      "travel_time_to_downtown": "Self-drive",
+      "travel_time_to_airport": "Self-drive",
+      "operating_hours": "8:00-18:00",
+      "booking_required": true,
+      "pickup_location": "Downtown office"
+    },
+    {
+      "hotel_id": 2,
+      "name": "Supratours Bus",
+      "description": "Comfortable bus service connecting Essaouira to Marrakech, Agadir, and other major destinations. Reliable and affordable option for intercity travel.",
+      "transport_type": "bus",
+      "estimated_cost": "50-90",
+      "travel_time_to_downtown": "Walk to bus station",
+      "travel_time_to_airport": "Not applicable",
+      "operating_hours": "Multiple daily departures",
+      "booking_required": true,
+      "pickup_location": "Bus station (10 minutes walk)"
+    },
+    {
+      "hotel_id": 2,
+      "name": "Bicycle Rental",
+      "description": "Explore Essaouira and surrounding areas on two wheels. Various bike types available including city bikes and mountain bikes for coastal trails.",
+      "transport_type": "bicycle",
+      "estimated_cost": "80-150",
+      "travel_time_to_downtown": "5-10 minutes",
+      "travel_time_to_airport": "Not recommended",
+      "operating_hours": "8:00-19:00",
+      "booking_required": false,
+      "pickup_location": "Local bike shops"
+    },
+    {
+      "hotel_id": 2,
+      "name": "Horse-drawn Carriage",
+      "description": "Traditional and romantic way to explore Essaouira's main sights. Perfect for couples or those wanting a unique local experience through the medina.",
+      "transport_type": "carriage",
+      "estimated_cost": "100-200",
+      "travel_time_to_downtown": "10-15 minutes",
+      "travel_time_to_airport": "Not available",
+      "operating_hours": "9:00-17:00",
+      "booking_required": false,
+      "pickup_location": "Place Moulay Hassan"
+    }
+  ]
+}

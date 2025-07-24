@@ -1,0 +1,139 @@
+---
+export const prerender = true; // ✅ SSG - Pre-render at build time
+
+import CollectionPageLayout from '../../layouts/CollectionPageLayout.astro';
+import {
+  getCurrentHotel,
+  getGuestServicesByHotelId,
+  getCurrentHotelId,
+  getMediaUrl,
+} from '../../lib/directus.js';
+import type { Hotel } from '../../types/hotel.ts';
+
+console.log(`🏗️ [BUILD] Pre-rendering guest directory services page...`);
+
+// Get hotel data from environment variable
+const hotelData = await getCurrentHotel();
+
+if (!hotelData) {
+  throw new Error('Hotel not found. Check HOTEL_ID in environment variables.');
+}
+
+const hotel = hotelData as Hotel;
+const hotelId = getCurrentHotelId();
+
+console.log(`✅ [BUILD] Hotel loaded: ${hotel.name} (ID: ${hotel.id})`);
+
+// Get guest services and also include hotel facilities and activities as they are part of hotel services
+const [guestServices, facilities, activities] = await Promise.all([
+  getGuestServicesByHotelId(hotelId),
+  // Get facilities from the hotel data
+  Promise.resolve(hotel.facilities || []),
+  // Get activities from the hotel data
+  Promise.resolve(hotel.activities || []),
+]);
+
+// Combine all services for display
+const allServices = [
+  ...guestServices.map((service) => ({ ...service, type: 'guest_service' })),
+  ...facilities.map((facility) => ({ ...facility, type: 'facility' })),
+  ...activities.map((activity) => ({ ...activity, type: 'activity' })),
+];
+
+// Simple theme name extraction
+const hotelSlug = hotel.domain?.split('.')[0] || 'default';
+
+console.log(
+  `✅ Hotel services loaded: ${allServices.length} services (${guestServices.length} guest services, ${facilities.length} facilities, ${activities.length} activities)`
+);
+---
+
+<CollectionPageLayout
+  title={`Guest Services - ${hotel.name}`}
+  description={`Discover guest services available at ${hotel.name} - concierge, housekeeping, and more`}
+  pageTitle="Guest Services"
+  pageDescription="Our dedicated team is here to assist you with all your needs during your stay"
+  hotel={hotel}
+  hotelSubdomain={hotelSlug}
+  hotelDomain={hotel.domain}
+  isSubdomain={true}
+  items={allServices}
+  itemType="experiences"
+  breadcrumbItems={[
+    { label: hotel.name, href: '/' },
+    { label: 'Guest Directory', href: '/guest-directory' },
+    { label: 'Services' },
+  ]}
+  ctaTitle="Need Immediate Assistance?"
+  ctaDescription="Our concierge team is available 24/7 to help with any requests"
+  ctaPrimaryText="Contact Concierge"
+  ctaPrimaryHref="/contact"
+  ctaSecondaryText="Call Front Desk"
+  ctaSecondaryHref="tel:+1234567890"
+  gridId="guest-services-grid"
+>
+  {
+    allServices.map((service) => (
+      <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200">
+        {service.main_photo?.id && (
+          <figure class="aspect-video overflow-hidden">
+            <img
+              src={getMediaUrl(service.main_photo.id, {
+                width: 400,
+                height: 250,
+              })}
+              alt={service.name}
+              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          </figure>
+        )}
+
+        <div class="card-body">
+          <h3 class="card-title text-lg font-semibold text-base-content">
+            {service.name}
+          </h3>
+
+          {service.description && (
+            <p class="text-base-content/70 text-sm line-clamp-2 mb-3">
+              {service.description}
+            </p>
+          )}
+
+          <div class="flex flex-wrap gap-2 mb-4">
+            {service.operating_hours && (
+              <div class="badge badge-outline badge-sm">🕐 Hours Available</div>
+            )}
+
+            {(service.booking_required || service.booking_requiered) && (
+              <div class="badge badge-secondary badge-sm">
+                📅 Reservation required
+              </div>
+            )}
+
+            {(service.service_category || service.type) && (
+              <div class="badge badge-accent badge-sm">
+                {(service.service_category || service.type).replace('_', ' ')}
+              </div>
+            )}
+          </div>
+
+          <div class="card-actions justify-end">
+            <a
+              href={
+                service.type === 'facility'
+                  ? `/facilities/${service.id}`
+                  : service.type === 'activity'
+                    ? `/activities/${service.id}`
+                    : `/guest-directory/services/${service.id}`
+              }
+              class="btn btn-primary btn-sm"
+            >
+              View Details
+            </a>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</CollectionPageLayout>
