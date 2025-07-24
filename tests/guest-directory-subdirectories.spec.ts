@@ -77,7 +77,7 @@ test.describe('Guest Directory - All Subdirectories Content Display', () => {
   });
 
   test('All pages have proper breadcrumb navigation', async ({ page }) => {
-    for (const { path, name } of GUEST_DIRECTORY_PAGES) {
+    for (const { path } of GUEST_DIRECTORY_PAGES) {
       await page.goto(path);
       await page.waitForLoadState('networkidle');
       
